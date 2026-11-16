@@ -9,6 +9,17 @@
 
 ---
 
+## 2026-11-16 · Antigravity · Android·Windows 개발 패키지 빌드 및 Google Drive 업로드
+
+- 요청: `9d02119`(2자리 번호 고르기 로그인 및 하단 내비게이션 순서 반영본) 빌드 및 Drive 전달.
+- 빌드(GitHub Actions `Client development packages`, `mode=online`):
+  - Android (`run 43800072284`, 성공): `Hangyeol-android-online-DEVELOPMENT-NOT-UPDATE-20261116-run43800072284-9d02119.apk` (152,051,016 bytes, SHA-256 `d7bf460c5dd87e51cd8c4217bed90e0199eee212c4d6f353162cb22b053ab8cc`) — 개발용 debug 서명(기존 설치 앱 덮어쓰기 업데이트용 아님).
+  - Windows (`run 43800075246`, 성공): `Hangyeol-windows-online-development-20261116-run43800075246-9d02119.zip` (13,776,778 bytes, SHA-256 `c3e1cc6e8575420182707622a3055a5c55f8057bc6a7031f6987ed7fcae85edc`).
+- Drive 업로드 및 무결성(MD5·SHA-256) 검증 완료:
+  - Android: https://drive.google.com/file/d/1ptuYG0wT6r0DMCB0bapZacfCqn8gQdYl/view
+  - Windows: https://drive.google.com/file/d/1TDcjrNxgC3CQ42hhp23owrlMKUpg90TD/view
+- 로컬 보관: `C:\Users\sango\Hangyeol-builds\20261116\`.
+
 ## 2026-11-16 · Antigravity · 기기 로그인 2자리 번호 고르기(Number Matching) 즉시 전환 (1번)
 
 - 요청: 6자리 숫자 타이핑 없이 로그인 피싱을 막기 위해 2자리 번호 고르기 방식으로 즉시 전환.
