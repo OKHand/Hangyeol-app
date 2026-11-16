@@ -35,7 +35,7 @@ jobs:
           import json, os, pathlib, re
           if not pathlib.Path('apps/flutter_shell/pubspec.lock').is_file():
               raise SystemExit('Reviewed pubspec.lock is required before packaging.')
-          pubspec = pathlib.Path('apps/flutter_shell/pubspec.yaml').read_text()
+          pubspec = pathlib.Path('apps/flutter_shell/pubspec.yaml').read_text(encoding='utf-8')
           m = re.search(r'^version:\s*(\d+\.\d+\.\d+)\+\d+\s*$', pubspec, re.M)
           if not m:
               raise SystemExit('Expected numbered version in pubspec.yaml.')
@@ -46,7 +46,7 @@ jobs:
           if online and not re.fullmatch(r'https://script\.google\.com/macros/s/[A-Za-z0-9_-]+/exec', url):
               raise SystemExit('Set the existing public API URL in repository variables; no Google credentials are used.')
           cfg = {'SERVERLESS':'true', 'APPS_SCRIPT_API_URL':url, 'APP_VERSION':version, 'APP_BUILD_NUMBER':str(build_num)} if online else {'OFFLINE_DEMO':'true', 'APP_VERSION':version, 'APP_BUILD_NUMBER':str(build_num)}
-          pathlib.Path('config/online.json').write_text(json.dumps(cfg))
+          pathlib.Path('config/online.json').write_text(json.dumps(cfg), encoding='utf-8')
           with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env_file:
               env_file.write(f'APP_VERSION={version}\nAPP_BUILD_NUMBER={build_num}\n')
       - uses: subosito/flutter-action@v2
