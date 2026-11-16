@@ -18,6 +18,9 @@
     - `품목 코드로 전체 품목·품종 선택` 패널(`market-catalogue-panel`) 추가: 부류(`LARGE`) 필터, 품목·품종·코드 검색창(`market-item-search`), 품목 전체(`LARGE:MID`) 및 개별 품종(`LARGE:MID:SMALL`) 선택 조회, `품목 코드 API` 실시간 동기화 버튼(`market-sync-codes`) 제공.
   - `apps/flutter_shell/test/market_prices_test.dart`: 다품목 프리셋 및 품목 코드 카탈로그 검색·선택 위젯 테스트 추가.
 - 확인: 로컬 `dart analyze` 무결점 및 시세 관련 위젯 테스트 7건 모두 통과.
+- 빌드 및 Google Drive 업로드 (`6d7863a`):
+  - Android (`run 43810821504`, 성공): `Hangyeol-android-online-DEVELOPMENT-NOT-UPDATE-20261116-run43810821504-6d7863a.apk` (152,070,652 bytes, SHA-256 `4972603f2473d8ed37c5fcf17e93e896c1c4b01e04fc3618bfd9c5e17eb8c9b0`) → https://drive.google.com/file/d/16za_AnW3rbvBxcR0PgGgY7_V_G3FQQJE/view
+  - Windows (`run 43810824829`, 성공): `Hangyeol-windows-online-development-20261116-run43810824829-6d7863a.zip` (13,790,715 bytes, SHA-256 `acbd6e61b888ce830297d7748f9a127f2f52492ef7df90c4b66b6461656bc95d`) → https://drive.google.com/file/d/134OrO2vLWbsf5X3fSgq7DXwuAGeOAf3z/view
 
 ## 2026-11-16 · Antigravity · Android·Windows 개발 패키지 빌드 및 Google Drive 업로드
 
