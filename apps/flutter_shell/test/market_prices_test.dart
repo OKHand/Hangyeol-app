@@ -53,5 +53,16 @@ void main(){
     await tester.pumpWidget(MaterialApp(home:MarketPricesPage(client:client)));await tester.pumpAndSettle();
     expect(find.textContaining('전체 거래에 자료가 없다는 의미는 아닙니다.'),findsOneWidget);expect(find.textContaining('휴장·수집 지연'),findsNothing);expect(tester.takeException(),isNull);
   });
-
+  testWidgets('quick presets and item-code catalogue selection query any crop or variety',(tester) async {
+    phone(tester);final client=XmlQuoteClient()..token='a'*64;addTearDown(client.close);
+    await tester.pumpWidget(MaterialApp(home:MarketPricesPage(client:client)));await tester.pumpAndSettle();
+    for(final key in ['general-tomato','paprika','eggplant','pepper','cabbage','broccoli']){
+      expect(find.byKey(Key('market-product-$key')),findsOneWidget);
+    }
+    await tester.tap(find.byKey(const Key('market-product-paprika')));await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('market-catalogue-panel')));await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('market-item-search')),'백다다기');await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('market-code-09:01:02')));await tester.pumpAndSettle();
+    expect(find.byKey(const Key('market-product-custom')),findsOneWidget);expect(tester.takeException(),isNull);
+  });
 }

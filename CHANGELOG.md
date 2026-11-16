@@ -9,6 +9,16 @@
 
 ---
 
+## 2026-11-16 · Antigravity · 농산물 경매 시세 다품목 빠른 선택 및 품목 코드 API 전체 품목 선택 기능
+
+- 요청: 자주 보는 품목(찰토마토, 일반토마토, 대추방울, 파프리카, 가지, 고추, 양배추, 브로콜리) 빠른 선택 칩과, 품목 코드 API(`Grid_20240626000000000668_1`) 연동 기반 전체 부류·품목·품종 검색/선택 시세 조회 지원.
+- 변경:
+  - `apps/flutter_shell/lib/src/market/market_prices.dart`:
+    - 자주 보는 8개 품목 빠른 선택 ChoiceChip 제공.
+    - `품목 코드로 전체 품목·품종 선택` 패널(`market-catalogue-panel`) 추가: 부류(`LARGE`) 필터, 품목·품종·코드 검색창(`market-item-search`), 품목 전체(`LARGE:MID`) 및 개별 품종(`LARGE:MID:SMALL`) 선택 조회, `품목 코드 API` 실시간 동기화 버튼(`market-sync-codes`) 제공.
+  - `apps/flutter_shell/test/market_prices_test.dart`: 다품목 프리셋 및 품목 코드 카탈로그 검색·선택 위젯 테스트 추가.
+- 확인: 로컬 `dart analyze` 무결점 및 시세 관련 위젯 테스트 7건 모두 통과.
+
 ## 2026-11-16 · Antigravity · Android·Windows 개발 패키지 빌드 및 Google Drive 업로드
 
 - 요청: `9d02119`(2자리 번호 고르기 로그인 및 하단 내비게이션 순서 반영본) 빌드 및 Drive 전달.
