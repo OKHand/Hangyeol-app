@@ -9,6 +9,23 @@
 - Never call a debug package an update for an existing installed app.
 - Keep Flutter, Node and dependency locks pinned. Missing locks block CI readiness.
 - No automatic retries of compiler failures. No Google or production writes in tests.
+
+## Change history — user instruction, 2026-11-16
+
+The user codes with several tools (Codex, VS Code Codex, Antigravity). Every tool must
+leave a handoff so the others know what changed.
+
+- Before starting, read the newest entries in `CHANGELOG.md`.
+- After any change (code, config, docs, workflow, GitHub settings) or a decision by the
+  user, add a new entry at the top of `CHANGELOG.md`: date · tool · title, then the
+  request, what changed (files), checks actually run, user decisions, and remaining work.
+- Record review-only or settings-only work too. Write it in Korean, keep it concise,
+  and never claim a check or build that did not run.
+- Commit the entry together with the change so it reaches GitHub. Docs-only pushes do
+  not start Actions here.
+- This repository is Public: never record secrets or server-vulnerability details here.
+  Put those in the Private `OKHand/Hangyeol` docs and reference only the file name.
+
 ## Build delivery rule — user instruction, 2026-11-16
 
 - After each explicitly requested successful Windows or Android build, upload the existing verified artifact to the user's Google Drive update folder, then verify the uploaded file and report its link. Do not rebuild or rerun Actions merely to deliver or re-upload an existing result.
