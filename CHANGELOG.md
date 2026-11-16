@@ -19,6 +19,9 @@
     - 1페이지(100건) 수신 즉시 로딩바를 해제하고 요약 카드·거래 내역을 먼저 표시.
     - 백그라운드 `_loadProgressive`에서 최근 14일(`D-13`..`D-1`)을 3개 배치로 나누어 병렬 조회하고, 배치가 완료될 때마다 그래프 점·선을 실시간 추가(`2주 추이 불러오는 중… (n/3)` 진행 표시 포함) 및 추가 거래 페이지(`page 2, 3`) 점진적 병합.
 - 확인: 로컬 `dart analyze` 무결점 및 시세 위젯 테스트 7건 모두 통과.
+- 빌드 및 Google Drive 업로드 (`6155850`):
+  - Android (`run 43819310788`, 성공): `Hangyeol-android-online-DEVELOPMENT-NOT-UPDATE-20261116-run43819310788-6155850.apk` (152,094,768 bytes, SHA-256 `d84d8efaf54e21a9ea9bf0edb00117a2c931710d33a2125443dfabebb1e444a2`) → https://drive.google.com/file/d/1yu4ZvUyL8Y0omTMJLpXD-kk5rUF6x608/view
+  - Windows (`run 43819314283`, 성공): `Hangyeol-windows-online-development-20261116-run43819314283-6155850.zip` (13,815,952 bytes, SHA-256 `898726338fb994243b845fab77a34c971f212702ff159d5f5cdcbdb236d2814d`) → https://drive.google.com/file/d/1CD9-CphZUFhQOlguFLERMGDIr9fxq6MC/view
 
 ## 2026-11-16 · Antigravity · 농산물 경매 시세 요약 대시보드·일별 시세 추이 꺾은선 그래프·도매시장 선택 업그레이드
 
