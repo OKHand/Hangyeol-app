@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../serverless/client.dart';
 import 'market_setup.dart';
@@ -12,6 +13,22 @@ const marketProducts={
   'cabbage':'양배추',
   'broccoli':'브로콜리',
 };
+const marketDefaultMarkets=<Map<String,String>>[
+  {'code':'110001','name':'서울가락'},
+  {'code':'110008','name':'서울강서'},
+  {'code':'210001','name':'부산엄궁'},
+  {'code':'210009','name':'부산반여'},
+  {'code':'220001','name':'대구북부'},
+  {'code':'230001','name':'인천남촌'},
+  {'code':'240001','name':'광주각화'},
+  {'code':'240004','name':'광주서부'},
+  {'code':'250001','name':'대전오정'},
+  {'code':'250003','name':'대전노은'},
+  {'code':'311201','name':'구리'},
+  {'code':'320301','name':'강릉'},
+  {'code':'350101','name':'전주'},
+  {'code':'380101','name':'창원팔용'},
+];
 const marketDefaultItems=<List<String>>[
   ['08','과일과채류','03','토마토','04','찰토마토'],
   ['08','과일과채류','03','토마토','01','토마토(일반)'],
@@ -79,12 +96,29 @@ const marketDefaultItems=<List<String>>[
   ['13','양채류','28','로메인','01','로메인(일반)'],
 ];
 const marketSampleDate='2026-11-10';
+double? _parseKg(String? pack){
+  if(pack==null){return null;}
+  final m=RegExp(r'^(\d+(?:\.\d+)?)\s*(kg|g)\s*(?:상자|박스|봉지|파렛트|단|망)?$',caseSensitive:false).firstMatch(pack.trim());
+  if(m==null){return null;}
+  final v=double.tryParse(m.group(1)!)??0;
+  return v<=0?null:(m.group(2)!.toLowerCase()=='g'?v/1000:v);
+}
 // Invented demonstration trades, never presented as official/current prices.
 Map<String,dynamic> marketSample(String product,{String? label}){
-  final name=label??marketProducts[product]??product;
+  final name=label??(product=='date-cherry-tomato'?'대추방울토마토':marketProducts[product]??product);
+  final cherry=product=='date-cherry-tomato',baseKg=cherry?3:5,basePrice=cherry?18000:14000;
+  final quotes=List.generate(3,(i){final price=basePrice+i*2000;return <String,dynamic>{'id':'sample-$product-$i','product':product,'productName':name,'date':marketSampleDate,'market':i==2?'예시 도매시장 B':'예시 도매시장 A','grade':i==1?'상':'특','package':'${baseKg}kg 상자','price':price,'currency':'KRW','quantity':10+i*5,'weightKg':baseKg,'pricePerKg':price/baseKg};});
+  final basePerKg=(basePrice+2000)/baseKg;
+  final offsets=[-12,-10,-8,-6,-4,-2,0];
+  final deltas=[-220,180,-310,-90,40,120,0];
+  final trend=List.generate(offsets.length,(i){
+    final d=DateTime.parse('${marketSampleDate}T00:00:00Z').add(Duration(days:offsets[i]));
+    final mm=d.month.toString().padLeft(2,'0'),dd=d.day.toString().padLeft(2,'0');
+    return <String,dynamic>{'date':'${d.year}-$mm-$dd','label':'$mm.$dd','avgPricePerKg':(basePerKg+deltas[i]).round(),'avgPackagePrice':basePrice+deltas[i]*baseKg,'totalWeightKg':45*baseKg};
+  });
   return {
     'product':product,'date':marketSampleDate,'sample':true,'source':'화면 체험용 가상 자료','fetchedAt':'','total':3,'truncated':false,
-    'quotes':List.generate(3,(i){final cherry=product=='date-cherry-tomato',kg=cherry?3:5,price=(cherry?18000:14000)+i*2000;return <String,dynamic>{'id':'sample-$product-$i','product':product,'productName':name,'date':marketSampleDate,'market':i==2?'예시 도매시장 B':'예시 도매시장 A','grade':i==1?'상':'특','package':'${kg}kg 상자','price':price,'currency':'KRW','quantity':10+i*5,'weightKg':kg,'pricePerKg':price/kg};}),
+    'quotes':quotes,'trend':trend,
   };
 }
 String marketMoney(num value)=>value.round().toString().replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'),(m)=>'${m[1]},');
@@ -99,20 +133,22 @@ class MarketPricesPage extends StatefulWidget {
   State<MarketPricesPage> createState()=>_MarketPricesPageState();
 }
 class _MarketPricesPageState extends State<MarketPricesPage> {
-  String _product='chal-tomato',_customLabel='',_market='',_error='',_codeError='',_largeFilter='',_searchQuery='';
+  String _product='chal-tomato',_customLabel='',_market='',_marketCode='110001',_error='',_codeError='',_largeFilter='',_searchQuery='';
   Map<String,String>? _codeParams;
   final _searchController=TextEditingController();
   late List<Map<String,String>> _catalogue;
+  late List<Map<String,String>> _markets;
   late bool _sample;
   late DateTime _date;
   Map<String,dynamic>? _data;
-  bool _loading=false,_syncingCodes=false;
+  bool _loading=false,_syncingCodes=false,_showGrades=false;
   int _generation=0;
   int? _nextCodeStart=1;
   @override
   void initState(){
     super.initState();
     _catalogue=[for(final r in marketDefaultItems){'id':'${r[0]}:${r[2]}:${r[4]}','large':r[0],'largeName':r[1],'mid':r[2],'midName':r[3],'small':r[4],'goodName':r[5]}];
+    _markets=[for(final m in marketDefaultMarkets){'code':m['code']!,'name':m['name']!}];
     _sample=widget.client==null;
     final kst=DateTime.now().toUtc().add(const Duration(hours:9));
     _date=DateTime(kst.year,kst.month,kst.day);
@@ -121,7 +157,13 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
   Future<void> _load() async {
     final generation=++_generation;setState((){_loading=true;_error='';_data=null;_market='';});
     try{
-      final params=<String,dynamic>{'product':_product,'date':marketDay(_date),if(_codeParams!=null)..._codeParams!};
+      final params=<String,dynamic>{
+        'product':_product,
+        'date':marketDay(_date),
+        'includeTrend':true,
+        if(_marketCode!='110001')'marketCode':_marketCode,
+        if(_codeParams!=null)..._codeParams!,
+      };
       final result=_sample?marketSample(_product,label:_customLabel.isEmpty?null:_customLabel):await widget.client!.call('market.prices',params:params);
       if(!mounted||generation!=_generation){return;}
       if(result['sample']!=_sample||result['product']!=_product||result['date']!=(_sample?marketSampleDate:marketDay(_date))||result['quotes'] is! List){throw PlatformAuthFailure('MARKET_RESPONSE_INVALID','조회 조건과 응답이 일치하지 않습니다.');}
@@ -143,7 +185,16 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         final id=raw['id'] as String? ?? '';
         if(id.isNotEmpty){map[id]={'id':id,'large':'${raw['large']??''}','largeName':'${raw['largeName']??''}','mid':'${raw['mid']??''}','midName':'${raw['midName']??''}','small':'${raw['small']??''}','goodName':'${raw['goodName']??''}'};}
       }
-      setState((){_catalogue=map.values.toList();_nextCodeStart=result['nextStart'] as int?;});
+      final mList=<Map<String,String>>[];
+      for(final raw in List<Map<String,dynamic>>.from(result['markets'] as List? ?? [])){
+        final code='${raw['code']??''}',name='${raw['name']??''}';
+        if(code.isNotEmpty&&name.isNotEmpty){mList.add({'code':code,'name':name});}
+      }
+      setState((){
+        _catalogue=map.values.toList();
+        if(mList.isNotEmpty){_markets=mList;}
+        _nextCodeStart=result['nextStart'] as int?;
+      });
     }catch(e){
       if(!mounted){return;}
       if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){await widget.onAuthError?.call(e);}
@@ -167,6 +218,128 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
   }
   @override
   void dispose(){_generation++;_searchController.dispose();super.dispose();}
+  Map<String,dynamic> _computeSummary(List<Map<String,dynamic>> visible){
+    final serverSummary=_data?['summary'] is Map?Map<String,dynamic>.from(_data!['summary'] as Map):null;
+    if(_market.isEmpty&&serverSummary!=null&&serverSummary['settlementSource']!=null){return serverSummary;}
+    double totalKg=0,totalAmt=0,pkgAmt=0,pkgCnt=0,totalQty=0;
+    final groups=<String,Map<String,dynamic>>{};
+    for(final r in visible){
+      final price=(r['price'] as num?)?.toDouble();
+      if(price==null){continue;}
+      final qty=((r['quantity'] as num?)??1).toDouble();
+      final kg=((r['weightKg'] as num?)?.toDouble())??_parseKg(r['package'] as String?);
+      totalQty+=qty;pkgAmt+=price*qty;pkgCnt+=qty;
+      final rowKg=kg!=null&&kg>0?kg*qty:0.0,rowAmt=price*qty;
+      if(rowKg>0){totalKg+=rowKg;totalAmt+=rowAmt;}
+      final grade=(r['grade'] as String?)??'등급 미제공';
+      final pack=(r['package'] as String?)??'';
+      final key=(grade!='등급 미제공'?grade:pack).isEmpty?'기타':(grade!='등급 미제공'?grade:pack);
+      final g=groups.putIfAbsent(key,()=>{'label':key,'grade':grade,'package':pack,'totalKg':0.0,'totalAmt':0.0,'pkgAmt':0.0,'count':0.0});
+      g['count']=(g['count'] as double)+qty;
+      g['pkgAmt']=(g['pkgAmt'] as double)+rowAmt;
+      if(rowKg>0){g['totalKg']=(g['totalKg'] as double)+rowKg;g['totalAmt']=(g['totalAmt'] as double)+rowAmt;}
+    }
+    final groupList=[for(final g in groups.values){
+      'label':g['label'],
+      'avgPricePerKg':(g['totalKg'] as double)>0?((g['totalAmt'] as double)/(g['totalKg'] as double)).round():null,
+      'avgPrice':(g['count'] as double)>0?((g['pkgAmt'] as double)/(g['count'] as double)).round():null,
+      'totalWeightKg':(g['totalKg'] as double).round(),
+      'quantity':(g['count'] as double).round(),
+    }];
+    return {
+      'avgPricePerKg':totalKg>0?(totalAmt/totalKg).round():null,
+      'totalWeightKg':totalKg.round(),
+      'avgPackagePrice':pkgCnt>0?(pkgAmt/pkgCnt).round():null,
+      'totalQuantity':totalQty.round(),
+      'groups':groupList,
+    };
+  }
+  Widget _dashboardSection(List<Map<String,dynamic>> visible){
+    final summary=_computeSummary(visible);
+    final avgPerKg=summary['avgPricePerKg'] as int?;
+    final avgPkg=summary['avgPackagePrice'] as int?;
+    final totalKg=(summary['totalWeightKg'] as int?)??0;
+    final totalQty=(summary['totalQuantity'] as int?)??0;
+    final groups=List<Map<String,dynamic>>.from(summary['groups'] as List? ?? []);
+    final rawTrend=List<Map<String,dynamic>>.from(_data?['trend'] as List? ?? []);
+    final usePerKg=avgPerKg!=null||rawTrend.any((p)=>p['avgPricePerKg'] is num);
+    final chartPoints=<({String label,double value})>[
+      for(final p in rawTrend)
+        if((usePerKg?p['avgPricePerKg']:p['avgPackagePrice']) is num)
+          (label:'${p['label']??''}',value:((usePerKg?p['avgPricePerKg']:p['avgPackagePrice']) as num).toDouble()),
+    ];
+    if(chartPoints.isEmpty&&(avgPerKg!=null||avgPkg!=null)){
+      final d=(_sample?marketSampleDate:marketDay(_date)).substring(5).replaceAll('-','.');
+      chartPoints.add((label:d,value:(avgPerKg??avgPkg!).toDouble()));
+    }
+    return Container(
+      key:const Key('market-dashboard-card'),
+      margin:const EdgeInsets.symmetric(vertical:8),
+      padding:const EdgeInsets.all(14),
+      decoration:BoxDecoration(color:const Color(0xfff4f6f8),borderRadius:BorderRadius.circular(18)),
+      child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+        Row(children:[
+          Expanded(child:Container(
+            key:const Key('market-avg-price-card'),
+            padding:const EdgeInsets.symmetric(vertical:14,horizontal:12),
+            decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(14)),
+            child:Column(children:[
+              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.monetization_on,size:18,color:Color(0xfff59e0b)),SizedBox(width:4),Text('평균가격',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600))]),
+              const SizedBox(height:6),
+              Text(avgPerKg!=null?'${marketMoney(avgPerKg)}원/kg':avgPkg!=null?'${marketMoney(avgPkg)}원':'-',style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+            ]),
+          )),
+          const SizedBox(width:10),
+          Expanded(child:Container(
+            key:const Key('market-total-volume-card'),
+            padding:const EdgeInsets.symmetric(vertical:14,horizontal:12),
+            decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(14)),
+            child:Column(children:[
+              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.local_shipping,size:18,color:Color(0xff3b82f6)),SizedBox(width:4),Text('거래량',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600))]),
+              const SizedBox(height:6),
+              Text(totalKg>0?'${marketMoney(totalKg)}kg':totalQty>0?'${marketMoney(totalQty)}건':'0kg',style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+            ]),
+          )),
+        ]),
+        if(groups.isNotEmpty)...[
+          const SizedBox(height:10),
+          Material(color:Colors.white,borderRadius:BorderRadius.circular(12),child:InkWell(
+            key:const Key('market-grade-breakdown'),
+            borderRadius:BorderRadius.circular(12),
+            onTap:()=>setState(()=>_showGrades=!_showGrades),
+            child:Padding(padding:const EdgeInsets.symmetric(vertical:10,horizontal:14),child:Column(children:[
+              Row(mainAxisAlignment:MainAxisAlignment.center,children:[
+                Text(summary['settlementSource']!=null?'등급별 평균가':'규격·등급별 평균가',style:const TextStyle(fontSize:13,fontWeight:FontWeight.w600)),
+                const SizedBox(width:4),
+                Icon(_showGrades?Icons.expand_less:Icons.chevron_right,size:18),
+              ]),
+              if(_showGrades)...[
+                const Divider(height:16),
+                for(final g in groups)Padding(padding:const EdgeInsets.symmetric(vertical:3),child:Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
+                  Text('${g['label']}',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w600)),
+                  Text('${g['avgPricePerKg']!=null?'${marketMoney(g['avgPricePerKg'] as num)}원/kg · ':''}${g['avgPrice']!=null?'평균 ${marketMoney(g['avgPrice'] as num)}원':''}',style:const TextStyle(fontSize:12)),
+                ])),
+              ],
+            ])),
+          )),
+        ],
+        if(chartPoints.isNotEmpty)...[
+          const SizedBox(height:12),
+          Container(
+            key:const Key('market-trend-chart'),
+            padding:const EdgeInsets.fromLTRB(14,14,14,12),
+            decoration:BoxDecoration(color:const Color(0xffe6f7f0),borderRadius:BorderRadius.circular(16)),
+            child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+              const Text('일별 시세 추이',textAlign:TextAlign.center,style:TextStyle(fontSize:15,fontWeight:FontWeight.bold,color:Color(0xff1b3a2b))),
+              Align(alignment:Alignment.centerRight,child:Text(usePerKg?'단위 : 원/kg':'단위 : 원',style:const TextStyle(fontSize:11,color:Color(0xff52685c)))),
+              const SizedBox(height:8),
+              SizedBox(height:170,child:CustomPaint(painter:_MarketTrendPainter(points:chartPoints))),
+            ]),
+          ),
+        ],
+      ]),
+    );
+  }
   Widget _catalogueSection(){
     final lclasses=<String,String>{for(final item in _catalogue)item['large']!:item['largeName']!};
     final q=_searchQuery.trim().toLowerCase();
@@ -177,14 +350,26 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     }).toList();
     final byMid=<String,List<Map<String,String>>>{};
     for(final item in filtered){byMid.putIfAbsent('${item['large']}:${item['mid']}',()=>[]).add(item);}
+    final currentMarketName=_markets.firstWhere((m)=>m['code']==_marketCode,orElse:()=>{'name':'서울가락'})['name'];
     return ExpansionTile(
       key:const Key('market-catalogue-panel'),
       tilePadding:EdgeInsets.zero,
-      title:Text('품목 코드로 전체 품목·품종 선택 (${_catalogue.length}개)',style:const TextStyle(fontSize:14,fontWeight:FontWeight.w600)),
-      subtitle:Text(_customLabel.isEmpty?'부류·품목·품종 검색 및 품목 코드 API 연동':'현재 선택: $_customLabel ($_product)',style:const TextStyle(fontSize:12)),
+      title:Text('품목·도매시장 코드 전체 선택 (${_catalogue.length}개)',style:const TextStyle(fontSize:14,fontWeight:FontWeight.w600)),
+      subtitle:Text('[$currentMarketName] ${_customLabel.isEmpty?(marketProducts[_product]??_product):'$_customLabel ($_product)'}',style:const TextStyle(fontSize:12)),
       children:[
+        const Align(alignment:Alignment.centerLeft,child:Text('공영도매시장 선택 (도매시장 코드 API)',style:TextStyle(fontSize:12,fontWeight:FontWeight.bold))),
+        const SizedBox(height:4),
+        SingleChildScrollView(scrollDirection:Axis.horizontal,child:Row(children:[
+          for(final m in _markets)Padding(padding:const EdgeInsets.only(right:6),child:ChoiceChip(
+            key:ValueKey('market-whsal-${m['code']}'),
+            label:Text('${m['name']}'),
+            selected:_marketCode==m['code'],
+            onSelected:_loading?null:(_){setState(()=>_marketCode=m['code']!);_load();},
+          )),
+        ])),
+        const SizedBox(height:8),
         Padding(padding:const EdgeInsets.only(bottom:8),child:Row(children:[
-          Expanded(child:TextField(key:const Key('market-item-search'),controller:_searchController,onChanged:(v)=>setState(()=>_searchQuery=v),decoration:InputDecoration(labelText:'품목·품종·코드 검색',hintText:'예: 오이, 호박, 수박, 청양, 대저, 08:03',suffixIcon:_searchQuery.isEmpty?const Icon(Icons.search):IconButton(icon:const Icon(Icons.clear),onPressed:(){_searchController.clear();setState(()=>_searchQuery='');})))),
+          Expanded(child:TextField(key:const Key('market-item-search'),controller:_searchController,onChanged:(v)=>setState(()=>_searchQuery=v),decoration:InputDecoration(labelText:'품목·품종·코드 검색',hintText:'예: 오이, 호박, 수박, 대파, 청양, 대저, 08:03',suffixIcon:_searchQuery.isEmpty?const Icon(Icons.search):IconButton(icon:const Icon(Icons.clear),onPressed:(){_searchController.clear();setState(()=>_searchQuery='');})))),
           if(widget.client!=null)...[
             const SizedBox(width:8),
             OutlinedButton.icon(key:const Key('market-sync-codes'),onPressed:_syncingCodes||_loading?null:_syncCatalogue,icon:const Icon(Icons.sync,size:16),label:Text(_syncingCodes?'불러오는 중…':'품목 코드 API')),
@@ -214,7 +399,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     final rows=List<Map<String,dynamic>>.from(_data?['quotes'] as List? ?? []),markets=rows.map((r)=>r['market'] as String).toSet().toList()..sort();
     final visible=rows.where((r)=>_market.isEmpty||r['market']==_market).toList();
     final stamp=DateTime.tryParse(_data?['fetchedAt'] as String? ?? '')?.toLocal();
-    return Scaffold(appBar:AppBar(title:const Text('농산물 경매 시세'),actions:[if(widget.canManage&&widget.client!=null)IconButton(key:const Key('market-open-setup'),tooltip:'시세 품목 연결',onPressed:_loading?null:() async {final result=await Navigator.of(context).push<bool>(MaterialPageRoute(builder:(_)=>MarketSetupPage(client:widget.client!,onAuthError:widget.onAuthError)));if(result==true&&mounted){await _load();}},icon:const Icon(Icons.settings_outlined)),IconButton(key:const Key('market-refresh'),tooltip:'시세 다시 조회',onPressed:_loading?null:_load,icon:const Icon(Icons.refresh))]),body:SafeArea(child:ListView(padding:const EdgeInsets.all(12),children:[
+    return Scaffold(appBar:AppBar(title:const Text('농산물 경매 시세'),actions:[if(widget.canManage&&widget.client!=null)IconButton(key:const Key('market-open-setup'),tooltip:'시세 품목 연결',onPressed:_loading?null:() async {final result=await Navigator.of(context).push<bool>(MaterialPageRoute(builder:(_)=>MarketSetupPage(client:widget.client!,onAuthError:widget.onAuthError)));if(result==true&&mounted){await _load();}},icon:const Icon(Icons.settings_outlined)),IconButton(key:const Key('market-refresh'),tooltip:'시세 다시 조회',onPressed:_loading?null:_load,icon:const Icon(Icons.refresh))]),body:SafeArea(child:SingleChildScrollView(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
       if(widget.client!=null)Wrap(spacing:8,children:[ChoiceChip(key:const Key('market-live'),label:const Text('실제 시세'),selected:!_sample,onSelected:_loading?null:(_){setState(()=>_sample=false);_load();}),ChoiceChip(key:const Key('market-sample'),label:const Text('예시 자료 보기'),selected:_sample,onSelected:_loading?null:(_){setState(()=>_sample=true);_load();})]),
       if(_sample)Container(key:const Key('market-sample-banner'),margin:const EdgeInsets.symmetric(vertical:8),padding:const EdgeInsets.all(12),color:Theme.of(context).colorScheme.surfaceContainerHighest,child:const Text('체험용 가상 가격입니다. 실제 시장 시세가 아닙니다.',style:TextStyle(fontWeight:FontWeight.bold))),
       Wrap(spacing:8,runSpacing:4,children:[
@@ -227,6 +412,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
       if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:12),child:Text(_error,key:const Key('market-error'),style:TextStyle(color:Theme.of(context).colorScheme.error))),
       if(_data!=null)...[
         DropdownButtonFormField<String>(key:ValueKey('market-filter-$_product-$_sample'),initialValue:_market,isExpanded:true,decoration:const InputDecoration(labelText:'시장 선택'),items:[const DropdownMenuItem(value:'',child:Text('조회된 시장 전체')),for(final name in markets)DropdownMenuItem(value:name,child:Text(name))],onChanged:(v)=>setState(()=>_market=v??'')),
+        _dashboardSection(visible),
         Padding(padding:const EdgeInsets.symmetric(vertical:10),child:Text('${_data!['source']}\n${_sample?'고정 샘플 자료':stamp==null?'조회 시각 미상':'조회 시각 ${marketDay(stamp)} ${stamp.hour.toString().padLeft(2,'0')}:${stamp.minute.toString().padLeft(2,'0')}'}${_data!['cached']==true?' · 캐시 자료':''}',style:const TextStyle(fontSize:12))),
         if(_data!['truncated']==true)const Text('일부 거래만 조회했습니다. 전체 거래의 평균이나 전체 시장 가격으로 해석하지 마세요.'),
         Text('표시 ${visible.length}건 · ${_data!['priceBasis']=='unconfirmed'?'제공가격의 단가 기준 확인이 필요합니다.':'가격은 해당 거래의 규격당 낙찰가입니다.'}',style:const TextStyle(fontSize:12)),
@@ -241,6 +427,52 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         ]))),
       ],
       const Padding(padding:EdgeInsets.symmetric(vertical:12),child:Text('같은 품목이라도 등급·포장 중량이 다르면 가격이 다릅니다. 개별 거래를 단순 평균해 대표 시세로 표시하지 않습니다.',style:TextStyle(fontSize:12))),
-    ])));
+    ]))));
   }
+}
+
+class _MarketTrendPainter extends CustomPainter {
+  const _MarketTrendPainter({required this.points});
+  final List<({String label,double value})> points;
+  @override
+  void paint(Canvas canvas,Size size){
+    if(points.isEmpty){return;}
+    const leftPad=46.0,rightPad=12.0,topPad=10.0,bottomPad=24.0;
+    final chartW=math.max(1.0,size.width-leftPad-rightPad);
+    final chartH=math.max(1.0,size.height-topPad-bottomPad);
+    final maxVal=points.map((p)=>p.value).reduce(math.max);
+    final step=maxVal<=0?100.0:math.pow(10,math.max(1,(math.log(maxVal)/math.ln10).floor())).toDouble();
+    final yMax=math.max(step*4,((maxVal/(step/2)).ceil()*(step/2)).toDouble());
+    final gridPaint=Paint()..color=const Color(0xffcde5da)..strokeWidth=1;
+    final bgPaint=Paint()..color=Colors.white;
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(leftPad,topPad,chartW,chartH),const Radius.circular(6)),bgPaint);
+    for(var i=0;i<=4;i++){
+      final ratio=i/4.0,y=topPad+chartH*(1-ratio);
+      canvas.drawLine(Offset(leftPad,y),Offset(leftPad+chartW,y),gridPaint);
+      final label=marketMoney((yMax*ratio).round());
+      final tp=TextPainter(text:TextSpan(text:label,style:const TextStyle(fontSize:10,color:Color(0xff52685c))),textDirection:TextDirection.ltr)..layout();
+      tp.paint(canvas,Offset(leftPad-tp.width-6,y-tp.height/2));
+    }
+    final coords=<Offset>[];
+    for(var i=0;i<points.length;i++){
+      final x=points.length==1?leftPad+chartW/2:leftPad+chartW*(i/(points.length-1));
+      final y=topPad+chartH*(1-(yMax<=0?0:(points[i].value/yMax).clamp(0.0,1.0)));
+      coords.add(Offset(x,y));
+      final tp=TextPainter(text:TextSpan(text:points[i].label,style:const TextStyle(fontSize:10,color:Color(0xff52685c))),textDirection:TextDirection.ltr)..layout();
+      tp.paint(canvas,Offset(x-tp.width/2,topPad+chartH+6));
+    }
+    if(coords.length>1){
+      final path=Path()..moveTo(coords.first.dx,coords.first.dy);
+      for(final pt in coords.skip(1)){path.lineTo(pt.dx,pt.dy);}
+      canvas.drawPath(path,Paint()..color=const Color(0xff2b7de9)..style=PaintingStyle.stroke..strokeWidth=2.2);
+    }
+    final fillPaint=Paint()..color=Colors.white..style=PaintingStyle.fill;
+    final strokePaint=Paint()..color=const Color(0xff2b7de9)..style=PaintingStyle.stroke..strokeWidth=2.2;
+    for(final pt in coords){
+      canvas.drawCircle(pt,4.5,fillPaint);
+      canvas.drawCircle(pt,4.5,strokePaint);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant _MarketTrendPainter oldDelegate)=>oldDelegate.points!=points;
 }
