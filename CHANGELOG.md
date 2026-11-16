@@ -24,6 +24,9 @@
   - `apps/flutter_shell/tool/native/icons/**`, `tool/bootstrap.sh`, `tool/bootstrap.ps1`, `lib/src/serverless/app.dart`, `apps/web/index.html`:
     - 한결씨드 그린(`#1E6247`) 바탕의 잎 모양 런처 아이콘(`ic_launcher.png` mdpi~xxxhdpi, Android 8+ 어댑티브 벡터 아이콘 `ic_launcher.xml`, Windows 다중 해상도 `app_icon.ico`, 웹 SVG 파비콘, 앱 상단 바 리프 아이콘) 생성 및 빌드 부트스트랩 자동 복사 구성.
 - 확인: 로컬 `dart analyze` 무결점 및 Flutter 전체 테스트 104건 모두 통과.
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`195e565`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 59`, `run 43829063685`)**: `Hangyeol-android-0.2.0-59.apk` (`55,951,658` bytes, SHA-256 `b02ffd623b53d79f06e047acfa4a5b5f1e6eb3564eb87b2d4e84b0e4493e7ab5`) → https://drive.google.com/file/d/1Ngijr_rmHGhcuL16cFZVl5fG21lTqXJB/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 60`, `run 43829069527`)**: `Hangyeol-windows-0.2.0-60.zip` (`13,833,081` bytes, SHA-256 `c68e86751101252bf227057b8f6e20e93a37b66917288fc5626afbf54882f811`) → https://drive.google.com/file/d/1jO9-vhcU-qeiWx0PJYIhDA5ykuVkG75u/view
 
 ## 2026-11-16 · Antigravity · 정식 버전(0.2.0) 전환 완료 — 고정 Android 서명 Release 빌드 · Google Drive 게시 · 앱 내 업데이트 등록
 
