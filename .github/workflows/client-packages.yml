@@ -1,0 +1,118 @@
+name: Client development packages
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Build one platform only
+        type: choice
+        options: [android, windows]
+        required: true
+      mode:
+        description: Development package mode (no update publication)
+        type: choice
+        options: [online, offline]
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: client-package-${{ inputs.platform }}-${{ inputs.mode }}
+  cancel-in-progress: false
+jobs:
+  package:
+    if: github.repository == 'OKHand/Hangyeol-app' && github.ref == 'refs/heads/main'
+    runs-on: ${{ inputs.platform == 'windows' && 'windows-2022' || 'ubuntu-24.04' }}
+    timeout-minutes: 35
+    env:
+      PACKAGE_MODE: ${{ inputs.mode }}
+      APPS_SCRIPT_API_URL: ${{ vars.APPS_SCRIPT_API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate inputs before downloading build tools
+        shell: python
+        run: |
+          import json, os, pathlib, re
+          if not pathlib.Path('apps/flutter_shell/pubspec.lock').is_file():
+              raise SystemExit('Reviewed pubspec.lock is required before packaging.')
+          online = os.environ['PACKAGE_MODE'] == 'online'
+          url = os.environ.get('APPS_SCRIPT_API_URL', '')
+          if online and not re.fullmatch(r'https://script\.google\.com/macros/s/[A-Za-z0-9_-]+/exec', url):
+              raise SystemExit('Set the existing public API URL in repository variables; no Google credentials are used.')
+          pathlib.Path('config/online.json').write_text(json.dumps({'SERVERLESS':'true', 'APPS_SCRIPT_API_URL':url}) if online else json.dumps({'OFFLINE_DEMO':'true'}))
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.7'
+          channel: stable
+          cache: true
+          cache-key: flutter-${{ runner.os }}-${{ hashFiles('.flutter-version') }}
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('.flutter-version', 'apps/flutter_shell/pubspec.lock') }}
+      - name: Prepare Android runner
+        if: inputs.platform == 'android'
+        working-directory: apps/flutter_shell
+        shell: bash
+        run: |
+          bash tool/bootstrap.sh
+          if [[ "$PACKAGE_MODE" == online ]]; then
+            python3 tool/prepare_serverless_android.py
+          else
+            python3 tool/prepare_offline_android.py
+          fi
+      - uses: actions/setup-java@v4
+        if: inputs.platform == 'android'
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+          cache-dependency-path: |
+            apps/flutter_shell/android/**/*.gradle*
+            apps/flutter_shell/android/**/gradle-wrapper.properties
+            apps/flutter_shell/pubspec.lock
+            .flutter-version
+      - name: Prepare Windows runner
+        if: inputs.platform == 'windows'
+        working-directory: apps/flutter_shell
+        shell: pwsh
+        run: |
+          ./tool/bootstrap.ps1
+          if ($env:PACKAGE_MODE -eq 'online') { ./tool/prepare_serverless_windows.ps1 }
+      - name: Analyze and test once
+        working-directory: apps/flutter_shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter analyze --no-pub
+          flutter test --no-pub --timeout 2m
+      - name: Build development Android APK (not an installed-app update)
+        if: inputs.platform == 'android'
+        working-directory: apps/flutter_shell
+        shell: bash
+        run: flutter build apk --debug --no-pub --dart-define-from-file=../../config/online.json
+      - name: Build Windows package
+        if: inputs.platform == 'windows'
+        working-directory: apps/flutter_shell
+        shell: pwsh
+        run: |
+          flutter build windows --release --no-pub --dart-define-from-file=../../config/online.json
+          if ($LASTEXITCODE -ne 0) { throw 'Windows build failed; no compiler retry.' }
+          if ($env:PACKAGE_MODE -eq 'online') {
+            ./tool/package_online_windows.ps1 -OutputDirectory (Join-Path $env:RUNNER_TEMP 'package')
+          } else {
+            New-Item -ItemType Directory -Force (Join-Path $env:RUNNER_TEMP 'package') | Out-Null
+            Copy-Item build/windows/x64/runner/Release (Join-Path $env:RUNNER_TEMP 'package/HangyeolDemo') -Recurse
+          }
+      - uses: actions/upload-artifact@v4
+        if: inputs.platform == 'android'
+        with:
+          name: android-${{ inputs.mode }}-development-${{ github.run_number }}
+          path: apps/flutter_shell/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 3
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: inputs.platform == 'windows'
+        with:
+          name: windows-${{ inputs.mode }}-development-${{ github.run_number }}
+          path: ${{ runner.temp }}/package
+          retention-days: 3
+          if-no-files-found: error

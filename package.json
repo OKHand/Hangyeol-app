@@ -1,0 +1,13 @@
+{
+  "name": "hangyeol-app-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/web", "packages/contracts"],
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "typecheck": "npm run typecheck --workspace @hangyeol/web",
+    "test": "npm run test --workspace @hangyeol/web",
+    "build": "npm run build --workspace @hangyeol/web"
+  }
+}

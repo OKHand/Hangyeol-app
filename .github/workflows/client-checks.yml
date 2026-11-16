@@ -1,0 +1,85 @@
+name: Client checks
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/contracts/**'
+      - 'package*.json'
+      - '.flutter-version'
+      - '.node-version'
+      - '.github/workflows/client-checks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+concurrency:
+  group: client-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  changed:
+    if: github.repository == 'OKHand/Hangyeol-app'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      flutter: ${{ steps.paths.outputs.flutter }}
+      web: ${{ steps.paths.outputs.web }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@v3
+        id: paths
+        with:
+          filters: |
+            flutter:
+              - 'apps/flutter_shell/**'
+              - '.flutter-version'
+              - '.github/workflows/client-checks.yml'
+            web:
+              - 'apps/web/**'
+              - 'packages/contracts/**'
+              - 'package*.json'
+              - '.node-version'
+              - '.github/workflows/client-checks.yml'
+  flutter:
+    needs: changed
+    if: github.event_name == 'workflow_dispatch' || needs.changed.outputs.flutter == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/flutter_shell
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Require reviewed dependency lock
+        run: test -s pubspec.lock
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.7'
+          channel: stable
+          cache: true
+          cache-key: flutter-${{ runner.os }}-${{ hashFiles('.flutter-version') }}
+          pub-cache-key: pub-${{ runner.os }}-${{ hashFiles('.flutter-version', 'apps/flutter_shell/pubspec.lock') }}
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze --no-pub
+      - run: flutter test --no-pub --timeout 2m
+  web:
+    needs: changed
+    if: github.event_name == 'workflow_dispatch' || needs.changed.outputs.web == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test

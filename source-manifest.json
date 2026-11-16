@@ -1,0 +1,491 @@
+{
+  "files": [
+    {
+      "path": "apps/flutter_shell/.gitignore",
+      "sourceSha256": "323cd8bfcec99d201632612d3e314073dfb4935c6302696c05aa2c8ae84351a9",
+      "exportSha256": "323cd8bfcec99d201632612d3e314073dfb4935c6302696c05aa2c8ae84351a9",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/analysis_options.yaml",
+      "sourceSha256": "3e8f8d9589f080df2a6bde5157632613fd0b4185af9f505e2acd8f44eabbd3eb",
+      "exportSha256": "3e8f8d9589f080df2a6bde5157632613fd0b4185af9f505e2acd8f44eabbd3eb",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/assets/erp-parity.json",
+      "sourceSha256": "625616b4812f83ff5b933609b01198a6a2eedf8b1e0460f3ccd6d1bf1e02151b",
+      "exportSha256": "f6910170ac6d9ccb8ad96efc4596d8b703cce12aa41118bb2d0782b3e0f1953b",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/lib/main.dart",
+      "sourceSha256": "e1959559b372f8f26670f8164b21f52891c739e91abf98cfbaa366e745f2e431",
+      "exportSha256": "e1959559b372f8f26670f8164b21f52891c739e91abf98cfbaa366e745f2e431",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/api.dart",
+      "sourceSha256": "867cd5abd89f457161ee4af55ac1a75fcb60a3f245eb52ef079dd0097b8f8ce6",
+      "exportSha256": "867cd5abd89f457161ee4af55ac1a75fcb60a3f245eb52ef079dd0097b8f8ce6",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/app.dart",
+      "sourceSha256": "a160827d2e31d9eee0ad50a4fa9bf9b51118d3a5f423ce602014d5025862096b",
+      "exportSha256": "a160827d2e31d9eee0ad50a4fa9bf9b51118d3a5f423ce602014d5025862096b",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/bridge.dart",
+      "sourceSha256": "0b82b0b4858e5c0fb2849a2ec7f35a7d82df6c26586955fb4dfd920276b04257",
+      "exportSha256": "0b82b0b4858e5c0fb2849a2ec7f35a7d82df6c26586955fb4dfd920276b04257",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/company_webview.dart",
+      "sourceSha256": "15784cab452a557fbccd5ffca6d84348c62bd07677b90120110a524cafe4047a",
+      "exportSha256": "15784cab452a557fbccd5ffca6d84348c62bd07677b90120110a524cafe4047a",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/config.dart",
+      "sourceSha256": "baceb24561cf272f72d70d555946e72c4aa7416d27a1c5f0a48f445409a86644",
+      "exportSha256": "baceb24561cf272f72d70d555946e72c4aa7416d27a1c5f0a48f445409a86644",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/demo_app.dart",
+      "sourceSha256": "4d48c69790658a9df07f605306d1693968880a43052899a6f72f97af19f9520d",
+      "exportSha256": "4d48c69790658a9df07f605306d1693968880a43052899a6f72f97af19f9520d",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/demo_erp.dart",
+      "sourceSha256": "4a7340eae70fb0a5af8260fe63afe5af2ccd7fef3df8db0a057b5efa05a71e44",
+      "exportSha256": "4a7340eae70fb0a5af8260fe63afe5af2ccd7fef3df8db0a057b5efa05a71e44",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/demo_erp_page.dart",
+      "sourceSha256": "e7fa0c4b6426f30dbe65a8ea1e96b3606fb184d12ad2fa3af5d5a4f11d0e9666",
+      "exportSha256": "f3f38079216f73a6e702fa6ae1169198c2a0e5c842c4e31c410a07adb84498bd",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/demo_fixtures.g.dart",
+      "sourceSha256": "b6a25de36d455115af765b774ea5e0bf99f0786f080246362e9fcdb103214dcb",
+      "exportSha256": "20d0fe19af699b9e3720d26f6d6cdd2f613ba0ebc4da5ade37e44e6c280f1505",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/demo_photo_metadata.dart",
+      "sourceSha256": "e84ac040391386d0f904acb1db2d01d8c724dea93b414191a9b0f1be6fde2fdf",
+      "exportSha256": "e84ac040391386d0f904acb1db2d01d8c724dea93b414191a9b0f1be6fde2fdf",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/demo_photos.dart",
+      "sourceSha256": "846e5f9a5d6aab96828f1a058cf308c66ab0b3b0afc658af20aab4bd98e61c7e",
+      "exportSha256": "846e5f9a5d6aab96828f1a058cf308c66ab0b3b0afc658af20aab4bd98e61c7e",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/demo_store.dart",
+      "sourceSha256": "baf18fc6daf9bc7cb8eee77c0ed138782c80408ae0ca51c38d1198764fffb3ac",
+      "exportSha256": "2bd838853271fad2cdbc1a7e4b239c33b0e623322adca998a42d198feec8d384",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/demo/erp_report_view.dart",
+      "sourceSha256": "f54f0295d3157eab3e5f430c4d02a3c6d34dd3e3af5cff96a2aff0f041c16f1a",
+      "exportSha256": "f54f0295d3157eab3e5f430c4d02a3c6d34dd3e3af5cff96a2aff0f041c16f1a",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/market/market_prices.dart",
+      "sourceSha256": "e176f384b3a1bd789d126c279b201b6b608f31db3bf0945d4b0d538d91cd2333",
+      "exportSha256": "e176f384b3a1bd789d126c279b201b6b608f31db3bf0945d4b0d538d91cd2333",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/market/market_setup.dart",
+      "sourceSha256": "d750693be8e5a4a882e3d4ed225214d0f59a1c96001e0dbdf074e61d01155c3c",
+      "exportSha256": "d750693be8e5a4a882e3d4ed225214d0f59a1c96001e0dbdf074e61d01155c3c",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/app.dart",
+      "sourceSha256": "b3d75c9cedbdf6230ae05228a1ad1a32381458d43a07cd15bb040849ef2bebbe",
+      "exportSha256": "b3d75c9cedbdf6230ae05228a1ad1a32381458d43a07cd15bb040849ef2bebbe",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/app_updates.dart",
+      "sourceSha256": "7fe3ac7db3ce6114fec7c034b300c3f82ed1306489e4000f6e462b739339578a",
+      "exportSha256": "7fe3ac7db3ce6114fec7c034b300c3f82ed1306489e4000f6e462b739339578a",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/auth_browser.dart",
+      "sourceSha256": "2cc80d87071234e85d9daec38419442a1aa261ffc01c25fb3cb5edc14bd1b1b2",
+      "exportSha256": "2cc80d87071234e85d9daec38419442a1aa261ffc01c25fb3cb5edc14bd1b1b2",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/client.dart",
+      "sourceSha256": "37c421d345bbc6bba8bec410d9b2cef9013fc89853cbd861e4e60ed2e9ff428d",
+      "exportSha256": "37c421d345bbc6bba8bec410d9b2cef9013fc89853cbd861e4e60ed2e9ff428d",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/company_connections.dart",
+      "sourceSha256": "222320a0e24c4121f8299d82097db1d0373bb1ad00cf3177306eac95602ba518",
+      "exportSha256": "222320a0e24c4121f8299d82097db1d0373bb1ad00cf3177306eac95602ba518",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/photo_bulk_edit.dart",
+      "sourceSha256": "4e41f985000a93b4a0d177fe9e56fb362601514df0970c09c831141377845bd7",
+      "exportSha256": "4e41f985000a93b4a0d177fe9e56fb362601514df0970c09c831141377845bd7",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/photo_cache_settings.dart",
+      "sourceSha256": "1c063a8091bc2e851c7bfafb9a87fa1be1deb10a1ca1f57da399fd9b7321c8ee",
+      "exportSha256": "1c063a8091bc2e851c7bfafb9a87fa1be1deb10a1ca1f57da399fd9b7321c8ee",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/photo_library.dart",
+      "sourceSha256": "5688907eaebf1c4606e6083b2445ff086957d79db5594a6199a7f5b92da655d6",
+      "exportSha256": "5688907eaebf1c4606e6083b2445ff086957d79db5594a6199a7f5b92da655d6",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/photo_repository.dart",
+      "sourceSha256": "d4ddb149a3463ee80a98f71ea3610d7c51f4b929645a3620f365c139e7be0734",
+      "exportSha256": "d4ddb149a3463ee80a98f71ea3610d7c51f4b929645a3620f365c139e7be0734",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/photo_store.dart",
+      "sourceSha256": "9113e9becf4626c1fe50c6b88527cf36cb628e24f6bf3088864e1e8b992914ec",
+      "exportSha256": "9113e9becf4626c1fe50c6b88527cf36cb628e24f6bf3088864e1e8b992914ec",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/serverless/photos.dart",
+      "sourceSha256": "f5c32b44be0c1829ead8c7c73d5e19d756a684475242f1a85d24edacf4afd5f5",
+      "exportSha256": "b3e2fb0da5476ce3828eb73c5b7bc5559eddcd0bd9c3910268e24d2bbc0567e2",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/lib/src/upload_queue.dart",
+      "sourceSha256": "bc661e78818322f3bae80b5f8686a93ce7cfa68a735ddb7a48f839248e4e4de7",
+      "exportSha256": "bc661e78818322f3bae80b5f8686a93ce7cfa68a735ddb7a48f839248e4e4de7",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/pubspec.yaml",
+      "sourceSha256": "e125c6428bf6e54ece2044da43d4ebebcec818bffe9d6d6f49dfd7f3b1ca9542",
+      "exportSha256": "e125c6428bf6e54ece2044da43d4ebebcec818bffe9d6d6f49dfd7f3b1ca9542",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/app_updates_test.dart",
+      "sourceSha256": "ff02e0f8e89046d19ca97a1fc8407f3599a47f45f3a887e5aec181faf48bc382",
+      "exportSha256": "ff02e0f8e89046d19ca97a1fc8407f3599a47f45f3a887e5aec181faf48bc382",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/auth_browser_test.dart",
+      "sourceSha256": "9ac0d212f785b2c3f73c2b3eb7f76271652cf01bd6d5c8f8df1e4f1ee44ea6aa",
+      "exportSha256": "9ac0d212f785b2c3f73c2b3eb7f76271652cf01bd6d5c8f8df1e4f1ee44ea6aa",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/bridge_security_test.dart",
+      "sourceSha256": "019febfb812ae0b85214038f8404f8a3e63278525004e64412ef565a10e86919",
+      "exportSha256": "019febfb812ae0b85214038f8404f8a3e63278525004e64412ef565a10e86919",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/company_connections_test.dart",
+      "sourceSha256": "3272ca0efbb7e5f4fa1ba67ba8b8533a73887b66486c9c26230e7a34ccfed27f",
+      "exportSha256": "3272ca0efbb7e5f4fa1ba67ba8b8533a73887b66486c9c26230e7a34ccfed27f",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/erp_interaction_test.dart",
+      "sourceSha256": "8d9bfd5149d749d1aeb1f85877d0ca6421eb23ba07b58b8af6a8e65efdc6a32c",
+      "exportSha256": "6aca7bd8fbffbc0436dec1673f273564e23e4e6ea5a74b12437dd01f0a6a0f5a",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/erp_report_navigation_test.dart",
+      "sourceSha256": "9ea7eccd66f60322833138ee8508ed6b841278eb56a745a2f8aa6b5d08b0bb0a",
+      "exportSha256": "9ea7eccd66f60322833138ee8508ed6b841278eb56a745a2f8aa6b5d08b0bb0a",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/gallery_test_data.dart",
+      "sourceSha256": "8ee4c511a85dd9845bd5a794742e7244224d31e97ce219c4323df5b0f4d533f6",
+      "exportSha256": "8b95323e26e13b71d7e4da2f7bfa31ef4c9bcb0ed5dce219364b3e26310f3478",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/google_login_routing_test.dart",
+      "sourceSha256": "29b82842604b1a2d6ea0b51ff2381b694c4e40fbd949b2d42353f090e3d789c4",
+      "exportSha256": "29b82842604b1a2d6ea0b51ff2381b694c4e40fbd949b2d42353f090e3d789c4",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/market_prices_test.dart",
+      "sourceSha256": "1d27f0d5676cc4506085f59f63b71ebe8bd37422bbf0cba0851140001fd46e4f",
+      "exportSha256": "1d27f0d5676cc4506085f59f63b71ebe8bd37422bbf0cba0851140001fd46e4f",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/market_setup_test.dart",
+      "sourceSha256": "ddbeb3926270510ca298c7594c34662cdb98251d368428747d3dfa3fe5e12321",
+      "exportSha256": "ddbeb3926270510ca298c7594c34662cdb98251d368428747d3dfa3fe5e12321",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/offline_demo_test.dart",
+      "sourceSha256": "8b3cd0f1785beeb976f2aa3de5096810f567ea3456c912c6229b911400608706",
+      "exportSha256": "c7672f1ce639cab07808b4ed54de3d94c08faf49ad4c5f27777b4c3acb9dbd44",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/online_photos_test.dart",
+      "sourceSha256": "e43309d8a444865b04d7eb97678d25a5339c91e35ef7aa2aee7fe470276dee67",
+      "exportSha256": "72af4bb7bb0b7c980b2c48a5c509d3ec2a75999678a4b9103870dd5f759c05ea",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/photo_batch_store_test.dart",
+      "sourceSha256": "df60f9b31f3b6a8f2ea4dc0f6cbbdf58dc9dd6fd810e940b0ebbeec6c771f957",
+      "exportSha256": "d223840d069eaf6aebcb7410226f2816263ff8d7ca7c7eedf55a9f48281cce4b",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/photo_bulk_edit_test.dart",
+      "sourceSha256": "40b53cd14d996fcf3cbf22b11459e592a700d0f0423a2b86395aede2a235df6e",
+      "exportSha256": "861bf2c9be7c0b257a872d5ea5959c75a9583bc006bb26d06412616d95e33677",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/photo_cache_test.dart",
+      "sourceSha256": "fb9c8e565936242ed6bb3412f05c2f5e29d2eab9b860e274d574f63aea8dbeea",
+      "exportSha256": "f5cbf9b928e4b737735dac1858f2d175c02187424a7ebafab447632cafbe5a6b",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/photo_detail_test.dart",
+      "sourceSha256": "7f6f4451dd0669f76c3c24d043a978991643e761dbc883b97dead9869b0831f4",
+      "exportSha256": "7afe7cb0649e01bf0332816eb9e4dd53a77c4ef7c8b196dea0e668a8540f5ba2",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/photo_gallery_ui_test.dart",
+      "sourceSha256": "47b2885a2f00befd63134dc5d38455be29e747c9f3fa1cdd0dd300316ece7875",
+      "exportSha256": "87f20137db7fcc7bd5feb3aaed669378133587f132b2c98a981088ddcf29d225",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/photo_library_test.dart",
+      "sourceSha256": "91894c1d1f2b802981a5831de5224d71a840ed17ac4e43c18d4981f3bb51d90f",
+      "exportSha256": "fa982b8ad122cead66a4a6bacec15c82bc281d3cbc11d36688d446a1de1184a3",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/test/serverless_auth_test.dart",
+      "sourceSha256": "14edac8d9635be78eb43887678f79c46ea7181f869ace8d777195c600c5722be",
+      "exportSha256": "14edac8d9635be78eb43887678f79c46ea7181f869ace8d777195c600c5722be",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/settings_photo_cache_test.dart",
+      "sourceSha256": "ea014a6a2de1f4016de1de4f6686df9eac653f3ef16dc99c24c9dfba1ca8c3d6",
+      "exportSha256": "ea014a6a2de1f4016de1de4f6686df9eac653f3ef16dc99c24c9dfba1ca8c3d6",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/test/upload_queue_test.dart",
+      "sourceSha256": "18bf90f909e94eabf229750c62d257a6788ebb97e543baa89b1abc1f0b23d7e7",
+      "exportSha256": "18bf90f909e94eabf229750c62d257a6788ebb97e543baa89b1abc1f0b23d7e7",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/bootstrap.ps1",
+      "sourceSha256": "7fb3223f22e88bbbe5308da5410b12768358528f05309f27756b40f854510879",
+      "exportSha256": "f8c082dd8fe615820976388cb0ce21b4ef46f97b67dd4f5685f29eb570cca2e1",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/tool/bootstrap.sh",
+      "sourceSha256": "3549348a007a3739dd640552bfd6144f724a682dcc5646b0afa87b6deab3213a",
+      "exportSha256": "d8d2e08e66ac935720e74dd7bbb30560a7476ef04f94444563686e04bcd9f67b",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/flutter_shell/tool/configure_android_signing.py",
+      "sourceSha256": "4ae18cd32ed9a1b5b3dbad47b79fa2a6120b84c4ba09010a8ede5f490ef7ddc5",
+      "exportSha256": "4ae18cd32ed9a1b5b3dbad47b79fa2a6120b84c4ba09010a8ede5f490ef7ddc5",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/native/MainActivity.kt",
+      "sourceSha256": "d4f04b245f472f27d3c446b9b3407a8616c19d084e6cba6edce686d7fbd42182",
+      "exportSha256": "d4f04b245f472f27d3c446b9b3407a8616c19d084e6cba6edce686d7fbd42182",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/native/online_browser.cpp",
+      "sourceSha256": "4204d60a5b695e4b9103830915ae127f761d686cd56b7ccf3e0ec02fc4625160",
+      "exportSha256": "4204d60a5b695e4b9103830915ae127f761d686cd56b7ccf3e0ec02fc4625160",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/native/online_browser.h",
+      "sourceSha256": "48f16dd5769d8fbbf4d4468b545b4354285c2d7875c797d7e1f71958a991b881",
+      "exportSha256": "48f16dd5769d8fbbf4d4468b545b4354285c2d7875c797d7e1f71958a991b881",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/online_windows_plugins.cmake",
+      "sourceSha256": "197a8970eb5dbc878c759b2ef0196255bdd0bfdc57e2302766da2871f68b5523",
+      "exportSha256": "197a8970eb5dbc878c759b2ef0196255bdd0bfdc57e2302766da2871f68b5523",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/package_online_windows.ps1",
+      "sourceSha256": "d3f312f83a2df43645209fceac5acccb8e9f18a703dcc8e78a098e3b337181dd",
+      "exportSha256": "d3f312f83a2df43645209fceac5acccb8e9f18a703dcc8e78a098e3b337181dd",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/prepare_offline_android.py",
+      "sourceSha256": "203cd3d13577cdbd3388f9a277bfadb21eb6ea700688866cd6891229095d3708",
+      "exportSha256": "203cd3d13577cdbd3388f9a277bfadb21eb6ea700688866cd6891229095d3708",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/prepare_serverless_android.py",
+      "sourceSha256": "6ab11ce7e73e12dd1abe01861b1095e3e429249ea4d67c9a315543aaea68564d",
+      "exportSha256": "6ab11ce7e73e12dd1abe01861b1095e3e429249ea4d67c9a315543aaea68564d",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/flutter_shell/tool/prepare_serverless_windows.ps1",
+      "sourceSha256": "6870435947f76f0992e8120af8a528d71c71db3851bb73cd47f0af81c48d8aef",
+      "exportSha256": "6870435947f76f0992e8120af8a528d71c71db3851bb73cd47f0af81c48d8aef",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/index.html",
+      "sourceSha256": "b8ac13faeaafa1b959181c541323e8b0c535716f919ce4aae2f7b09a86d00810",
+      "exportSha256": "b8ac13faeaafa1b959181c541323e8b0c535716f919ce4aae2f7b09a86d00810",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/package.json",
+      "sourceSha256": "06a3952d49a292f519940bcd92cb39205d1e117b17698f9305a65f76e36df069",
+      "exportSha256": "06a3952d49a292f519940bcd92cb39205d1e117b17698f9305a65f76e36df069",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/App.tsx",
+      "sourceSha256": "049e317969027ec094bdecacf3fcbd7f58224b4ec3d77dbc153afbcd12a72bac",
+      "exportSha256": "049e317969027ec094bdecacf3fcbd7f58224b4ec3d77dbc153afbcd12a72bac",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/Erp.tsx",
+      "sourceSha256": "1538d9d96eb0856ff91b4d5b7dbf33f8f3a70fb8cd9f5ad980f10a9d01b12bbe",
+      "exportSha256": "b91eb95203f27ea1d0bc7c8fac27d63e302f251da26591d401f94ace667e237f",
+      "contentChanged": true
+    },
+    {
+      "path": "apps/web/src/GoogleLogin.tsx",
+      "sourceSha256": "cec3791006c136715a85d1e29e2ebc2770d639c787c0784eef04d4bdddec0262",
+      "exportSha256": "cec3791006c136715a85d1e29e2ebc2770d639c787c0784eef04d4bdddec0262",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/api.ts",
+      "sourceSha256": "facb674d9f49892dfc9d5939736caf2a38dd0adf85bdbc6f7e0af73154970163",
+      "exportSha256": "facb674d9f49892dfc9d5939736caf2a38dd0adf85bdbc6f7e0af73154970163",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/bridge.ts",
+      "sourceSha256": "626682372e2bcaf2c0e9db359dd8ba131111cf16d92a08b32a207aab0a8141b9",
+      "exportSha256": "626682372e2bcaf2c0e9db359dd8ba131111cf16d92a08b32a207aab0a8141b9",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/ids.ts",
+      "sourceSha256": "1afaefccab4ca8043752437d5e495d0bc8719127da35c0d0335dfe01ba959f88",
+      "exportSha256": "1afaefccab4ca8043752437d5e495d0bc8719127da35c0d0335dfe01ba959f88",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/main.tsx",
+      "sourceSha256": "46443a53ae77169a882cab8fb73a0d5950a50c17b8b52a54ab9d7449133b871d",
+      "exportSha256": "46443a53ae77169a882cab8fb73a0d5950a50c17b8b52a54ab9d7449133b871d",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/queue.test.ts",
+      "sourceSha256": "c799f2781ee07e4291e98ec165491d61fa03682534e38126ae5eb37097c8a16f",
+      "exportSha256": "c799f2781ee07e4291e98ec165491d61fa03682534e38126ae5eb37097c8a16f",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/queue.ts",
+      "sourceSha256": "2cc92f4a0108fee4c4166c8b3de436cf5a9833dd40bf3963c83ca6ad8d50af7d",
+      "exportSha256": "2cc92f4a0108fee4c4166c8b3de436cf5a9833dd40bf3963c83ca6ad8d50af7d",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/src/style.css",
+      "sourceSha256": "4c080c597741f34152e452df10294f6453e876416b674577afdfa396cbfd0b36",
+      "exportSha256": "4c080c597741f34152e452df10294f6453e876416b674577afdfa396cbfd0b36",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "sourceSha256": "330175d4c27b3523cbaaa3f12074be870265007cc35b0db7de86638954f9f261",
+      "exportSha256": "330175d4c27b3523cbaaa3f12074be870265007cc35b0db7de86638954f9f261",
+      "contentChanged": false
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "sourceSha256": "3e9ee1dbe1ab1bee75935014c6712233d0cc7690735c6e2e11e9ed861bdd4cb0",
+      "exportSha256": "3e9ee1dbe1ab1bee75935014c6712233d0cc7690735c6e2e11e9ed861bdd4cb0",
+      "contentChanged": false
+    },
+    {
+      "path": "packages/contracts/package.json",
+      "sourceSha256": "537a42f3fa0090d07f771c40929b5069fd6c6592d8d1a82744a165f5ba59115a",
+      "exportSha256": "537a42f3fa0090d07f771c40929b5069fd6c6592d8d1a82744a165f5ba59115a",
+      "contentChanged": false
+    },
+    {
+      "path": "packages/contracts/src/index.ts",
+      "sourceSha256": "24125928ad8ccc345fc902bf301fb069195e6d87122c898c5c7d902051357269",
+      "exportSha256": "24125928ad8ccc345fc902bf301fb069195e6d87122c898c5c7d902051357269",
+      "contentChanged": false
+    }
+  ],
+  "latestLocalBaselineConfirmed": true,
+  "privateBaseline": "97644e7",
+  "generatedDependencyLock": {
+    "path": "apps/flutter_shell/pubspec.lock",
+    "flutter": "3.35.7",
+    "sha256": "cce35cd7a1293c0cd26b544bf21faa04bd4d96c3e280c75881cca7e908af958a"
+  }
+}
