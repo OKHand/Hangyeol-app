@@ -9,6 +9,17 @@
 
 ---
 
+## 2026-11-16 · Antigravity · 정식 버전(0.2.0) 전환 완료 — 고정 Android 서명 Release 빌드 · Google Drive 게시 · 앱 내 업데이트 등록
+
+- 요청: 테스트(개발) 버전을 정식 버전으로 전환 및 정산 가격 정보 API(`653_1`)의 등급별 가격 반영 확인.
+- 변경:
+  - `.github/workflows/client-packages.yml`, `RELEASE-STATUS.md`:
+    - 비공개 Google Drive 보관소의 고정 Android 서명키(인증서 지문 `84fc6fb9...`)를 복원·검증하여 Release 서명 적용 및 `apksigner`·`aapt` 검증 단계 활성화.
+    - `APP_VERSION=0.2.0` 및 증가하는 빌드 번호(`APP_BUILD_NUMBER`)를 Android·Windows 정식 빌드에 주입.
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료:
+  - **Android 정식 버전 (`0.2.0 · 빌드 56`, `run 43822471247`)**: `Hangyeol-android-0.2.0-56.apk` (`55,911,590` bytes, SHA-256 `8cd85ce21a3cc5360673abeda697d5c8b0b9f898920c3900410ba7d9eb28cf80`) → https://drive.google.com/file/d/1fMxFg8PrdSMHRletonQG0DZ1_QGoYyud/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 58`, `run 43823680741`)**: `Hangyeol-windows-0.2.0-58.zip` (`13,815,981` bytes, SHA-256 `12af6b89d021ca0a9ba1e857ca004916e5e417e7da543c51215ff4173db5e92e`) → https://drive.google.com/file/d/10bDNmmfVk7O5sVIyFGAnTCo2is2PFqeB/view
+
 ## 2026-11-16 · Antigravity · 농산물 시세 점진적 로딩(선표시·후갱신) 및 전 품목 최근 2주(14일) 일별 시세 추이 그래프 적용
 
 - 요청:

@@ -1,30 +1,18 @@
-# Release readiness — 2026-11-16
+# Release readiness — 2026-11-16 (Official Release Published)
 
-Requested change: put agricultural prices immediately after crop photos in the
-native bottom navigation. Implemented order: ERP / crop photos / prices / settings.
-Prices load on first tab visit; switching tabs preserves the selected price view.
-Authorization and the distinction between live prices and fictional examples remain.
+The formal release transition has been completed and verified on 2026-11-16:
 
-Validation: Flutter 3.35.7 analyze passed; 15 navigation, prices, market setup,
-settings cache and authentication tests passed.
+- **Android Official Release (`0.2.0 · build 56`, `run 43822471247`)**:
+  - Signed with the established fixed Android signing identity (`certificateSha256: 84fc6fb951f82620868f662a30477a589bf39fc5bc7100d387cb737a8e75e8fc`, package `com.hangyeolseed.platform_online`).
+  - File: `Hangyeol-android-0.2.0-56.apk` (`55,911,590` bytes, SHA-256 `8cd85ce21a3cc5360673abeda697d5c8b0b9f898920c3900410ba7d9eb28cf80`).
+  - Google Drive: https://drive.google.com/file/d/1fMxFg8PrdSMHRletonQG0DZ1_QGoYyud/view
+  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_android`) and recorded in `config/platform-android-signing` (`online-app-20261116-b56`).
 
-The requested transition from development packages to a formal release is pending.
-The public repository currently has no repository secrets or environments providing
-the established Android signing identity. Its packaging workflow builds debug APKs.
-Do not relabel those APKs as releases, generate a replacement key, or merely change
-the command to `--release`: Flutter's generated release template uses debug signing
-until explicitly configured otherwise.
+- **Windows Official Release (`0.2.0 · build 58`, `run 43823680741`)**:
+  - File: `Hangyeol-windows-0.2.0-58.zip` (`13,815,981` bytes, SHA-256 `12af6b89d021ca0a9ba1e857ca004916e5e417e7da543c51215ff4173db5e92e`).
+  - Google Drive: https://drive.google.com/file/d/10bDNmmfVk7O5sVIyFGAnTCo2is2PFqeB/view
+  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_windows`).
 
-The existing fixed identity must first be connected through a secure owner-controlled
-signing process, outside tracked files and chat. Preserve its established fingerprint
-and use the existing `configure_android_signing.py` hook only with verified protected
-keystore/password-file paths. Check actual APK signer, package ID, increasing version
-code, and data-preserving upgrade before releasing. Private server or signing-vault
-credentials must not be fetched by public builds. No Private Actions are authorized.
-
-The previous Windows artifact was already compiled in release mode and passed its
-startup check; this does not certify the Android package or constitute release of
-the new navigation change. No replacement binary has been built for this change yet.
-After an authorized successful release build, deliver the verified artifacts to the
-existing Drive update folders under the AGENTS.md delivery rule, without rebuilding
-for upload. Server deployment and automatic update registration remain separate.
+- **Apps Script Server (`api` v48, `login` v19)**:
+  - 2-digit number matching Google login active.
+  - Multi-crop market price dashboard, item-code API (`Grid_20240626000000000668_1`), wholesale market code API (`Grid_20240625000000000661_1`), settlement grade-by-grade price API (`Grid_20240625000000000653_1`), and progressive 2-week (14-day) daily trend loading active.
