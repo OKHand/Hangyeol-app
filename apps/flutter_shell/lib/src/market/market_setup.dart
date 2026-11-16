@@ -41,6 +41,7 @@ class MarketPreferences {
     this.trendDays=14,
     this.preferPerKg=true,
     this.autoExpandGrades=false,
+    this.showMonthlyTrend=true,
   }):visibleProducts=visibleProducts??marketOrderedProducts.keys.toSet();
 
   String defaultMarketCode;
@@ -49,6 +50,7 @@ class MarketPreferences {
   int trendDays;
   bool preferPerKg;
   bool autoExpandGrades;
+  bool showMonthlyTrend;
 
   static MarketPreferences current=MarketPreferences();
   static void reset()=>current=MarketPreferences();
@@ -79,6 +81,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
   late int _prefTrendDays;
   late bool _prefPerKg;
   late bool _prefAutoGrades;
+  late bool _prefShowMonthly;
 
   static const products={'chal-tomato':'찰토마토','date-cherry-tomato':'대추방울토마토'};
   @override
@@ -91,6 +94,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
     _prefTrendDays=p.trendDays;
     _prefPerKg=p.preferPerKg;
     _prefAutoGrades=p.autoExpandGrades;
+    _prefShowMonthly=p.showMonthlyTrend;
     if(widget.canManage){_load();}
   }
   void _applyPreferences(){
@@ -102,7 +106,8 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
       ..visibleProducts=Set<String>.from(_prefVisible)
       ..trendDays=_prefTrendDays
       ..preferPerKg=_prefPerKg
-      ..autoExpandGrades=_prefAutoGrades;
+      ..autoExpandGrades=_prefAutoGrades
+      ..showMonthlyTrend=_prefShowMonthly;
     Navigator.pop(context,true);
   }
   Future<void> _work(Future<void> Function() run) async {
@@ -170,6 +175,14 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
         subtitle:const Text('시세 화면을 열 때 등급별 가격표를 바로 펼쳐서 표시합니다.'),
         value:_prefAutoGrades,
         onChanged:(v)=>setState(()=>_prefAutoGrades=v),
+      ),
+      SwitchListTile(
+        key:const Key('market-pref-monthly-trend'),
+        contentPadding:EdgeInsets.zero,
+        title:const Text('KAMIS 월별 시세 추이 그래프 표시'),
+        subtitle:const Text('일별 시세 추이 아래에 최근 12개월 월평균 도매 시세를 함께 표시합니다.'),
+        value:_prefShowMonthly,
+        onChanged:(v)=>setState(()=>_prefShowMonthly=v),
       ),
       const Divider(height:24),
       Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[

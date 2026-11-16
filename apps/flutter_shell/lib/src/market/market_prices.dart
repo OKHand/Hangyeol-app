@@ -93,9 +93,21 @@ Map<String,dynamic> marketSample(String product,{String? label}){
     final mm=d.month.toString().padLeft(2,'0'),dd=d.day.toString().padLeft(2,'0');
     return <String,dynamic>{'date':'${d.year}-$mm-$dd','label':'$mm.$dd','avgPricePerKg':(basePerKg+deltas[i]).round(),'avgPackagePrice':basePrice+deltas[i]*baseKg,'totalWeightKg':45*baseKg};
   });
+  final monthlyTrend=<String,dynamic>{
+    'supported':true,
+    'unit':'1kg',
+    'unitLabel':'원/kg',
+    'isPerKg':true,
+    'regionName':'서울',
+    'cropLabel':name,
+    'source':'KAMIS 농산물유통정보 (예시)',
+    'points':[
+      for(var i=0;i<6;i++){'month':'2026-0${i+5}','label':'26.0${i+5}','avgPrice':(basePerKg+deltas[i]).round()},
+    ],
+  };
   return {
     'product':product,'date':marketSampleDate,'sample':true,'source':'화면 체험용 가상 자료','fetchedAt':'','total':3,'truncated':false,
-    'quotes':quotes,'trend':trend,
+    'quotes':quotes,'trend':trend,'monthlyTrend':monthlyTrend,
   };
 }
 String marketMoney(num value)=>value.round().toString().replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+(?!\d))'),(m)=>'${m[1]},');
@@ -119,7 +131,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
   late bool _sample;
   late DateTime _date;
   Map<String,dynamic>? _data;
-  bool _loading=false,_loadingMoreQuotes=false,_loadingTrend=false,_syncingCodes=false,_showGrades=false;
+  bool _loading=false,_loadingMoreQuotes=false,_loadingTrend=false,_loadingMonthly=false,_syncingCodes=false,_showGrades=false;
   int _generation=0,_trendLoadedBatches=0,_totalTrendBatches=3;
   int? _nextCodeStart=1;
   @override
@@ -138,7 +150,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
   }
   Future<void> _load() async {
     final generation=++_generation;
-    setState((){_loading=true;_loadingMoreQuotes=false;_loadingTrend=false;_trendLoadedBatches=0;_error='';_data=null;_market='';});
+    setState((){_loading=true;_loadingMoreQuotes=false;_loadingTrend=false;_loadingMonthly=false;_trendLoadedBatches=0;_error='';_data=null;_market='';});
     try{
       final params=<String,dynamic>{
         'product':_product,
@@ -174,11 +186,31 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
   }
   Future<void> _loadProgressive(int generation,Map<String,dynamic> firstPage) async {
     final needTrend=firstPage['trendPending']==true;
+    final needMonthly=MarketPreferences.current.showMonthlyTrend&&firstPage['monthlyTrend']==null&&(firstPage['trendPending']==true||firstPage['monthlyTrendPending']==true);
     var nextPage=firstPage['nextPage'] as int?;
-    if(!needTrend&&nextPage==null){return;}
+    if(!needTrend&&!needMonthly&&nextPage==null){return;}
     final batches=_buildTrendBatches(MarketPreferences.current.trendDays);
     if(mounted&&generation==_generation){
-      setState((){_loadingTrend=needTrend;_totalTrendBatches=batches.length;_loadingMoreQuotes=nextPage!=null;});
+      setState((){_loadingTrend=needTrend;_loadingMonthly=needMonthly;_totalTrendBatches=batches.length;_loadingMoreQuotes=nextPage!=null;});
+    }
+    Future<void> fetchMonthlyTrend() async {
+      if(!needMonthly){return;}
+      try{
+        final res=await widget.client!.call('market.prices',params:{
+          'product':_product,
+          'date':marketDay(_date),
+          'monthlyTrend':true,
+          'months':12,
+          if(firstPage['large'] is String)'large':firstPage['large'],
+          if(firstPage['mid'] is String)'mid':firstPage['mid'],
+          if(firstPage['small'] is String)'small':firstPage['small'],
+          if(_marketCode!='110001')'marketCode':_marketCode,
+          if(_codeParams!=null)..._codeParams!,
+        });
+        if(!mounted||generation!=_generation||_data==null){return;}
+        setState((){_data={..._data!,'monthlyTrend':res};});
+      }catch(_){}
+      if(mounted&&generation==_generation){setState(()=>_loadingMonthly=false);}
     }
     Future<void> fetchTrendBatches() async {
       if(!needTrend){return;}
@@ -239,7 +271,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
       }
       if(mounted&&generation==_generation){setState(()=>_loadingMoreQuotes=false);}
     }
-    await Future.wait([fetchTrendBatches(),fetchRemainingQuotePages()]);
+    await Future.wait([fetchTrendBatches(),fetchMonthlyTrend(),fetchRemainingQuotePages()]);
   }
   Future<void> _syncCatalogue() async {
     if(_syncingCodes||widget.client==null){return;}
@@ -289,7 +321,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     final result=await Navigator.of(context).push<bool>(MaterialPageRoute(builder:(_)=>MarketSetupPage(client:widget.client!,onAuthError:widget.onAuthError,canManage:widget.canManage)));
     if(result==true&&mounted){
       final p=MarketPreferences.current;
-      final needReload=_marketCode!=p.defaultMarketCode||(!p.visibleProducts.contains(_product)&&_customLabel.isEmpty);
+      final needReload=_marketCode!=p.defaultMarketCode||(!p.visibleProducts.contains(_product)&&_customLabel.isEmpty)||(p.showMonthlyTrend&&_data?['monthlyTrend']==null);
       setState((){
         _marketCode=p.defaultMarketCode;
         _showGrades=p.autoExpandGrades;
@@ -431,6 +463,58 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             ]),
           ),
         ],
+        if(prefs.showMonthlyTrend)...[
+          _monthlyTrendSection(),
+        ],
+      ]),
+    );
+  }
+  Widget _monthlyTrendSection(){
+    final monthly=_data?['monthlyTrend'] is Map?Map<String,dynamic>.from(_data!['monthlyTrend'] as Map):null;
+    final rawPoints=List<Map<String,dynamic>>.from(monthly?['points'] as List? ?? []);
+    final mPoints=<({String label,double value})>[
+      for(final p in rawPoints)
+        if(p['avgPrice'] is num)
+          (label:'${p['label']??p['month']??''}',value:(p['avgPrice'] as num).toDouble()),
+    ];
+    if(!_loadingMonthly&&mPoints.isEmpty){
+      if(monthly!=null&&monthly['supported']==false){
+        return Padding(
+          padding:const EdgeInsets.only(top:10),
+          child:Text('${monthly['reason']??'KAMIS 월별 시세 추이를 제공하지 않는 품목입니다.'}',style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+    final unitLabel='${monthly?['unitLabel']??'원/kg'}';
+    final region='${monthly?['regionName']??''}';
+    final cropLabel='${monthly?['cropLabel']??''}';
+    final subTitle=mPoints.isEmpty
+      ?'KAMIS 월평균 도매가격 불러오는 중…'
+      :'KAMIS ${region.isEmpty?'도매':'$region 도매'}${cropLabel.isEmpty?'':' · $cropLabel'}';
+    final minVal=mPoints.isEmpty?null:mPoints.map((e)=>e.value).reduce(math.min).round();
+    final maxVal=mPoints.isEmpty?null:mPoints.map((e)=>e.value).reduce(math.max).round();
+    return Container(
+      key:const Key('market-monthly-trend-chart'),
+      margin:const EdgeInsets.only(top:12),
+      padding:const EdgeInsets.fromLTRB(14,14,14,12),
+      decoration:BoxDecoration(color:const Color(0xffeef4fa),borderRadius:BorderRadius.circular(16)),
+      child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+        Text('월별 시세 추이${mPoints.isNotEmpty?' (최근 ${mPoints.length}개월)':''}',textAlign:TextAlign.center,style:const TextStyle(fontSize:15,fontWeight:FontWeight.bold,color:Color(0xff1e3a4c))),
+        Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
+          Flexible(child:Text(subTitle,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,color:Color(0xff1e6247)))),
+          const SizedBox(width:8),
+          Text('단위 : $unitLabel',style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
+        ]),
+        if(_loadingMonthly)const Padding(padding:EdgeInsets.only(top:6),child:LinearProgressIndicator(minHeight:2)),
+        if(mPoints.isNotEmpty)...[
+          const SizedBox(height:8),
+          SizedBox(height:170,child:CustomPaint(painter:_MarketTrendPainter(points:mPoints,lineColor:const Color(0xff1e6247),gridColor:const Color(0xffd6e2ec)))),
+          if(minVal!=null&&maxVal!=null)Padding(
+            padding:const EdgeInsets.only(top:6),
+            child:Text('최근 ${mPoints.length}개월 평균 범위: 최저 ${marketMoney(minVal)}$unitLabel · 최고 ${marketMoney(maxVal)}$unitLabel',textAlign:TextAlign.center,style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
+          ),
+        ],
       ]),
     );
   }
@@ -534,8 +618,14 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
 }
 
 class _MarketTrendPainter extends CustomPainter {
-  const _MarketTrendPainter({required this.points});
+  const _MarketTrendPainter({
+    required this.points,
+    this.lineColor=const Color(0xff2b7de9),
+    this.gridColor=const Color(0xffcde5da),
+  });
   final List<({String label,double value})> points;
+  final Color lineColor;
+  final Color gridColor;
   @override
   void paint(Canvas canvas,Size size){
     if(points.isEmpty){return;}
@@ -545,7 +635,7 @@ class _MarketTrendPainter extends CustomPainter {
     final maxVal=points.map((p)=>p.value).reduce(math.max);
     final step=maxVal<=0?100.0:math.pow(10,math.max(1,(math.log(maxVal)/math.ln10).floor())).toDouble();
     final yMax=math.max(step*4,((maxVal/(step/2)).ceil()*(step/2)).toDouble());
-    final gridPaint=Paint()..color=const Color(0xffcde5da)..strokeWidth=1;
+    final gridPaint=Paint()..color=gridColor..strokeWidth=1;
     final bgPaint=Paint()..color=Colors.white;
     canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(leftPad,topPad,chartW,chartH),const Radius.circular(6)),bgPaint);
     for(var i=0;i<=4;i++){
@@ -569,15 +659,15 @@ class _MarketTrendPainter extends CustomPainter {
     if(coords.length>1){
       final path=Path()..moveTo(coords.first.dx,coords.first.dy);
       for(final pt in coords.skip(1)){path.lineTo(pt.dx,pt.dy);}
-      canvas.drawPath(path,Paint()..color=const Color(0xff2b7de9)..style=PaintingStyle.stroke..strokeWidth=2.2);
+      canvas.drawPath(path,Paint()..color=lineColor..style=PaintingStyle.stroke..strokeWidth=2.2);
     }
     final fillPaint=Paint()..color=Colors.white..style=PaintingStyle.fill;
-    final strokePaint=Paint()..color=const Color(0xff2b7de9)..style=PaintingStyle.stroke..strokeWidth=2.2;
+    final strokePaint=Paint()..color=lineColor..style=PaintingStyle.stroke..strokeWidth=2.2;
     for(final pt in coords){
       canvas.drawCircle(pt,4.5,fillPaint);
       canvas.drawCircle(pt,4.5,strokePaint);
     }
   }
   @override
-  bool shouldRepaint(covariant _MarketTrendPainter oldDelegate)=>oldDelegate.points!=points;
+  bool shouldRepaint(covariant _MarketTrendPainter oldDelegate)=>oldDelegate.points!=points||oldDelegate.lineColor!=lineColor||oldDelegate.gridColor!=gridColor;
 }

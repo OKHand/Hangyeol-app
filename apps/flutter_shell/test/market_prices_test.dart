@@ -72,4 +72,48 @@ void main(){
     await tester.tap(find.byKey(const ValueKey('market-code-09:01:01')));await tester.pumpAndSettle();
     expect(find.byKey(const Key('market-product-custom')),findsOneWidget);expect(tester.takeException(),isNull);
   });
+
+  testWidgets('monthly KAMIS trend renders directly beneath the daily trend chart',(tester) async {
+    phone(tester);
+    final client=_MonthlyTrendClient()..token='a'*64;
+    addTearDown(client.close);
+    await tester.pumpWidget(MaterialApp(home:MarketPricesPage(client:client)));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('market-trend-chart')),findsOneWidget);
+    expect(find.byKey(const Key('market-monthly-trend-chart')),findsOneWidget);
+    expect(find.textContaining('월별 시세 추이'),findsOneWidget);
+    expect(find.textContaining('KAMIS 서울 도매'),findsOneWidget);
+    expect(find.descendant(of:find.byKey(const Key('market-monthly-trend-chart')),matching:find.textContaining('단위 : 원/kg')),findsOneWidget);
+    expect(tester.takeException(),isNull);
+  });
+}
+
+class _MonthlyTrendClient extends AppsScriptPlatformClient {
+  _MonthlyTrendClient():super(Uri.parse('https://script.google.com/macros/s/monthly-test/exec'));
+  @override
+  Future<Map<String,dynamic>> call(String action,{Map<String,dynamic>? params,bool authenticated=true}) async {
+    if(params?['monthlyTrend']==true){
+      return {
+        'supported':true,
+        'unit':'1kg',
+        'unitLabel':'원/kg',
+        'isPerKg':true,
+        'regionName':'서울',
+        'cropLabel':'토마토',
+        'points':[
+          {'month':'2026-09','label':'26.09','avgPrice':4816},
+          {'month':'2026-10','label':'26.10','avgPrice':3877},
+          {'month':'2026-11','label':'26.11','avgPrice':3076},
+        ],
+      };
+    }
+    if(params?['trendBatch']==true){
+      return {'points':[{'date':'2026-11-15','label':'11.15','avgPricePerKg':3100}]};
+    }
+    return {
+      'sample':false,'product':params!['product'],'date':params['date'],'source':'테스트 시세','priceBasis':'per-package','truncated':false,'fetchedAt':'2026-11-16T00:00:00Z',
+      'trendPending':true,
+      'quotes':[{'id':'m-1','productName':'일반토마토','market':'서울가락','grade':'특','package':'5kg 상자','price':16000,'priceBasis':'per-package','quantity':10,'weightKg':5,'pricePerKg':3200,'date':params['date'],'company':'한국청과','auctionTime':'2026-11-16 08:00:00'}],
+    };
+  }
 }

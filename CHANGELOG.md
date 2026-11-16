@@ -9,6 +9,18 @@
 
 ---
 
+## 2026-11-16 · Antigravity · KAMIS 3번 API (`monthlySalesList`) 기반 월별 시세 추이 그래프 추가 (`1kg` 환산)
+
+- 요청: 일별 시세 추이 그래프 바로 아래에 KAMIS 월별 시세 추이 그래프를 함께 표시.
+- 변경:
+  - `apps/flutter_shell/lib/src/market/market_prices.dart`:
+    - `_loadProgressive`에서 일별 추이 배치 및 추가 거래 내역과 병렬로 `monthlyTrend: true` 백그라운드 조회.
+    - `_monthlyTrendSection`(`market-monthly-trend-chart`) 추가: 일별 그래프 아래에 최근 12개월 월평균 도매 시세 꺾은선 그래프와 지역·품목·실제 단위(`원/kg`, 백다다기는 `원/50개`)·최저/최고 범위 표시.
+    - `_MarketTrendPainter`에 선·격자 색상 파라미터를 추가해 일별(파랑) / 월별(그린) 차트가 페인터를 공유.
+  - `apps/flutter_shell/lib/src/market/market_setup.dart`:
+    - `MarketPreferences.showMonthlyTrend` 및 설정 화면 스위치(`market-pref-monthly-trend`) 추가.
+- 확인: 로컬 `dart analyze` 무결점 및 Flutter 전체 테스트 105건 모두 통과.
+
 ## 2026-11-16 · Antigravity · 농산물 시세 설정 개편·실제 시세 단일화·11개 품목 순서 개편 및 잎 모양 앱·프로그램 아이콘 적용
 
 - 요청:

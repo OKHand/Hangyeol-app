@@ -32,6 +32,7 @@ void main(){
     expect(find.byKey(const Key('market-pref-days-7')),findsOneWidget);
     expect(find.byKey(const Key('market-pref-days-14')),findsOneWidget);
     expect(find.byKey(const Key('market-pref-days-21')),findsOneWidget);
+    expect(find.byKey(const Key('market-pref-monthly-trend')),findsOneWidget);
     final discover=find.byKey(const Key('market-discover'));expect(tester.widget<FilledButton>(discover).onPressed,isNull);expect(client.calls,['market.settings']);
     final httpSwitch=find.byKey(const Key('market-setup-http'));await tester.ensureVisible(httpSwitch);await tester.tap(httpSwitch);await tester.pumpAndSettle();await tester.ensureVisible(discover);await tester.tap(discover);await tester.pumpAndSettle();
     expect(client.calls,['market.settings','market.catalogue']);expect(find.text('공식 코드에서 품목 찾기'),findsNothing);expect(find.text('다음 코드에서 품목 찾기'),findsOneWidget);expect(find.byKey(const Key('market-setup-date')),findsNothing);
