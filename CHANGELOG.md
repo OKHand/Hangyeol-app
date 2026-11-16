@@ -20,6 +20,9 @@
   - `apps/flutter_shell/lib/src/market/market_setup.dart`:
     - `MarketPreferences.showMonthlyTrend` 및 설정 화면 스위치(`market-pref-monthly-trend`) 추가.
 - 확인: 로컬 `dart analyze` 무결점 및 Flutter 전체 테스트 105건 모두 통과.
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`fbeec73`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 61`, `run 43836225291`)**: `Hangyeol-android-0.2.0-61.apk` (`55,968,042` bytes, SHA-256 `7e5f9b8411b387e90739536b557d5bccbb0157047c1dc1b6298cc505aa1b4b4d`) → https://drive.google.com/file/d/1QL44TDGkzCyijdt2qNDCwHeXyWHVjEF7/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 62`, `run 43836230203`)**: `Hangyeol-windows-0.2.0-62.zip` (`13,837,158` bytes, SHA-256 `f866903dfa3be06413880e9af38de764fb6925f0289f08a5251e5c6f5f4a6f8a`) → https://drive.google.com/file/d/1MQaw1-bswz5F_CscwN1y0rJHGCNnEWK3/view
 
 ## 2026-11-16 · Antigravity · 농산물 시세 설정 개편·실제 시세 단일화·11개 품목 순서 개편 및 잎 모양 앱·프로그램 아이콘 적용
 
