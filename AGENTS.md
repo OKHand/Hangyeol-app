@@ -9,3 +9,12 @@
 - Never call a debug package an update for an existing installed app.
 - Keep Flutter, Node and dependency locks pinned. Missing locks block CI readiness.
 - No automatic retries of compiler failures. No Google or production writes in tests.
+## Build delivery rule — user instruction, 2026-11-16
+
+- After each explicitly requested successful Windows or Android build, upload the existing verified artifact to the user's Google Drive update folder, then verify the uploaded file and report its link. Do not rebuild or rerun Actions merely to deliver or re-upload an existing result.
+- Destination: https://drive.google.com/drive/folders/1sX_b3n1b-6d43JoqIwxWhpk2JYE9jn2m . Keep the existing Android and Windows subfolders and sharing settings. Private tools/drive-update-config.json records their IDs.
+- Name artifacts with platform, development/release status, source commit and run ID. Check for an existing matching artifact before uploading to avoid duplicates. Preserve older installers.
+- Development/debug APKs must be clearly marked DEVELOPMENT-NOT-UPDATE; uploading them is storage only. Never register them as an installed-app update or replace the established signing key. Release registration still requires signer, package ID, increasing version and data-preserving upgrade verification.
+- Use the connected Drive tool or an authenticated browser for delivery. Never put Google credentials in the Public repository, fetch private credentials from a Public build, start Private Actions, or write the server/update registry for this upload-only rule.
+- If a connector rejects a large artifact, upload the same bytes through the browser; do not rebuild. If delivery remains blocked, preserve the local artifact and report the exact blocker.
+- This is a chat-driven delivery rule, not an unattended Drive uploader installed in GitHub Actions. Do not claim unattended upload automation is configured.
