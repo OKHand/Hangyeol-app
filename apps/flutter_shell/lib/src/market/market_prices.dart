@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../serverless/client.dart';
@@ -98,7 +99,7 @@ const marketDefaultItems=<List<String>>[
 const marketSampleDate='2026-11-10';
 double? _parseKg(String? pack){
   if(pack==null){return null;}
-  final m=RegExp(r'^(\d+(?:\.\d+)?)\s*(kg|g)\s*(?:상자|박스|봉지|파렛트|단|망)?$',caseSensitive:false).firstMatch(pack.trim());
+  final m=RegExp(r'^(\d+(?:\.\d+)?)\s*(kg|g)(?:\s*[가-힣A-Za-z]+)?$',caseSensitive:false).firstMatch(pack.trim());
   if(m==null){return null;}
   final v=double.tryParse(m.group(1)!)??0;
   return v<=0?null:(m.group(2)!.toLowerCase()=='g'?v/1000:v);
@@ -109,8 +110,8 @@ Map<String,dynamic> marketSample(String product,{String? label}){
   final cherry=product=='date-cherry-tomato',baseKg=cherry?3:5,basePrice=cherry?18000:14000;
   final quotes=List.generate(3,(i){final price=basePrice+i*2000;return <String,dynamic>{'id':'sample-$product-$i','product':product,'productName':name,'date':marketSampleDate,'market':i==2?'예시 도매시장 B':'예시 도매시장 A','grade':i==1?'상':'특','package':'${baseKg}kg 상자','price':price,'currency':'KRW','quantity':10+i*5,'weightKg':baseKg,'pricePerKg':price/baseKg};});
   final basePerKg=(basePrice+2000)/baseKg;
-  final offsets=[-12,-10,-8,-6,-4,-2,0];
-  final deltas=[-220,180,-310,-90,40,120,0];
+  final offsets=[-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0];
+  final deltas=[-240,-180,-220,160,180,-120,-310,-150,-90,20,40,90,120,0];
   final trend=List.generate(offsets.length,(i){
     final d=DateTime.parse('${marketSampleDate}T00:00:00Z').add(Duration(days:offsets[i]));
     final mm=d.month.toString().padLeft(2,'0'),dd=d.day.toString().padLeft(2,'0');
@@ -141,8 +142,8 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
   late bool _sample;
   late DateTime _date;
   Map<String,dynamic>? _data;
-  bool _loading=false,_syncingCodes=false,_showGrades=false;
-  int _generation=0;
+  bool _loading=false,_loadingMoreQuotes=false,_loadingTrend=false,_syncingCodes=false,_showGrades=false;
+  int _generation=0,_trendLoadedBatches=0;
   int? _nextCodeStart=1;
   @override
   void initState(){
@@ -155,24 +156,103 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     _load();
   }
   Future<void> _load() async {
-    final generation=++_generation;setState((){_loading=true;_error='';_data=null;_market='';});
+    final generation=++_generation;
+    setState((){_loading=true;_loadingMoreQuotes=false;_loadingTrend=false;_trendLoadedBatches=0;_error='';_data=null;_market='';});
     try{
       final params=<String,dynamic>{
         'product':_product,
         'date':marketDay(_date),
         'includeTrend':true,
+        'progressive':true,
+        'page':1,
         if(_marketCode!='110001')'marketCode':_marketCode,
         if(_codeParams!=null)..._codeParams!,
       };
       final result=_sample?marketSample(_product,label:_customLabel.isEmpty?null:_customLabel):await widget.client!.call('market.prices',params:params);
       if(!mounted||generation!=_generation){return;}
       if(result['sample']!=_sample||result['product']!=_product||result['date']!=(_sample?marketSampleDate:marketDay(_date))||result['quotes'] is! List){throw PlatformAuthFailure('MARKET_RESPONSE_INVALID','조회 조건과 응답이 일치하지 않습니다.');}
-      setState(()=>_data=result);
+      setState((){_data=Map<String,dynamic>.from(result);_loading=false;});
+      if(!_sample&&widget.client!=null){
+        unawaited(_loadProgressive(generation,Map<String,dynamic>.from(result)));
+      }
     }catch(e){
       if(!mounted||generation!=_generation){return;}
       if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){await widget.onAuthError?.call(e);}
       if(mounted&&generation==_generation){setState(()=>_error=e is PlatformAuthFailure?e.message:'시세를 불러오지 못했습니다. 다시 확인해 주세요.');}
-    }finally{if(mounted&&generation==_generation){setState(()=>_loading=false);}}
+    }finally{if(mounted&&generation==_generation&&_loading){setState(()=>_loading=false);}}
+  }
+  Future<void> _loadProgressive(int generation,Map<String,dynamic> firstPage) async {
+    final needTrend=firstPage['trendPending']==true;
+    var nextPage=firstPage['nextPage'] as int?;
+    if(!needTrend&&nextPage==null){return;}
+    if(mounted&&generation==_generation){
+      setState((){_loadingTrend=needTrend;_loadingMoreQuotes=nextPage!=null;});
+    }
+    Future<void> fetchTrendBatches() async {
+      if(!needTrend){return;}
+      final batches=<List<int>>[
+        [-4,-3,-2,-1],
+        [-9,-8,-7,-6,-5],
+        [-13,-12,-11,-10],
+      ];
+      for(final offsets in batches){
+        if(!mounted||generation!=_generation){return;}
+        final dates=[for(final off in offsets)marketDay(_date.add(Duration(days:off)))];
+        try{
+          final res=await widget.client!.call('market.prices',params:{
+            'product':_product,
+            'date':marketDay(_date),
+            'trendBatch':true,
+            'dates':dates,
+            if(firstPage['large'] is String)'large':firstPage['large'],
+            if(firstPage['mid'] is String)'mid':firstPage['mid'],
+            if(firstPage['small'] is String)'small':firstPage['small'],
+            if(_marketCode!='110001')'marketCode':_marketCode,
+            if(_codeParams!=null)..._codeParams!,
+          });
+          if(!mounted||generation!=_generation||_data==null){return;}
+          final incoming=List<Map<String,dynamic>>.from(res['points'] as List? ?? []);
+          final current=List<Map<String,dynamic>>.from(_data!['trend'] as List? ?? []);
+          final merged=<String,Map<String,dynamic>>{
+            for(final p in current)if(p['date'] is String)p['date'] as String:p,
+            for(final p in incoming)if(p['date'] is String)p['date'] as String:p,
+          };
+          final sorted=merged.values.toList()..sort((a,b)=>'${a['date']}'.compareTo('${b['date']}'));
+          setState((){
+            _trendLoadedBatches++;
+            _data={..._data!,'trend':sorted};
+          });
+        }catch(_){}
+      }
+      if(mounted&&generation==_generation){setState(()=>_loadingTrend=false);}
+    }
+    Future<void> fetchRemainingQuotePages() async {
+      while(nextPage!=null&&mounted&&generation==_generation){
+        final pageToFetch=nextPage!;
+        nextPage=null;
+        try{
+          final res=await widget.client!.call('market.prices',params:{
+            'product':_product,
+            'date':marketDay(_date),
+            'progressive':true,
+            'page':pageToFetch,
+            if(_marketCode!='110001')'marketCode':_marketCode,
+            if(_codeParams!=null)..._codeParams!,
+          });
+          if(!mounted||generation!=_generation||_data==null){return;}
+          final existing=List<Map<String,dynamic>>.from(_data!['quotes'] as List? ?? []);
+          final incoming=List<Map<String,dynamic>>.from(res['quotes'] as List? ?? []);
+          final seen={for(final q in existing)'${q['id']}'};
+          for(final q in incoming){if(seen.add('${q['id']}')){existing.add(q);}}
+          nextPage=res['nextPage'] as int?;
+          setState((){
+            _data={..._data!,'quotes':existing,'truncated':res['truncated']??_data!['truncated']};
+          });
+        }catch(_){break;}
+      }
+      if(mounted&&generation==_generation){setState(()=>_loadingMoreQuotes=false);}
+    }
+    await Future.wait([fetchTrendBatches(),fetchRemainingQuotePages()]);
   }
   Future<void> _syncCatalogue() async {
     if(_syncingCodes||widget.client==null){return;}
@@ -262,16 +342,18 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     final totalQty=(summary['totalQuantity'] as int?)??0;
     final groups=List<Map<String,dynamic>>.from(summary['groups'] as List? ?? []);
     final rawTrend=List<Map<String,dynamic>>.from(_data?['trend'] as List? ?? []);
+    final todayStr=_sample?marketSampleDate:marketDay(_date);
+    final todayLabel=todayStr.substring(5).replaceAll('-','.');
+    if((avgPerKg!=null||avgPkg!=null)&&!rawTrend.any((p)=>p['date']==todayStr)){
+      rawTrend.add({'date':todayStr,'label':todayLabel,'avgPricePerKg':avgPerKg,'avgPackagePrice':avgPkg,'totalWeightKg':totalKg});
+      rawTrend.sort((a,b)=>'${a['date']}'.compareTo('${b['date']}'));
+    }
     final usePerKg=avgPerKg!=null||rawTrend.any((p)=>p['avgPricePerKg'] is num);
     final chartPoints=<({String label,double value})>[
       for(final p in rawTrend)
         if((usePerKg?p['avgPricePerKg']:p['avgPackagePrice']) is num)
           (label:'${p['label']??''}',value:((usePerKg?p['avgPricePerKg']:p['avgPackagePrice']) as num).toDouble()),
     ];
-    if(chartPoints.isEmpty&&(avgPerKg!=null||avgPkg!=null)){
-      final d=(_sample?marketSampleDate:marketDay(_date)).substring(5).replaceAll('-','.');
-      chartPoints.add((label:d,value:(avgPerKg??avgPkg!).toDouble()));
-    }
     return Container(
       key:const Key('market-dashboard-card'),
       margin:const EdgeInsets.symmetric(vertical:8),
@@ -330,8 +412,12 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             padding:const EdgeInsets.fromLTRB(14,14,14,12),
             decoration:BoxDecoration(color:const Color(0xffe6f7f0),borderRadius:BorderRadius.circular(16)),
             child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-              const Text('일별 시세 추이',textAlign:TextAlign.center,style:TextStyle(fontSize:15,fontWeight:FontWeight.bold,color:Color(0xff1b3a2b))),
-              Align(alignment:Alignment.centerRight,child:Text(usePerKg?'단위 : 원/kg':'단위 : 원',style:const TextStyle(fontSize:11,color:Color(0xff52685c)))),
+              const Text('일별 시세 추이 (최근 2주)',textAlign:TextAlign.center,style:TextStyle(fontSize:15,fontWeight:FontWeight.bold,color:Color(0xff1b3a2b))),
+              Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
+                Text(_loadingTrend?'2주 추이 불러오는 중… ($_trendLoadedBatches/3)':'조회 일수 ${chartPoints.length}일',style:const TextStyle(fontSize:11,color:Color(0xff2b7de9))),
+                Text(usePerKg?'단위 : 원/kg':'단위 : 원',style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
+              ]),
+              if(_loadingTrend)const Padding(padding:EdgeInsets.only(top:4),child:LinearProgressIndicator(minHeight:2)),
               const SizedBox(height:8),
               SizedBox(height:170,child:CustomPaint(painter:_MarketTrendPainter(points:chartPoints))),
             ]),
@@ -416,6 +502,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         Padding(padding:const EdgeInsets.symmetric(vertical:10),child:Text('${_data!['source']}\n${_sample?'고정 샘플 자료':stamp==null?'조회 시각 미상':'조회 시각 ${marketDay(stamp)} ${stamp.hour.toString().padLeft(2,'0')}:${stamp.minute.toString().padLeft(2,'0')}'}${_data!['cached']==true?' · 캐시 자료':''}',style:const TextStyle(fontSize:12))),
         if(_data!['truncated']==true)const Text('일부 거래만 조회했습니다. 전체 거래의 평균이나 전체 시장 가격으로 해석하지 마세요.'),
         Text('표시 ${visible.length}건 · ${_data!['priceBasis']=='unconfirmed'?'제공가격의 단가 기준 확인이 필요합니다.':'가격은 해당 거래의 규격당 낙찰가입니다.'}',style:const TextStyle(fontSize:12)),
+        if(_loadingMoreQuotes)const Padding(padding:EdgeInsets.symmetric(vertical:4),child:Text('추가 경매 내역을 이어서 불러오는 중…',style:TextStyle(fontSize:12,color:Color(0xff2b7de9)))),
         if(visible.isEmpty)Padding(padding:const EdgeInsets.all(20),child:Text(_data!['truncated']==true?'조회한 일부 거래에서 해당 품목을 찾지 못했습니다. 전체 거래에 자료가 없다는 의미는 아닙니다.':'해당 거래일의 자료가 없습니다. 휴장·수집 지연일 수 있으니 다른 날짜도 확인하세요.')),
         for(final row in visible)Card(key:ValueKey('market-quote-${row['id']}'),margin:const EdgeInsets.symmetric(vertical:4),child:Padding(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
           Text(row['market'] as String,style:const TextStyle(fontWeight:FontWeight.bold)),
@@ -454,12 +541,15 @@ class _MarketTrendPainter extends CustomPainter {
       tp.paint(canvas,Offset(leftPad-tp.width-6,y-tp.height/2));
     }
     final coords=<Offset>[];
+    final labelStep=points.length>8?2:1;
     for(var i=0;i<points.length;i++){
       final x=points.length==1?leftPad+chartW/2:leftPad+chartW*(i/(points.length-1));
       final y=topPad+chartH*(1-(yMax<=0?0:(points[i].value/yMax).clamp(0.0,1.0)));
       coords.add(Offset(x,y));
-      final tp=TextPainter(text:TextSpan(text:points[i].label,style:const TextStyle(fontSize:10,color:Color(0xff52685c))),textDirection:TextDirection.ltr)..layout();
-      tp.paint(canvas,Offset(x-tp.width/2,topPad+chartH+6));
+      if(i%labelStep==0||i==points.length-1){
+        final tp=TextPainter(text:TextSpan(text:points[i].label,style:const TextStyle(fontSize:10,color:Color(0xff52685c))),textDirection:TextDirection.ltr)..layout();
+        tp.paint(canvas,Offset(x-tp.width/2,topPad+chartH+6));
+      }
     }
     if(coords.length>1){
       final path=Path()..moveTo(coords.first.dx,coords.first.dy);

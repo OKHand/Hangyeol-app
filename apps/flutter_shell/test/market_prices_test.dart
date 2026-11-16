@@ -64,7 +64,7 @@ void main(){
     expect(find.byKey(const Key('market-avg-price-card')),findsOneWidget);
     expect(find.byKey(const Key('market-total-volume-card')),findsOneWidget);
     expect(find.byKey(const Key('market-trend-chart')),findsOneWidget);
-    expect(find.text('일별 시세 추이'),findsOneWidget);
+    expect(find.textContaining('일별 시세 추이'),findsOneWidget);
     await tester.tap(find.byKey(const Key('market-catalogue-panel')));await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('market-item-search')),'백다다기');await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('market-code-09:01:02')));await tester.pumpAndSettle();
