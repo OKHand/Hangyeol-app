@@ -23,5 +23,16 @@ p.write_text(s)
 p=root/'android/app/src/debug/AndroidManifest.xml'
 p.write_text('<manifest xmlns:android="http://schemas.android.com/apk/res/android"><uses-permission android:name="android.permission.INTERNET"/><application android:usesCleartextTraffic="true"/></manifest>')
 PY
+if [[ -d "$project/tool/native/icons" ]]; then
+  for dir in mipmap-mdpi mipmap-hdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi mipmap-anydpi-v26 drawable values; do
+    if [[ -d "$project/tool/native/icons/$dir" && -d "$project/android/app/src/main/res" ]]; then
+      mkdir -p "$project/android/app/src/main/res/$dir"
+      cp -f "$project/tool/native/icons/$dir/"* "$project/android/app/src/main/res/$dir/"
+    fi
+  done
+  if [[ -f "$project/tool/native/icons/app_icon.ico" && -d "$project/windows/runner/resources" ]]; then
+    cp -f "$project/tool/native/icons/app_icon.ico" "$project/windows/runner/resources/app_icon.ico"
+  fi
+fi
 cd "$project"
 flutter pub get --enforce-lockfile

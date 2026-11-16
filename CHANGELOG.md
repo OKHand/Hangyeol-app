@@ -9,6 +9,22 @@
 
 ---
 
+## 2026-11-16 · Antigravity · 농산물 시세 설정 개편·실제 시세 단일화·11개 품목 순서 개편 및 잎 모양 앱·프로그램 아이콘 적용
+
+- 요청:
+  1. 농산물 시세 설정 화면을 실용적인 시세 설정(기본 도매시장, 첫 시작 품목, 추이 그래프 기간 7/14/21일, 대표 단가 기준 `원/kg` vs 상자 단가, 등급별 평균가 자동 펼치기, 상단 빠른 선택 품목 표시 관리 + 관리자 서버 API 코드 연결)으로 개편.
+  2. 실제 시세만 조회하므로 `실제 시세` / `예시 자료 보기` 전환 버튼 및 가상 가격 배너 제거.
+  3. 품목 탭 순서를 `일반토마토, 찰토마토, 대추방울, 파프리카, 가지, 홍고추, 풋고추, 백다다기, 양파, 양배추, 브로콜리` 11개로 개편.
+  4. 어플(Android) 및 프로그램(Windows) 아이콘을 잎 모양 아이콘으로 변경.
+- 변경:
+  - `apps/flutter_shell/lib/src/market/market_setup.dart`, `market_prices.dart`:
+    - `MarketPreferences` 및 새 설정 화면(`MarketSetupPage`) 구현, 모든 사용자에게 시세 설정 버튼(`market-open-setup`) 제공.
+    - 온라인 시세 화면에서 `실제 시세` / `예시 자료 보기` 토글 제거.
+    - `marketOrderedProducts` 11개 품목 순서(`일반토마토` → `브로콜리`) 적용.
+  - `apps/flutter_shell/tool/native/icons/**`, `tool/bootstrap.sh`, `tool/bootstrap.ps1`, `lib/src/serverless/app.dart`, `apps/web/index.html`:
+    - 한결씨드 그린(`#1E6247`) 바탕의 잎 모양 런처 아이콘(`ic_launcher.png` mdpi~xxxhdpi, Android 8+ 어댑티브 벡터 아이콘 `ic_launcher.xml`, Windows 다중 해상도 `app_icon.ico`, 웹 SVG 파비콘, 앱 상단 바 리프 아이콘) 생성 및 빌드 부트스트랩 자동 복사 구성.
+- 확인: 로컬 `dart analyze` 무결점 및 Flutter 전체 테스트 104건 모두 통과.
+
 ## 2026-11-16 · Antigravity · 정식 버전(0.2.0) 전환 완료 — 고정 Android 서명 Release 빌드 · Google Drive 게시 · 앱 내 업데이트 등록
 
 - 요청: 테스트(개발) 버전을 정식 버전으로 전환 및 정산 가격 정보 API(`653_1`)의 등급별 가격 반영 확인.

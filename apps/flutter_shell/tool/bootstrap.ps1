@@ -24,6 +24,25 @@ try {
   $debugManifest = Join-Path $project 'android/app/src/debug/AndroidManifest.xml'
   $debugXml = '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><uses-permission android:name="android.permission.INTERNET"/><application android:usesCleartextTraffic="true"/></manifest>'
   [IO.File]::WriteAllText($debugManifest, $debugXml, [Text.UTF8Encoding]::new($false))
+  $iconRoot = Join-Path $PSScriptRoot 'native/icons'
+  if (Test-Path $iconRoot) {
+    $resRoot = Join-Path $project 'android/app/src/main/res'
+    if (Test-Path $resRoot) {
+      foreach ($dir in @('mipmap-mdpi','mipmap-hdpi','mipmap-xhdpi','mipmap-xxhdpi','mipmap-xxxhdpi','mipmap-anydpi-v26','drawable','values')) {
+        $srcDir = Join-Path $iconRoot $dir
+        if (Test-Path $srcDir) {
+          $dstDir = Join-Path $resRoot $dir
+          New-Item -ItemType Directory -Force $dstDir | Out-Null
+          Copy-Item (Join-Path $srcDir '*') $dstDir -Force
+        }
+      }
+    }
+    $winRes = Join-Path $project 'windows/runner/resources'
+    $icoFile = Join-Path $iconRoot 'app_icon.ico'
+    if ((Test-Path $winRes) -and (Test-Path $icoFile)) {
+      Copy-Item $icoFile (Join-Path $winRes 'app_icon.ico') -Force
+    }
+  }
   Push-Location $project
   try {
     & flutter pub get --enforce-lockfile

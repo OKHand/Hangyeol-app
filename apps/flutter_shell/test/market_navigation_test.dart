@@ -48,8 +48,8 @@ void main() {
     await tester.tap(find.byKey(const Key('open-market-prices')));
     await tester.pumpAndSettle();
     expect(client.marketCalls, 1);
-    expect(find.byKey(const Key('market-live')), findsOneWidget);
-    expect(find.byKey(const Key('market-open-setup')), findsNothing);
+    expect(find.byKey(const Key('market-live')), findsNothing);
+    expect(find.byKey(const Key('market-open-setup')), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
     await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('설정')));
     await tester.pumpAndSettle();
