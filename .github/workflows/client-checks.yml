@@ -1,5 +1,14 @@
 name: Client checks
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/contracts/**'
+      - 'package*.json'
+      - '.flutter-version'
+      - '.node-version'
+      - '.github/workflows/client-checks.yml'
   pull_request:
     branches: [main]
     paths:

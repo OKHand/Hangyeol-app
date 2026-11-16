@@ -41,8 +41,7 @@ API 주소·클라이언트 ID는 공개 식별자이며 인증 토큰과 서명
 
 ## 자동화와 배포
 
-- 검사: main PR에서 변경된 클라이언트만 분석·테스트합니다. main push 검사는
-  PR 검사와 중복되지 않도록 생략합니다. 수동 검사도 가능합니다.
+- 검사: `main` push 및 PR에서 변경된 클라이언트(Flutter / 웹)만 분석·테스트합니다. 수동 검사도 가능합니다.
 - 문서만 변경하면 검사가 실행되지 않습니다. 저장소 분리 도구도 앱 검사 대상이 아닙니다.
 - 패키징은 수동 `Client development packages`만 제공합니다. Android/Windows 중
   하나를 고르고, Google API 주소는 저장소 변수 `APPS_SCRIPT_API_URL`에서 읽습니다.

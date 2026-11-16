@@ -9,6 +9,15 @@
 
 ---
 
+## 2026-11-16 · Antigravity · `main` 브랜치 push 자동 검사 활성화 (3번-B)
+
+- 요청: PR 없이 `main`에 직접 push할 때도 클라이언트 검사가 자동으로 돌도록 설정(옵션 B).
+- 변경: `.github/workflows/client-checks.yml`, `README.md`, `CHANGELOG.md`.
+- 확인: 로컬 `actionlint`로 워크플로 문법 검증. 문서 외 워크플로 파일 변경이 포함되어 push 시 GitHub Actions `Client checks` 실행됨(Public 저장소 무료 러너).
+- 결정(사용자):
+  - 3번은 B(`main` push 시 변경된 클라이언트만 자동 검사)로 확정.
+  - 1번은 **번호 고르기(2자리 숫자 선택 탭)** 방식으로 진행 예정.
+
 ## 2026-11-16 · Antigravity · 전체 코드 리뷰 (코드 변경 없음)
 
 - 요청: GitHub와 PC(`C:\Users\sango`)의 한결씨드 온라인 리뷰.
