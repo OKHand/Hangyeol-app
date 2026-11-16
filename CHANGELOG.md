@@ -20,6 +20,9 @@
     - 공영도매시장 선택 칩(서울가락·서울강서·부산엄궁·대구북부·강릉 등) 및 도매시장 코드 API 동기화 연동.
   - `apps/flutter_shell/test/market_prices_test.dart`: 대시보드 요약 카드 및 일별 시세 추이 차트 위젯 테스트 추가.
 - 확인: 로컬 `dart analyze` 무결점 및 시세 위젯 테스트 7건 모두 통과.
+- 빌드 및 Google Drive 업로드 (`cdfd67a`):
+  - Android (`run 43815471899`, 성공): `Hangyeol-android-online-DEVELOPMENT-NOT-UPDATE-20261116-run43815471899-cdfd67a.apk` (152,078,360 bytes, SHA-256 `5f83fe0971a9961d05edf09255d472435cdd68511e056c6c54b603d0ee858952`) → https://drive.google.com/file/d/1Jjy8Y2pDI38xD1poy70V6IVKo3uajqHY/view
+  - Windows (`run 43815476153`, 성공): `Hangyeol-windows-online-development-20261116-run43815476153-cdfd67a.zip` (13,808,569 bytes, SHA-256 `b4061ccbe2690daa5c450e0ccb33b3e4e18d50bf971fff2bda030b18aab4b181`) → https://drive.google.com/file/d/16018O_1Zc_hkSFAargNt40OOMc9vfSEu/view
 
 ## 2026-11-16 · Antigravity · 농산물 경매 시세 다품목 빠른 선택 및 품목 코드 API 전체 품목 선택 기능
 
