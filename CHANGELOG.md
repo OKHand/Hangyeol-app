@@ -9,6 +9,16 @@
 
 ---
 
+## 2026-11-16 · Antigravity · 기기 로그인 2자리 번호 고르기(Number Matching) 즉시 전환 (1번)
+
+- 요청: 6자리 숫자 타이핑 없이 로그인 피싱을 막기 위해 2자리 번호 고르기 방식으로 즉시 전환.
+- 변경:
+  - `apps/flutter_shell/lib/src/serverless/client.dart`: `auth.start`의 `userCode`를 2자리 숫자(`^\d{2}$`)로 검증.
+  - `apps/flutter_shell/lib/src/serverless/app.dart`: 로그인 대기 화면 중앙에 2자리 확인 번호 배지(`login-match-code`)를 크게 표시하고 브라우저의 3개 숫자 중 같은 번호를 누르도록 안내.
+  - `apps/flutter_shell/test/serverless_auth_test.dart`, `auth_browser_test.dart`, `google_login_routing_test.dart`: 2자리 번호 기준 테스트 갱신.
+- 확인: 로컬 `flutter analyze --no-pub` 및 인증 테스트 3개 파일 통과, `main` push 시 GitHub Actions `Client checks` 자동 실행.
+- 주의: 서버(`OKHand/Hangyeol`의 `platform/apps-script-auth`)도 즉시 전환으로 함께 수정되었으며, 실제 Google Apps Script 반영과 앱 새 빌드 배포를 맞물려 진행해야 함.
+
 ## 2026-11-16 · Antigravity · `main` 브랜치 push 자동 검사 활성화 (3번-B)
 
 - 요청: PR 없이 `main`에 직접 push할 때도 클라이언트 검사가 자동으로 돌도록 설정(옵션 B).

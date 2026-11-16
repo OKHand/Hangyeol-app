@@ -7,7 +7,7 @@ import 'package:hangyeol_platform/src/serverless/client.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel=MethodChannel('hangyeol/isolated_auth_browser');
-  final login=GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'private-verifier',userCode:'012345',url:Uri.parse('https://script.google.com/macros/s/login/exec?device=${'ab'*32}'),expiresAt:DateTime.now().add(const Duration(minutes:5)));
+  final login=GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'private-verifier',userCode:'47',url:Uri.parse('https://script.google.com/macros/s/login/exec?device=${'ab'*32}'),expiresAt:DateTime.now().add(const Duration(minutes:5)));
   tearDown(() {
     debugDefaultTargetPlatformOverride=null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(channel,null);

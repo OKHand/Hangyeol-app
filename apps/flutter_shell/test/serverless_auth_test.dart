@@ -20,7 +20,7 @@ class _Vault implements SessionVault {
 class _UiClient extends AppsScriptPlatformClient {
   _UiClient():super(Uri.parse(endpoint));
   @override
-  Future<GoogleDeviceLogin> startLogin() async => GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'x'*43,userCode:'012345',url:Uri.parse('https://script.google.com/macros/s/login/exec?device=${'ab'*32}'),expiresAt:DateTime.now().add(const Duration(minutes:5)));
+  Future<GoogleDeviceLogin> startLogin() async => GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'x'*43,userCode:'47',url:Uri.parse('https://script.google.com/macros/s/login/exec?device=${'ab'*32}'),expiresAt:DateTime.now().add(const Duration(minutes:5)));
   @override
   Future<Map<String,dynamic>?> poll(GoogleDeviceLogin login) async {token='cd'*32;return {'email':'viewer@example.com','role':'viewer','permissions':['erp.read']};}
   @override
@@ -56,7 +56,7 @@ void main(){
       expect(body.containsKey('token'),isFalse);
       if(body['action']=='auth.start'){
         challenge=body['params']['challenge'] as String;
-        return http.Response(jsonEncode({'ok':true,'result':{'deviceCode':'ab'*32,'userCode':'012345','verificationUrl':'https://script.google.com/macros/s/google-login/exec?device=${'ab'*32}','expiresAt':DateTime.now().add(const Duration(minutes:5)).millisecondsSinceEpoch}}),200);
+        return http.Response(jsonEncode({'ok':true,'result':{'deviceCode':'ab'*32,'userCode':'47','verificationUrl':'https://script.google.com/macros/s/google-login/exec?device=${'ab'*32}','expiresAt':DateTime.now().add(const Duration(minutes:5)).millisecondsSinceEpoch}}),200);
       }
       expect(sha256.convert(utf8.encode(body['params']['verifier'] as String)).toString(),challenge);
       return http.Response(jsonEncode({'ok':true,'result':{'status':'pending'}}),200);
@@ -70,7 +70,7 @@ void main(){
       expect(body['action'],'auth.logout');expect(body['token'],'cd'*32);
       return http.Response(jsonEncode({'ok':true,'result':{'loggedOut':true}}),200);
     }));
-    final user=await client.poll(GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'x'*43,userCode:'012345',url:Uri.parse(endpoint),expiresAt:DateTime.now().add(const Duration(minutes:5))));
+    final user=await client.poll(GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'x'*43,userCode:'47',url:Uri.parse(endpoint),expiresAt:DateTime.now().add(const Duration(minutes:5))));
     expect(user?['email'],'viewer@example.com');expect(client.token,'cd'*32);await client.logout();expect(client.token,isNull);client.close();
   });
   testWidgets('mobile browser failure exposes a copyable canonical login address without app secrets',(tester)async{
@@ -81,7 +81,7 @@ void main(){
     await tester.tap(find.byKey(const Key('google-login')));await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('로그인 화면이 열리지 않나요?'));await tester.tap(find.text('로그인 화면이 열리지 않나요?'));await tester.pumpAndSettle();
     final copy=find.byKey(const Key('copy-google-login-url'));await tester.ensureVisible(copy);await tester.tap(copy);await tester.pumpAndSettle();
-    expect(copied,'https://script.google.com/macros/s/login/exec?device=${'ab'*32}');expect(copied,isNot(contains('x'*43)));expect(copied,isNot(contains('012345')));expect(tester.takeException(),isNull);
+    expect(copied,'https://script.google.com/macros/s/login/exec?device=${'ab'*32}');expect(copied,isNot(contains('x'*43)));expect(copied,isNot(contains('47')));expect(tester.takeException(),isNull);
     await tester.pumpWidget(const SizedBox.shrink());client.close();
   });
   testWidgets('unsupported isolated browser keeps recovery usable on initial launch and retry',(tester)async{
@@ -93,11 +93,11 @@ void main(){
     expect(calls,2);expect(find.text('Chrome 업데이트 후 다시 시도해 주세요.'),findsOneWidget);expect(tester.takeException(),isNull);
     await tester.pumpWidget(const SizedBox.shrink());client.close();
   });
-  testWidgets('Google approval returns to the native ERP and persists a session without exposing staff controls to a viewer',(tester)async{
+  testWidgets('Google approval shows the 2-digit match code, returns to the native ERP and persists a session without exposing staff controls to a viewer',(tester)async{
     final vault=_Vault();Uri? launched;
     final client=_UiClient();
     await tester.pumpWidget(ServerlessApp(apiUrl:endpoint,client:client,vault:vault,launch:(uri)async{launched=uri;return true;}));await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('google-login')));await tester.pumpAndSettle();expect(launched?.host,'accounts.google.com',reason:find.byType(Text).evaluate().map((e)=>(e.widget as Text).data??'').join(' | '));expect(find.text('012345'),findsNothing);expect(find.text('6자리 번호를 입력할 필요가 없습니다.\n승인 후 앱으로 돌아오면 연결됩니다.'),findsOneWidget);
+    await tester.tap(find.byKey(const Key('google-login')));await tester.pumpAndSettle();expect(launched?.host,'accounts.google.com',reason:find.byType(Text).evaluate().map((e)=>(e.widget as Text).data??'').join(' | '));expect(find.byKey(const Key('login-match-code')),findsOneWidget);expect(find.text('47'),findsOneWidget);expect(find.text('브라우저에서 회사 Google 계정을 확인하고\n아래 2자리 번호를 눌러 승인해 주세요.'),findsOneWidget);
     await tester.tap(find.text('로그인 확인'));await tester.pumpAndSettle();expect(find.text('직원·권한'),findsNothing);expect(find.text('ERP 조회'),findsOneWidget);expect(vault.values[client.storageKey],'cd'*32);expect(find.text('빠른 체험'),findsNothing);
     await tester.tap(find.byTooltip('로그아웃'));await tester.pumpAndSettle();expect(vault.values,isEmpty);expect(find.byKey(const Key('google-login')),findsOneWidget);expect(tester.takeException(),isNull);
     await tester.pumpWidget(const SizedBox.shrink());client.close();

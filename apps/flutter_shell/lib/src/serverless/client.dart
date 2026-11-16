@@ -93,7 +93,7 @@ class AppsScriptPlatformClient {
     final result=await call('auth.start',authenticated:false,params:{'challenge':sha256.convert(utf8.encode(verifier)).toString()});
     final device=result['deviceCode'] as String,userCode=result['userCode'] as String,uri=Uri.parse(result['verificationUrl'] as String);
     final base=uri.replace(query:'');
-    if(!RegExp(r'^[a-f0-9]{64}$').hasMatch(device)||!RegExp(r'^\d{6}$').hasMatch(userCode)||!validApiUrl(base)||uri.queryParameters.length!=1||uri.queryParameters['device']!=device){throw PlatformAuthFailure('INVALID_LOGIN','Google 로그인 주소를 확인하지 못했습니다.');}
+    if(!RegExp(r'^[a-f0-9]{64}$').hasMatch(device)||!RegExp(r'^\d{2}$').hasMatch(userCode)||!validApiUrl(base)||uri.queryParameters.length!=1||uri.queryParameters['device']!=device){throw PlatformAuthFailure('INVALID_LOGIN','Google 로그인 주소를 확인하지 못했습니다.');}
     return GoogleDeviceLogin(deviceCode:device,verifier:verifier,userCode:userCode,url:uri,expiresAt:DateTime.fromMillisecondsSinceEpoch(result['expiresAt'] as int));
   }
   Future<Map<String,dynamic>?> poll(GoogleDeviceLogin login) async {

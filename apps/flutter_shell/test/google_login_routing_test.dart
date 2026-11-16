@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hangyeol_platform/src/serverless/client.dart';
 void main(){
-  GoogleDeviceLogin login(Uri url)=>GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'private-verifier-must-not-leave-app',userCode:'012345',url:url,expiresAt:DateTime.now().add(const Duration(minutes:5)));
+  GoogleDeviceLogin login(Uri url)=>GoogleDeviceLogin(deviceCode:'ab'*32,verifier:'private-verifier-must-not-leave-app',userCode:'47',url:url,expiresAt:DateTime.now().add(const Duration(minutes:5)));
   final canonical=Uri.parse('https://script.google.com/macros/s/login/exec?device=${'ab'*32}');
   test('Samsung multi-account recovery selects a Google account before entering canonical Apps Script',(){
     final device=login(canonical),browser=device.browserUrl;
