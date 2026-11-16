@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hangyeol_platform/src/serverless/client.dart';
 import 'package:hangyeol_platform/src/serverless/photo_library.dart';
-import 'package:hangyeol_platform/src/serverless/photo_repository.dart';
 import 'package:hangyeol_platform/src/serverless/photos.dart';
 
 class LibraryClient extends AppsScriptPlatformClient {

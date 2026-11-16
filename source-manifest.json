@@ -487,5 +487,12 @@
     "path": "apps/flutter_shell/pubspec.lock",
     "flutter": "3.35.7",
     "sha256": "cce35cd7a1293c0cd26b544bf21faa04bd4d96c3e280c75881cca7e908af958a"
-  }
+  },
+  "postExportChanges": [
+    {
+      "path": "apps/flutter_shell/test/photo_library_test.dart",
+      "reason": "Remove redundant import to allow strict analysis before development packaging",
+      "sha256": "ecd209f774b3044dfdaa936cb2c573780fad6ae9086807380aa5528ac6a344b2"
+    }
+  ]
 }
