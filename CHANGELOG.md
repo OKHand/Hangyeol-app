@@ -17,6 +17,9 @@
   - `apps/flutter_shell/lib/src/serverless/industry_news.dart`: `IndustryNewsPage` 구현(5개 트랙 필터, 검색, 작물 태그, 유사보도 펼치기, 외부 원문 열기, `관련 없음` 피드백 제외).
   - `apps/flutter_shell/lib/src/serverless/news_discord_settings.dart`: `NewsDiscordSettingsPage` 구현(웹훅 입력·해제, 매주 월요일 오전 10시 자동 발송 스위치, 즉시 시험 발송, 관리대장 시트 열기).
   - `apps/flutter_shell/test/industry_news_test.dart`, `market_navigation_test.dart`, `company_connections_test.dart`: 위젯 테스트 추가·갱신(전체 107건 통과).
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`bdf5d40`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 63`, `run 43999508143`)**: `Hangyeol-android-0.2.0-63.apk` (`56,066,786` bytes, SHA-256 `ef1b27f76ae761b88387a280c7d60af34d240bdc2262c4d505b10a9e42ad26c3`) → https://drive.google.com/file/d/1sxjxHb_V9kXpOPSsyjwBaoV5QWZAP2iX/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 64`, `run 43999512044`)**: `Hangyeol-windows-0.2.0-64.zip` (`13,853,669` bytes, SHA-256 `4d13992a138aeb09b8131dff5f362cf70d7f99681eb9fef016c54bd7293ecd16`) → https://drive.google.com/file/d/12dUFMtaoOiQ2oq-iSSREvegonnDvm9cB/view
 
 ## 2026-11-16 · Antigravity · KAMIS 3번 API (`monthlySalesList`) 기반 월별 시세 추이 그래프 추가 (`1kg` 환산)
 

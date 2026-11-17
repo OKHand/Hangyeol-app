@@ -1,19 +1,18 @@
-# Release readiness — 2026-11-16 (Official Release Published)
+# Release readiness — 2026-11-17 (Official Release Published)
 
-The formal release transition has been completed and verified on 2026-11-16:
+The formal release transition has been completed and verified on 2026-11-17:
 
-- **Android Official Release (`0.2.0 · build 61`, `run 43836225291`)**:
+- **Android Official Release (`0.2.0 · build 63`, `run 43999508143`)**:
   - Signed with the established fixed Android signing identity (`certificateSha256: 84fc6fb951f82620868f662a30477a589bf39fc5bc7100d387cb737a8e75e8fc`, package `com.hangyeolseed.platform_online`).
-  - File: `Hangyeol-android-0.2.0-61.apk` (`55,968,042` bytes, SHA-256 `7e5f9b8411b387e90739536b557d5bccbb0157047c1dc1b6298cc505aa1b4b4d`).
-  - Google Drive: https://drive.google.com/file/d/1QL44TDGkzCyijdt2qNDCwHeXyWHVjEF7/view
-  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_android`) and recorded in `config/platform-android-signing` (`online-app-20261116-b61`).
+  - File: `Hangyeol-android-0.2.0-63.apk` (`56,066,786` bytes, SHA-256 `ef1b27f76ae761b88387a280c7d60af34d240bdc2262c4d505b10a9e42ad26c3`).
+  - Google Drive: https://drive.google.com/file/d/1sxjxHb_V9kXpOPSsyjwBaoV5QWZAP2iX/view
+  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_android`) and recorded in `config/platform-android-signing` (`online-app-20261117-b63`).
 
-- **Windows Official Release (`0.2.0 · build 62`, `run 43836230203`)**:
-  - File: `Hangyeol-windows-0.2.0-62.zip` (`13,837,158` bytes, SHA-256 `f866903dfa3be06413880e9af38de764fb6925f0289f08a5251e5c6f5f4a6f8a`).
-  - Google Drive: https://drive.google.com/file/d/1MQaw1-bswz5F_CscwN1y0rJHGCNnEWK3/view
+- **Windows Official Release (`0.2.0 · build 64`, `run 43999512044`)**:
+  - File: `Hangyeol-windows-0.2.0-64.zip` (`13,853,669` bytes, SHA-256 `4d13992a138aeb09b8131dff5f362cf70d7f99681eb9fef016c54bd7293ecd16`).
+  - Google Drive: https://drive.google.com/file/d/12dUFMtaoOiQ2oq-iSSREvegonnDvm9cB/view
   - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_windows`).
 
-- **Apps Script Server (`api` v50, `login` v21)**:
-  - 2-digit number matching Google login active.
-  - KAMIS 3번 API (`monthlySalesList`, `p_convert_kg_yn=Y`) monthly wholesale trend chart (`1kg` converted) beneath the daily trend chart active.
-  - Leaf-shaped app & program icons, redesigned market settings screen, live-only market prices, 11 ordered quick-select crop presets (`일반토마토`, `찰토마토`, `대추방울`, `파프리카`, `가지`, `홍고추`, `풋고추`, `백다다기`, `양파`, `양배추`, `브로콜리`), and settlement grade-by-grade price API (`Grid_20240625000000000653_1`) active.
+- **Apps Script Server (`api` v51, `login` v22)**:
+  - `Industry News` bottom tab (`news.list`, `news.feedback`) reading from isolated spreadsheet `1mLQvEAI2lPte8u2UZAzIc1HOCD9Yt5fUIGCUGHvrvB4`.
+  - Admin Discord webhook settings (`news.settings`, `news.configure`, `news.sendWeekly`) & Monday 10:00 AM KST weekly batch briefing (`newsWeeklyBriefingWorker_`) active.
