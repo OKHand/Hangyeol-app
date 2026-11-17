@@ -13,6 +13,8 @@ import 'photos.dart';
 import 'company_connections.dart';
 import 'app_updates.dart';
 import 'photo_cache_settings.dart';
+import 'industry_news.dart';
+import 'news_discord_settings.dart';
 abstract class SessionVault {
   Future<String?> read(String key);
   Future<void> write(String key,String value);
@@ -147,8 +149,9 @@ class _AuthHomeState extends State<_AuthHome> with WidgetsBindingObserver {
       DemoErpPage(key:ValueKey('erp-${user['email']}'),loadReport:_report,loadSuggestions:_suggestions,refreshSuggestions:_refreshSuggestions),
       _visitedTabs.contains(1)?OnlinePhotosPage(key:ValueKey('photos-${user['email']}'),client:_client!,email:user['email'] as String,canCreate:(user['permissions'] as List? ?? []).contains('photos.create'),owner:user['role']=='owner',canManage:manage,onAuthError:_handle,settingsRevision:_photoSettingsRevision,repository:_photosFor(),useAccountStorage:true):const SizedBox.shrink(),
       _visitedTabs.contains(2)?MarketPricesPage(key:ValueKey('market-${user['email']}'),client:_client!,onAuthError:_handle,canManage:manage):const SizedBox.shrink(),
-      _visitedTabs.contains(3)?_SettingsPage(client:_client!,user:user,manage:manage,onAuthError:_handle,onPhotoCache:_openPhotoCache,onConnectionsChanged:(){if(mounted){setState(()=>_photoSettingsRevision++);}}):const SizedBox.shrink(),
-    ]))])),bottomNavigationBar:NavigationBar(selectedIndex:_tab,onDestinationSelected:(value){FocusScope.of(context).unfocus();setState((){_visitedTabs.add(value);_tab=value;});},destinations:const [NavigationDestination(icon:Icon(Icons.table_chart_outlined),label:'ERP'),NavigationDestination(icon:Icon(Icons.photo_library_outlined),label:'작황 사진'),NavigationDestination(key:Key('open-market-prices'),icon:Icon(Icons.show_chart),label:'농산물 시세'),NavigationDestination(icon:Icon(Icons.settings_outlined),label:'설정')]));
+      _visitedTabs.contains(3)?IndustryNewsPage(key:ValueKey('news-${user['email']}'),client:_client!,onAuthError:_handle):const SizedBox.shrink(),
+      _visitedTabs.contains(4)?_SettingsPage(client:_client!,user:user,manage:manage,onAuthError:_handle,onPhotoCache:_openPhotoCache,onConnectionsChanged:(){if(mounted){setState(()=>_photoSettingsRevision++);}}):const SizedBox.shrink(),
+    ]))])),bottomNavigationBar:NavigationBar(selectedIndex:_tab,onDestinationSelected:(value){FocusScope.of(context).unfocus();setState((){_visitedTabs.add(value);_tab=value;});},destinations:const [NavigationDestination(icon:Icon(Icons.table_chart_outlined),label:'ERP'),NavigationDestination(icon:Icon(Icons.photo_library_outlined),label:'작황 사진'),NavigationDestination(key:Key('open-market-prices'),icon:Icon(Icons.show_chart),label:'농산물 시세'),NavigationDestination(key:Key('open-industry-news'),icon:Icon(Icons.newspaper_outlined),label:'업계 뉴스'),NavigationDestination(icon:Icon(Icons.settings_outlined),label:'설정')]));
   }
 }
 class _SettingsPage extends StatelessWidget {
@@ -169,6 +172,8 @@ class _SettingsPage extends StatelessWidget {
       const Divider(),
       ListTile(key:const Key('settings-company-connections'),leading:const Icon(Icons.cloud_outlined),title:const Text('사진 저장소·Discord 연결'),subtitle:const Text('새 사진 저장 폴더와 알림 연결 관리'),trailing:const Icon(Icons.chevron_right),
         onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>CompanyConnectionsPage(client:client,owner:user['role']=='owner',onAuthError:onAuthError,onChanged:onConnectionsChanged)))),
+      ListTile(key:const Key('settings-news-discord'),leading:const Icon(Icons.newspaper_outlined),title:const Text('업계 뉴스 Discord 알림'),subtitle:const Text('매주 월요일 오전 10시 주간 브리핑 웹훅 설정'),trailing:const Icon(Icons.chevron_right),
+        onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>NewsDiscordSettingsPage(client:client,onAuthError:onAuthError)))),
       ListTile(key:const Key('settings-staff'),leading:const Icon(Icons.manage_accounts_outlined),title:const Text('직원·권한 관리'),trailing:const Icon(Icons.chevron_right),
         onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>Scaffold(appBar:AppBar(title:const Text('직원·권한 관리')),body:_StaffPage(client:client,owner:user['role']=='owner'))))),
     ]else const Padding(padding:EdgeInsets.symmetric(vertical:16),child:Text('회사 연결과 직원 권한은 관리자에게 문의해 주세요.')),

@@ -9,6 +9,15 @@
 
 ---
 
+## 2026-11-17 · Antigravity · 하단 `업계 뉴스` 탭 추가 및 `설정` 내 주간(월요일 10시) Discord 웹훅 설정 구현
+
+- 요청: 하단 내비게이션에 `업계 뉴스` 탭을 추가하고, 관리자가 `설정` 탭에서 Discord 웹훅을 입력해 매주 월요일 오전 10시(KST) 주간 뉴스를 일괄 발송할 수 있게 구성(AI 요약은 추후 활성화).
+- 변경:
+  - `apps/flutter_shell/lib/src/serverless/app.dart`: 하단 5탭(`ERP`, `작황 사진`, `농산물 시세`, `업계 뉴스`, `설정`) 구성 및 관리자 설정 메뉴 `업계 뉴스 Discord 알림` 추가.
+  - `apps/flutter_shell/lib/src/serverless/industry_news.dart`: `IndustryNewsPage` 구현(5개 트랙 필터, 검색, 작물 태그, 유사보도 펼치기, 외부 원문 열기, `관련 없음` 피드백 제외).
+  - `apps/flutter_shell/lib/src/serverless/news_discord_settings.dart`: `NewsDiscordSettingsPage` 구현(웹훅 입력·해제, 매주 월요일 오전 10시 자동 발송 스위치, 즉시 시험 발송, 관리대장 시트 열기).
+  - `apps/flutter_shell/test/industry_news_test.dart`, `market_navigation_test.dart`, `company_connections_test.dart`: 위젯 테스트 추가·갱신(전체 107건 통과).
+
 ## 2026-11-16 · Antigravity · KAMIS 3번 API (`monthlySalesList`) 기반 월별 시세 추이 그래프 추가 (`1kg` 환산)
 
 - 요청: 일별 시세 추이 그래프 바로 아래에 KAMIS 월별 시세 추이 그래프를 함께 표시.

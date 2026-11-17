@@ -42,7 +42,7 @@ void main() {
     await tester.pumpWidget(ServerlessApp(apiUrl: client.url.toString(), client: client, vault: _Vault()));
     await tester.pumpAndSettle();
     final destinations = tester.widgetList<NavigationDestination>(find.byType(NavigationDestination));
-    expect(destinations.map((d) => d.label), ['ERP', '작황 사진', '농산물 시세', '설정']);
+    expect(destinations.map((d) => d.label), ['ERP', '작황 사진', '농산물 시세', '업계 뉴스', '설정']);
     expect(client.marketCalls, 0);
     expect(find.byTooltip('농산물 경매 시세'), findsNothing);
     await tester.tap(find.byKey(const Key('open-market-prices')));

@@ -44,6 +44,7 @@ void main(){
       final admin=['owner','admin'].contains(role);
       expect(find.byKey(const Key('settings-app-update')),findsOneWidget);expect(find.byKey(const Key('settings-photo-cache')),findsOneWidget);
       expect(find.byKey(const Key('settings-company-connections')),admin?findsOneWidget:findsNothing);
+      expect(find.byKey(const Key('settings-news-discord')),admin?findsOneWidget:findsNothing);
       expect(find.byKey(const Key('settings-staff')),admin?findsOneWidget:findsNothing);expect(client.calls,isEmpty);
       if(admin){await tester.tap(find.byKey(const Key('settings-company-connections')));await tester.pumpAndSettle();expect(client.calls,['photos.settings']);}
       expect(tester.takeException(),isNull);await tester.pumpWidget(const SizedBox.shrink());
