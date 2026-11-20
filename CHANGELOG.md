@@ -17,6 +17,9 @@
     - `기본 조회 조건` / `화면 및 차트 표시` / `상단 빠른 선택 품목` / `관리자 · 서버 사전 준비` 4개 흰색 라운드 카드로 섹션을 구조화하고, 넓은 화면에서는 시장·품목 선택 필드를 2열로 배치하며 하단 고정 저장 버튼(`시세 설정 저장 및 적용`)을 적용.
     - 초기 개발용 `찰토마토`·`대추방울토마토` 코드 탐색·연결 더미 위젯 및 `uuid` 의존 사용부 제거.
   - `apps/flutter_shell/test/market_setup_test.dart`: 섹션 렌더링·관리자 사전 준비 스위치·일반 사용자 뷰·더미 UI 미노출 검증 추가(`dart analyze` 무결점 · Flutter 전체 113건 통과).
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`3ebe96e`, `tag: online-app-20261120-b69`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 69`, `run 44654220952`)**: `Hangyeol-android-0.2.0-69.apk` (`56,263,830` bytes, SHA-256 `20873e1b0b6ca5e9efc5586f195e25654da5b81251acc21d2352121f39897015`) → https://drive.google.com/file/d/1Fkq890LURUb84n2dv05X-RslOefN-PE1/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 70`, `run 44654224525`)**: `Hangyeol-windows-0.2.0-70.zip` (`13,879,650` bytes, SHA-256 `2e9a26c28fd03470e58aaa9aa4a9bbb55ff24a6d6b9c18ecc131461c9cf17433`) → https://drive.google.com/file/d/1QCylm7e31D1L94prWv2DwmsMA8FCFY9M/view
 
 ## 2026-11-20 · Antigravity · 농산물 시세 하루 1회 캐싱 · 백그라운드 품목 사전 준비 · 평균시세/차트 병렬 우선 로딩
 
