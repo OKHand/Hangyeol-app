@@ -58,7 +58,7 @@ class _PhotoBulkEditPageState extends State<PhotoBulkEditPage> {
   @override
   Widget build(BuildContext context)=>PopScope(canPop:!_saving,child:Scaffold(
     appBar:AppBar(title:Text('사진 ${_targets.length}장 정보 일괄 수정',overflow:TextOverflow.ellipsis),actions:[TextButton(key:const Key('bulk-save'),onPressed:_saving?null:_save,child:Text(_saving?'저장 중…':'변경 저장'))]),
-    body:Form(key:_form,child:ListView(padding:const EdgeInsets.all(16),children:[
+    body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
       if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:12),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),
       if(_saving)const LinearProgressIndicator(),
       const Text('체크한 항목만 선택한 사진 모두에 적용합니다. 체크하지 않은 항목은 사진마다 기존 값을 유지합니다.'),
@@ -77,6 +77,6 @@ class _PhotoBulkEditPageState extends State<PhotoBulkEditPage> {
             return null;
           }),
       ])),
-    ])),
+    ]))),
   ));
 }

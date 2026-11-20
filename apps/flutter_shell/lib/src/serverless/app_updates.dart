@@ -90,7 +90,7 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
   Widget build(BuildContext context){
     final release=_release,android=_platform==UpdatePlatform.android;
     final newer=release?.newerThan(widget.installed)??false;
-    return Scaffold(appBar:AppBar(title:const Text('앱 업데이트')),body:SafeArea(child:ListView(padding:const EdgeInsets.all(20),children:[
+    return Scaffold(appBar:AppBar(title:const Text('앱 업데이트')),body:SafeArea(child:ListView(padding:const EdgeInsets.fromLTRB(20,20,20,48),children:[
       const Icon(Icons.system_update_outlined,size:48),const SizedBox(height:16),
       Text(_platform==null?'앱 업데이트':android?'Android 앱 업데이트':'Windows 앱 업데이트',style:Theme.of(context).textTheme.headlineSmall),
       const SizedBox(height:12),Text('현재 버전 ${widget.installed.version}${widget.installed.build>0?' · 빌드 ${widget.installed.build}':' · 개발 버전'}'),

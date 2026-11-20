@@ -1093,7 +1093,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
           IconButton(key:const Key('market-refresh'),tooltip:'시세 다시 조회',onPressed:_loading||_loadingSummary?null:()=>_load(forceRefresh:true),icon:const Icon(Icons.refresh)),
         ],
       ),
-      body:SafeArea(child:SingleChildScrollView(padding:const EdgeInsets.fromLTRB(12,6,12,14),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+      body:SafeArea(child:SingleChildScrollView(padding:const EdgeInsets.fromLTRB(12,6,12,48),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
         Wrap(spacing:6,runSpacing:4,children:[
           for(final entry in marketProducts.entries)
             if(visibleChips.contains(entry.key)||_product==entry.key)

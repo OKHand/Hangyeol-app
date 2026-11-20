@@ -225,7 +225,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
             child:ConstrainedBox(
               constraints:const BoxConstraints(maxWidth:680),
               child:SingleChildScrollView(
-                padding:const EdgeInsets.fromLTRB(12,6,12,16),
+                padding:const EdgeInsets.fromLTRB(12,6,12,48),
                 child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
                   if(_busy)const Padding(padding:EdgeInsets.only(bottom:10),child:LinearProgressIndicator(minHeight:2)),
                   if(_error.isNotEmpty)Container(

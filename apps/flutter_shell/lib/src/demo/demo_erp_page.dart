@@ -62,7 +62,7 @@ class _DemoErpPageState extends State<DemoErpPage> {
     if (result != null) { return _results(result); }
     return ColoredBox(
       color: kHangyeolCanvas,
-      child: ListView(padding: const EdgeInsets.fromLTRB(12, 10, 12, 16), children: [
+      child: ListView(padding: const EdgeInsets.fromLTRB(12, 10, 12, 180), children: [
         const Text('ERP 조회', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: kHangyeolInk, letterSpacing: -0.3)),
         if (!widget.online) ...[const SizedBox(height: 2), const Text('가상 원장 21건 · 체험 기준일 2026-11-10', style: TextStyle(fontSize: 12, color: kHangyeolMuted))],
         const SizedBox(height: 8),
@@ -139,7 +139,7 @@ class _DemoErpPageState extends State<DemoErpPage> {
     onBack: () => setState(() => _result = null),
     onRowTap: (row) => _detail(report, row),
   );
-  void _detail(DemoReport report, List<String> row) => showModalBottomSheet<void>(context: context, isScrollControlled: true, showDragHandle: true, builder: (context) => SafeArea(child: SizedBox(height: MediaQuery.sizeOf(context).height * .72, child: ListView(padding: const EdgeInsets.fromLTRB(20, 0, 20, 20), children: [const Text('조회 내역 상세', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: kHangyeolInk)), const SizedBox(height: 10), ...report.columns.indexed.map((c) => ListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(c.$2, style: const TextStyle(fontSize: 12, color: kHangyeolMuted)), subtitle: SelectableText(row[c.$1].isEmpty ? '—' : row[c.$1], style: const TextStyle(color: kHangyeolInk))))]))));
+  void _detail(DemoReport report, List<String> row) => showModalBottomSheet<void>(context: context, isScrollControlled: true, showDragHandle: true, builder: (context) => SafeArea(child: SizedBox(height: MediaQuery.sizeOf(context).height * .72, child: ListView(padding: const EdgeInsets.fromLTRB(20, 0, 20, 48), children: [const Text('조회 내역 상세', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: kHangyeolInk)), const SizedBox(height: 10), ...report.columns.indexed.map((c) => ListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(c.$2, style: const TextStyle(fontSize: 12, color: kHangyeolMuted)), subtitle: SelectableText(row[c.$1].isEmpty ? '—' : row[c.$1], style: const TextStyle(color: kHangyeolInk))))]))));
 }
 class DemoMultiField extends StatefulWidget {
   const DemoMultiField({super.key, required this.controller, required this.options, required this.label, required this.hint, required this.fieldKey});
@@ -163,6 +163,6 @@ class _DemoMultiFieldState extends State<DemoMultiField> {
     },
     onSelected: (name) { final previous = _typed.split(RegExp('[,，]'))..removeLast(); widget.controller.text = "${[...previous.map((s) => s.trim()).where((s) => s.isNotEmpty), name].join(', ')}, "; widget.controller.selection = TextSelection.collapsed(offset: widget.controller.text.length); _typed = widget.controller.text; },
     fieldViewBuilder: (context, controller, focus, submit) => TextField(key: Key('demo-${widget.fieldKey}'), controller: controller, focusNode: focus, onTapOutside: (_) => focus.unfocus(), onChanged: (value) => _typed = value, onTap: () => _typed = controller.text, onSubmitted: (_) { _typed = controller.text; submit(); }, style: const TextStyle(fontSize: 14, color: kHangyeolInk), decoration: InputDecoration(labelText: widget.label, hintText: widget.hint, filled: true, fillColor: kHangyeolSurface, isDense: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: kHangyeolPrimary, width: 1.4)), suffixIcon: IconButton(tooltip: '${widget.label} 지우기', onPressed: () { controller.clear(); _typed = ''; }, icon: const Icon(Icons.clear, size: 16)))),
-    optionsViewBuilder: (context, select, options) => Material(color: kHangyeolCanvas, elevation: 4, borderRadius: BorderRadius.circular(12), child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 200), child: ListView(shrinkWrap: true, padding: EdgeInsets.zero, children: options.map((name) => ListTile(dense: true, title: Text(name, style: const TextStyle(fontSize: 14)), onTap: () => select(name))).toList()))),
+    optionsViewBuilder: (context, select, options) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Material(color: kHangyeolCanvas, elevation: 4, borderRadius: BorderRadius.circular(12), child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 160), child: ListView(shrinkWrap: true, padding: const EdgeInsets.only(bottom: 8), children: options.map((name) => ListTile(dense: true, title: Text(name, style: const TextStyle(fontSize: 14)), onTap: () => select(name))).toList())))),
   );
 }

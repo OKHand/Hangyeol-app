@@ -255,7 +255,7 @@ class _IndustryNewsPageState extends State<IndustryNewsPage> {
           child:visible.isEmpty&&!_busy
             ?Center(child:Padding(padding:const EdgeInsets.all(24),child:Text(_articles.isEmpty?'수집된 업계 뉴스가 아직 없습니다.\n관리대장 시트에서 수집을 실행하면 여기에 표시됩니다.':'선택한 조건에 맞는 기사가 없습니다.',textAlign:TextAlign.center,style:const TextStyle(color:kHangyeolMuted))))
             :ListView.builder(
-              padding:const EdgeInsets.only(bottom:16),
+              padding:const EdgeInsets.only(bottom:48),
               itemCount:visible.length,
               itemBuilder:(context,index){
                 final a=visible[index];

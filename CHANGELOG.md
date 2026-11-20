@@ -9,15 +9,16 @@
 
 ---
 
-## 2026-11-20 · Antigravity · 안드로이드 기본 화면 ERP 6개 모드 칩 한 줄 배치 및 사진 상세 편집 버튼 상시 복원
+## 2026-11-20 · Antigravity · 안드로이드 기본 화면 ERP 6개 모드 칩 한 줄 배치 · 사진 상세 편집 버튼 상시 복원 · 전체 화면 하단 SafeArea 및 여유 공백 적용
 
 - 요청:
   1. 안드로이드 기본 화면(360dp)에서 ERP 조회의 `입고`~`재고` 6개 탭 칩이 두 줄로 넘어가지 않고 한 줄에 표시되도록 조정.
   2. 사진 상세 화면에서 다른 계정/Discord 수집 사진을 직원(`member`) 계정으로 열었을 때도 `사진 크게 보기` 옆의 편집 아이콘 버튼(`photo-detail-edit`)이 항상 표시되도록 복원.
   3. 전반적인 기존 기능 누락 여부 전수 점검.
+  4. 윈도우·안드로이드 모든 환경 공통으로 상세 화면·입력 폼·목록 하단에 `SafeArea` 및 넉넉한 하단 여백을 부여해 안드로이드 하단 시스템 내비게이션 바 겹침 방지 및 사용감 안정성 향상.
 - 변경:
-  - `apps/flutter_shell/lib/src/ui/hangyeol_theme.dart`, `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`: `hangyeolChoicePill`에 컴팩트 패딩·밀도 옵션을 추가하고 ERP 모드 칩 간격(`spacing: 4`)과 패딩을 조정해 360px 안드로이드 기본 화면에서도 6개 칩이 모두 첫 줄에 들어가도록 개선.
-  - `apps/flutter_shell/lib/src/serverless/photos.dart`: `OnlinePhotosPage._view`에서 `PhotoDetailPage`의 `canEdit`을 `_canEdit(photo)` 대신 `widget.canCreate`로 전달(`_library`와 동일)해 직원(`member`) 계정으로 열람할 때도 `[다운로드] [사진 크게 보기] [사진 정보 수정]` 3개 아이콘 버튼이 모두 표시되도록 복원.
+  - `apps/flutter_shell/lib/src/ui/hangyeol_theme.dart`, `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`: `hangyeolChoicePill`에 컴팩트 패딩·밀도 옵션을 추가하고 ERP 모드 칩 간격(`spacing: 4`)과 패딩을 조정해 360px 안드로이드 기본 화면에서도 6개 칩이 모두 첫 줄에 들어가도록 개선. ERP 조회 화면 하단에 `180px` 여유 공백과 자동완성 드롭다운 하단 여백을 부여해 `판매품종명`·`원품종명` 추천어 팝업이 하단 바와 겹치지 않도록 개선.
+  - `apps/flutter_shell/lib/src/serverless/photos.dart`, `photo_bulk_edit.dart`, `photo_library.dart`, `app.dart`, `company_connections.dart`, `news_discord_settings.dart`, `app_updates.dart`, `industry_news.dart`, `market_prices.dart`, `market_setup.dart`, `demo_photos.dart`: `OnlinePhotosPage._view`에서 `PhotoDetailPage`의 `canEdit`을 `widget.canCreate`로 전달해 `[다운로드] [사진 크게 보기] [사진 정보 수정]` 3개 아이콘 버튼이 모두 표시되도록 복원하고, 모든 서브 화면(`사진 N장 공통 정보` 폼, `사진 일괄 편집`, `사진 정리·Discord 수집`, `직원·권한 관리`, `사진 상세` 등)에 `SafeArea` 및 하단 `48px` 여유 패딩을 공통 적용.
   - `apps/flutter_shell/test/erp_interaction_test.dart`, `apps/flutter_shell/test/photo_detail_test.dart`: 360px 화면 6개 ERP 모드 칩 단일 행 배치 및 사진 상세 상단 바 3개 아이콘 순서(`[다운로드] < [크게 보기] < [편집]`) 검증 추가 (`dart analyze` 무결점 · Flutter 전체 115건 통과).
 
 ## 2026-11-20 · Antigravity · ERP 조회 상단 액션바 이동 · 사진 상세 기기 다운로드 · 썸네일 경량화 · 농산물 시세 시인성 개선

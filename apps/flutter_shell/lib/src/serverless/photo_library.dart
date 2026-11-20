@@ -91,7 +91,7 @@ class _PhotoLibraryPageState extends State<PhotoLibraryPage> {
     ])),
     const Padding(padding:EdgeInsets.all(12),child:Text('선택한 사진에 농가·작물·방문을 연결합니다. 촬영일 미상은 그대로 유지합니다.',style:TextStyle(fontSize:12))),
     if(_farms.isEmpty)TextButton(onPressed:_busy?null:()=>_create('farm'),child:const Text('먼저 농가 등록')),
-    Expanded(child:ListView.builder(itemCount:_photos.length+1,itemBuilder:(context,i){
+    Expanded(child:ListView.builder(padding:const EdgeInsets.only(bottom:48),itemCount:_photos.length+1,itemBuilder:(context,i){
       if(i==_photos.length){return _next!=null?TextButton(onPressed:_busy?null:()=>_work(()=>_loadPhotos(more:true)),child:const Text('더 보기')):_photos.isEmpty?const Padding(padding:EdgeInsets.all(24),child:Text('조건에 맞는 사진이 없습니다.')):const SizedBox(height:16);}
       final p=_photos[i];return ListTile(key:ValueKey('library-photo-${p['id']}'),dense:true,contentPadding:const EdgeInsets.symmetric(horizontal:8),
         leading:Checkbox(key:ValueKey('library-select-${p['id']}'),value:_selected.containsKey(p['id']),onChanged:_busy||p['notification']=='sending'?null:(_)=>_toggle(p)),
@@ -101,7 +101,7 @@ class _PhotoLibraryPageState extends State<PhotoLibraryPage> {
         trailing:IconButton(tooltip:'사진 상세',onPressed:_busy?null:() async {await widget.openPhoto(p);if(mounted){await _reload();}},icon:const Icon(Icons.open_in_full,size:18)));
     })),
   ]);
-  Widget _farmList()=>ListView(padding:const EdgeInsets.all(12),children:[
+  Widget _farmList()=>ListView(padding:const EdgeInsets.fromLTRB(12,12,12,48),children:[
     Wrap(spacing:8,children:[FilledButton.icon(onPressed:_busy?null:()=>_create('farm'),icon:const Icon(Icons.add),label:const Text('농가 등록')),
       OutlinedButton.icon(onPressed:_busy||_farms.isEmpty?null:()=>_create('visit'),icon:const Icon(Icons.event_outlined),label:const Text('방문 등록'))]),
     const Padding(padding:EdgeInsets.symmetric(vertical:12),child:Text('방문일은 촬영일과 별개입니다. 농가나 방문을 눌러 연결된 사진을 확인하세요.')),
@@ -112,7 +112,7 @@ class _PhotoLibraryPageState extends State<PhotoLibraryPage> {
       _FarmVisits(key:ValueKey(farm['id']),client:widget.client,farm:farm,onAuthError:widget.onAuthError,onOpen:_collectionPhotos),
     ]),
   ]);
-  Widget _discord()=>ListView(padding:const EdgeInsets.all(12),children:[
+  Widget _discord()=>ListView(padding:const EdgeInsets.fromLTRB(12,12,12,48),children:[
     ListTile(contentPadding:EdgeInsets.zero,title:Text(_settings['configured']==true?'연결 채널 · ${_settings['channelName']}':'Discord 수집 미연결'),
       subtitle:const Text('새 메시지의 사진 첨부만 수동 수집합니다.'),trailing:IconButton(tooltip:'Discord 수집 설정',onPressed:_busy?null:_connect,icon:const Icon(Icons.settings_outlined))),
     const Text('같은 파일은 기존 사진에 출처만 연결합니다. 농가·촬영일은 자동 추정하지 않습니다.',style:TextStyle(fontSize:12)),
@@ -126,13 +126,13 @@ class _PhotoLibraryPageState extends State<PhotoLibraryPage> {
     if(_nextJobs!=null)TextButton(onPressed:_busy?null:()=>_work(() async {final result=await widget.client.call('discord.jobs',params:{'offset':_nextJobs});if(mounted){setState(()=>_setJobs(result,more:true));}}),child:const Text('기록 더 보기')),
   ]);
   @override
-  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('사진 정리'),actions:[IconButton(tooltip:'사진 정리 새로고침',onPressed:_busy?null:_reload,icon:const Icon(Icons.refresh))]),body:Column(children:[
+  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('사진 정리'),actions:[IconButton(tooltip:'사진 정리 새로고침',onPressed:_busy?null:_reload,icon:const Icon(Icons.refresh))]),body:SafeArea(child:Column(children:[
     if(_busy)const LinearProgressIndicator(),
     if(_error.isNotEmpty)Padding(padding:const EdgeInsets.all(12),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),
     if(_notice.isNotEmpty)Padding(padding:const EdgeInsets.all(12),child:Text(_notice)),
     Row(children:[for(final entry in const {0:'보완함',1:'농가·방문',2:'Discord 수집'}.entries)Expanded(child:TextButton(onPressed:_busy?null:()=>setState(()=>_tab=entry.key),child:Text(entry.value,style:TextStyle(fontWeight:_tab==entry.key?FontWeight.bold:FontWeight.normal))))]),
     Expanded(child:_tab==0?_inbox():_tab==1?_farmList():_discord()),
-  ]));
+  ])));
 }
 
 class _LibraryThumb extends StatefulWidget {
@@ -192,7 +192,7 @@ class _LibraryCreatePageState extends State<_LibraryCreatePage> {
   @override
   void dispose(){for(final c in [_name,_region,_note,_date,_assignee]){c.dispose();}super.dispose();}
   @override
-  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text(widget.kind=='farm'?'농가 등록':'방문 등록'),actions:[TextButton(onPressed:_busy?null:_save,child:const Text('저장'))]),body:Form(key:_form,child:ListView(padding:const EdgeInsets.all(16),children:[
+  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text(widget.kind=='farm'?'농가 등록':'방문 등록'),actions:[TextButton(onPressed:_busy?null:_save,child:const Text('저장'))]),body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
     if(_error.isNotEmpty)Text(_error),if(_busy)const LinearProgressIndicator(),
     if(widget.kind=='farm')...[
       TextFormField(controller:_name,readOnly:_request!=null,maxLength:120,decoration:const InputDecoration(labelText:'농가명'),validator:(v)=>v==null||v.trim().isEmpty?'농가명을 입력해 주세요.':null),
@@ -204,7 +204,7 @@ class _LibraryCreatePageState extends State<_LibraryCreatePage> {
     ],
     TextFormField(controller:_note,readOnly:_request!=null,maxLength:1500,maxLines:3,decoration:const InputDecoration(labelText:'메모')),
     if(_request!=null)const Text('응답이 끊겼다면 위 저장 버튼으로 같은 요청을 다시 확인합니다. 내용을 바꾸려면 뒤로 나가 새로 등록하세요.'),
-  ])));
+  ]))));
 }
 
 class _ClassifyPage extends StatefulWidget {
@@ -240,7 +240,7 @@ class _ClassifyPageState extends State<_ClassifyPage> {
   @override
   void dispose(){_crop.dispose();super.dispose();}
   @override
-  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text('사진 ${widget.photos.length}장 분류'),actions:[TextButton(key:const Key('library-classify-save'),onPressed:_busy||_loading?null:_save,child:const Text('변경 저장'))]),body:Form(key:_form,child:ListView(padding:const EdgeInsets.all(16),children:[
+  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text('사진 ${widget.photos.length}장 분류'),actions:[TextButton(key:const Key('library-classify-save'),onPressed:_busy||_loading?null:_save,child:const Text('변경 저장'))]),body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
     if(_error.isNotEmpty)Text(_error),if(_busy||_loading)const LinearProgressIndicator(),
     const Text('선택한 사진에만 적용합니다. 품종·촬영일·주소·메모는 사진 상세에서 수정할 수 있습니다.'),
     DropdownButtonFormField<String>(key:const Key('library-farm'),initialValue:_farm,isExpanded:true,decoration:const InputDecoration(labelText:'농가'),items:widget.farms.map((f)=>DropdownMenuItem(value:f['id'] as String,child:Text('${f['name']} · ${f['region']}'))).toList(),onChanged:_request!=null||_loading?null:_choose,validator:(v)=>v==null?'농가를 선택해 주세요.':null),
@@ -248,7 +248,7 @@ class _ClassifyPageState extends State<_ClassifyPage> {
     DropdownButtonFormField<String>(key:ValueKey('library-visit-$_farm'),initialValue:_visit,isExpanded:true,decoration:const InputDecoration(labelText:'방문 연결'),items:[const DropdownMenuItem(value:'keep',child:Text('같은 농가의 기존 연결 유지')),const DropdownMenuItem(value:'',child:Text('방문 연결 해제')),for(final v in _visits)DropdownMenuItem(value:v['id'] as String,child:Text('${v['date']} · ${v['assignee']}'))],onChanged:_request!=null||_loading?null:(v)=>setState(()=>_visit=v??'keep')),
     if(_nextVisits!=null)TextButton(onPressed:_request!=null||_loading?null:_moreVisits,child:const Text('이전 방문 더 불러오기')),
     const Padding(padding:EdgeInsets.only(top:12),child:Text('농가를 바꾸면 이전 농가의 방문 연결은 해제됩니다. 방문일을 촬영일로 대신 입력하지 않습니다.')),
-  ])));
+  ]))));
 }
 
 class _DiscordConnectPage extends StatefulWidget {
@@ -270,12 +270,12 @@ class _DiscordConnectPageState extends State<_DiscordConnectPage> {
   @override
   void dispose(){_channel.dispose();_token.dispose();super.dispose();}
   @override
-  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Discord 수집 설정'),actions:[TextButton(onPressed:_busy?null:_save,child:const Text('연결 저장'))]),body:ListView(padding:const EdgeInsets.all(16),children:[
+  Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Discord 수집 설정'),actions:[TextButton(onPressed:_busy?null:_save,child:const Text('연결 저장'))]),body:SafeArea(child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
     const Text('앱 알림용 웹훅과 별개의 읽기 봇입니다. 회사 공유용 일반 텍스트 채널 한 곳만 지정하세요. 이 채널 사진은 앱의 사진 조회 권한이 있는 직원에게 표시됩니다.'),
     const Padding(padding:EdgeInsets.symmetric(vertical:12),child:Text('Discord 개발자 포털에서 봇의 Message Content Intent를 켜고, 채널 보기·메시지 기록 읽기 권한으로 서버에 초대하세요. 연결 시점 이전 메시지는 가져오지 않습니다.')),
     if(_error.isNotEmpty)Text(_error),if(_busy)const LinearProgressIndicator(),
     TextField(controller:_channel,enabled:!_busy,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'채널 ID (숫자)')),
     TextField(controller:_token,enabled:!_busy,obscureText:true,autocorrect:false,enableSuggestions:false,decoration:const InputDecoration(labelText:'봇 토큰',helperText:'서버 비공개 설정에만 보관하며 다시 표시하지 않습니다.')),
     if(widget.settings['configured']==true)TextButton(onPressed:_busy?null:()=>_save(disconnect:true),child:const Text('수집 연결 해제 (저장된 사진 유지)')),
-  ]));
+  ])));
 }

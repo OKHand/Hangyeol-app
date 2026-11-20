@@ -130,7 +130,7 @@ class _DemoPhotoDetailState extends State<DemoPhotoDetail> {
     final matches=widget.store.photos.where((p)=>p.id==widget.photoId);
     if(matches.isEmpty){return Scaffold(appBar:AppBar(title:const Text('사진 상세')),body:const Center(child:Text('삭제된 체험 기록입니다.')));}
     final p=matches.first;
-    return Scaffold(appBar:AppBar(title:const Text('사진 상세')),body:ListView(padding:const EdgeInsets.all(16),children:[
+    return Scaffold(appBar:AppBar(title:const Text('사진 상세')),body:SafeArea(child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
       GestureDetector(
         onTap: () {
           showDialog<void>(
@@ -155,7 +155,7 @@ class _DemoPhotoDetailState extends State<DemoPhotoDetail> {
       ...[('기록 번호',p.number),('제목',p.title),('촬영일시',p.date.isEmpty?'미입력':'${p.date} ${p.time}'),('촬영일 출처',{'exif':'사진 정보(EXIF)','device':'촬영 시 기기 시각','manual':'직접 입력','unknown':'미확인'}[p.dateSource]??'미확인'),('주소',p.location),('위치 좌표',p.latitude==null?'미입력':'${p.latitude!.toStringAsFixed(6)}, ${p.longitude!.toStringAsFixed(6)} (${p.locationSource})'),('메모',p.note),('등록일',p.createdAt.isEmpty?'이전 체험판 기록':demoKoreanTimestamp(p.createdAt)),('등록 경로',p.isSample?'가상 샘플 삽화':'앱 · 기기에 저장')].map((r)=>ListTile(contentPadding:EdgeInsets.zero,dense:true,title:Text(r.$1,style:const TextStyle(fontSize:12,color:Color(0xff52685c))),subtitle:SelectableText(r.$2.isEmpty?'미입력':r.$2))),
       FilledButton.icon(onPressed:()async{final changed=await Navigator.of(context).push<bool>(MaterialPageRoute(builder:(_)=>DemoPhotoEditor(store:widget.store,photo:p)));if(changed==true&&mounted){widget.onChanged();setState((){});}},icon:const Icon(Icons.edit_outlined),label:const Text('정보 수정')),
       OutlinedButton.icon(onPressed:()=>demoIntegrationPreview(context,widget.store,p,widget.onChanged),icon:const Icon(Icons.preview_outlined),label:const Text('시트·Discord 연동 미리보기')),
-    ]));
+    ])));
   }
 }
 Future<void> demoIntegrationPreview(BuildContext context,DemoStore store,DemoPhoto photo,VoidCallback onChanged) async {
@@ -223,7 +223,7 @@ class _DemoPhotoEditorState extends State<DemoPhotoEditor> {
   }
   Widget _field(TextEditingController c,String label,{int length=100,int lines=1,String? hint})=>Padding(padding:const EdgeInsets.only(bottom:12),child:TextFormField(controller:c,enabled:!_busy,maxLength:length,maxLines:lines,decoration:InputDecoration(labelText:label,hintText:hint)));
   @override
-  Widget build(BuildContext context)=>PopScope(canPop:!_busy,child:Scaffold(appBar:AppBar(title:Text(widget.photo==null?'새 작황 사진':'사진 정보 수정')),body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.all(16),children:[
+  Widget build(BuildContext context)=>PopScope(canPop:!_busy,child:Scaffold(appBar:AppBar(title:Text(widget.photo==null?'새 작황 사진':'사진 정보 수정')),body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
     if(widget.photo!=null) DemoPhotoImage(photo:widget.photo!,store:widget.store,height:200) else ClipRRect(borderRadius:BorderRadius.circular(12),child:Image.file(widget.source!,cacheWidth:1600,height:200,fit:BoxFit.contain,errorBuilder:(context,error,stack)=>const SizedBox(height:100,child:Center(child:Text('사진 미리보기를 표시할 수 없습니다'))))),const SizedBox(height:16),
     _field(_farm,'농가명',hint:'예: 한결농장'),_field(_crop,'작물',hint:'예: 토마토'),_field(_variety,'품종'),
     OutlinedButton.icon(onPressed:_busy?null:_captureDate,icon:const Icon(Icons.calendar_today_outlined),label:Text(_date.isEmpty?'촬영일시 미입력 · 직접 지정':'$_date $_time')),

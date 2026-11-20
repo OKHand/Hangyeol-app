@@ -193,8 +193,8 @@ class _OnlinePhotosPageState extends State<OnlinePhotosPage> {
   Future<void> _browse(String field,String value) async {
     await Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>Scaffold(
       appBar:AppBar(title:Text('${photoFields[field]} · $value')),
-      body:OnlinePhotosPage(client:widget.client,email:widget.email,canCreate:widget.canCreate,owner:false,
-        canManage:widget.canManage||widget.owner,onAuthError:widget.onAuthError,repository:_repository,initialFilter:PhotoFilter(field,value)),
+      body:SafeArea(child:OnlinePhotosPage(client:widget.client,email:widget.email,canCreate:widget.canCreate,owner:false,
+        canManage:widget.canManage||widget.owner,onAuthError:widget.onAuthError,repository:_repository,initialFilter:PhotoFilter(field,value))),
     )));
   }
   bool _canEdit(Map<String,dynamic> photo)=>widget.canCreate&&(widget.owner||widget.canManage||photo['email']==widget.email);
@@ -342,7 +342,7 @@ class _OnlinePhotosPageState extends State<OnlinePhotosPage> {
   void dispose(){_search.dispose();_searchFocus.dispose();if(widget.repository==null){_repository.dispose();}super.dispose();}
   @override
   Widget build(BuildContext context){final entries=_entries();return ColoredBox(color:kHangyeolCanvas,child:Column(children:[if(_selecting)_selectionBar(),Expanded(child:RefreshIndicator(onRefresh:()=>_refresh(force:true),child:ListView.builder(
-    padding:const EdgeInsets.fromLTRB(14,10,14,14),physics:const AlwaysScrollableScrollPhysics(),itemCount:entries.length+1,
+    padding:const EdgeInsets.fromLTRB(14,10,14,48),physics:const AlwaysScrollableScrollPhysics(),itemCount:entries.length+1,
     itemBuilder:(context,index){if(index==0){return _header();}final entry=entries[index-1];
       if(entry.kind=='photo'){return _photoCard(entry.photo!);}if(entry.kind=='draft'){return _draftCard(entry.photo!);}
       if(entry.kind=='more'){return TextButton(onPressed:_loading?null:()=>_refresh(more:true),child:const Text('더 보기'));}
@@ -438,7 +438,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
         child:ConstrainedBox(constraints:const BoxConstraints(minHeight:48),child:content)))
       :content);
   }
-  Widget _info()=>SingleChildScrollView(key:const Key('photo-detail-info'),padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+  Widget _info()=>SingleChildScrollView(key:const Key('photo-detail-info'),padding:const EdgeInsets.fromLTRB(16,16,16,48),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
     for(final field in const {'farm':'농가','crop':'작물','variety':'품종','date':'촬영일','region':'주소·지역','note':'메모','email':'등록자','createdAt':'등록일','editedAt':'수정일'}.entries)
       _infoField(field.key,field.value),
   ]));
@@ -508,7 +508,7 @@ class _PhotoFormState extends State<_PhotoForm>{
   @override
   void dispose(){for(final c in _fields.values){c.dispose();}super.dispose();}
   @override
-  Widget build(BuildContext context)=>PopScope(canPop:!_saving,child:Scaffold(appBar:AppBar(title:Text(widget.initial==null?'사진 ${widget.count}장 공통 정보':'사진 정보 수정',overflow:TextOverflow.ellipsis),actions:[if(widget.initial!=null)TextButton(key:const Key('photo-form-save'),onPressed:_saving?null:_save,child:Text(_saving?'저장 중…':'변경 저장'))]),body:Form(key:_form,child:ListView(padding:const EdgeInsets.all(16),children:[
+  Widget build(BuildContext context)=>PopScope(canPop:!_saving,child:Scaffold(appBar:AppBar(title:Text(widget.initial==null?'사진 ${widget.count}장 공통 정보':'사진 정보 수정',overflow:TextOverflow.ellipsis),actions:[if(widget.initial!=null)TextButton(key:const Key('photo-form-save'),onPressed:_saving?null:_save,child:Text(_saving?'저장 중…':'변경 저장'))]),body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
     if(_saving)const LinearProgressIndicator(),
     if(_error.isNotEmpty)Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error)),
     if(widget.initial!=null)const Text('원본 사진은 유지하고 정보를 수정합니다. 이미 발송된 Discord 메시지는 그대로 유지됩니다.'),
@@ -523,5 +523,5 @@ class _PhotoFormState extends State<_PhotoForm>{
         })),
     if(widget.initial==null)FilledButton.icon(key:const Key('photo-form-save'),onPressed:_saving?null:_save,
       icon:Icon(widget.initial==null?Icons.cloud_upload_outlined:Icons.save_outlined),label:Text(widget.initial==null?'${widget.count}장 보관하고 전송':'변경 저장')),
-  ]))));
+  ])))));
 }

@@ -123,7 +123,7 @@ class _NewsDiscordSettingsPageState extends State<NewsDiscordSettingsPage> {
             ),
           ],
         ),
-        body:SafeArea(child:ListView(padding:const EdgeInsets.all(16),children:[
+        body:SafeArea(child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
           const Text('관리자만 설정할 수 있습니다. 저장된 웹훅 주소는 보안상 다시 표시하지 않습니다.',style:TextStyle(fontSize:13)),
           if(_busy)const Padding(padding:EdgeInsets.only(top:8),child:LinearProgressIndicator()),
           if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:12),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),

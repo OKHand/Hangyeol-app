@@ -64,7 +64,7 @@ class _CompanyConnectionsPageState extends State<CompanyConnectionsPage> {
     appBar:AppBar(title:const Text('회사 연결 설정',overflow:TextOverflow.ellipsis),actions:[
       TextButton(key:const Key('company-settings-save'),onPressed:_busy||_config?['ready']!=true||!(_changeFolder||_changeDiscord)?null:_save,child:const Text('저장')),
     ]),
-    body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.all(16),children:[
+    body:SafeArea(child:Form(key:_form,child:ListView(padding:const EdgeInsets.fromLTRB(16,16,16,48),children:[
       const Text('관리자·최초 관리자만 변경할 수 있습니다. 회사의 모든 직원에게 적용됩니다.'),
       if(_busy)const LinearProgressIndicator(),
       if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:12),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),

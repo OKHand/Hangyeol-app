@@ -201,7 +201,7 @@ class _SettingsPage extends StatelessWidget {
         alignment:Alignment.topCenter,
         child:ConstrainedBox(
           constraints:const BoxConstraints(maxWidth:680),
-          child:ListView(padding:const EdgeInsets.only(bottom:24),children:[
+          child:ListView(padding:const EdgeInsets.only(bottom:48),children:[
             Container(
               color:kHangyeolCanvas,
               padding:const EdgeInsets.fromLTRB(16,14,16,16),
@@ -266,7 +266,7 @@ class _SettingsPage extends StatelessWidget {
                   icon:Icons.manage_accounts_outlined,
                   title:'직원·권한 관리',
                   subtitle:'등록된 직원 계정 및 역할 관리',
-                  onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>Scaffold(appBar:AppBar(title:const Text('직원·권한 관리')),body:_StaffPage(client:client,owner:user['role']=='owner')))),
+                  onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>Scaffold(appBar:AppBar(title:const Text('직원·권한 관리')),body:SafeArea(child:_StaffPage(client:client,owner:user['role']=='owner'))))),
                 ),
               ]),
             ],
@@ -299,7 +299,7 @@ class _StaffPageState extends State<_StaffPage> {
   @override
   Widget build(BuildContext context)=>ColoredBox(
     color:kHangyeolCanvas,
-    child:ListView(padding:const EdgeInsets.fromLTRB(16,12,16,20),children:[
+    child:ListView(padding:const EdgeInsets.fromLTRB(16,12,16,48),children:[
       const Text('직원·권한',style:TextStyle(fontSize:20,fontWeight:FontWeight.w700,color:kHangyeolInk)),
       const SizedBox(height:6),
       const Text('사용할 Google 이메일을 먼저 등록하세요. 원본 시트를 직원에게 직접 공유할 필요는 없습니다.',style:TextStyle(fontSize:12,color:kHangyeolMuted)),
