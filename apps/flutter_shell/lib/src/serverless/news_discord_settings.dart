@@ -156,7 +156,7 @@ class _NewsDiscordSettingsPageState extends State<NewsDiscordSettingsPage> {
               key:const Key('news-weekly-switch'),
               contentPadding:EdgeInsets.zero,
               title:const Text('매주 월요일 오전 10시 자동 일괄 발송'),
-              subtitle:Text('${s['scheduleLabel']??'매주 월요일 오전 10시 (KST)'} · 최근 7일간의 주요 기사를 한 번에 보냅니다.'),
+              subtitle:Text('${s['scheduleLabel']??'매주 월요일 오전 10시 (KST)'} · 최근 7일간의 중요 기사 최대 10건을 요약해 보냅니다.'),
               value:_weeklyEnabled,
               onChanged:_busy?null:(v)=>setState(()=>_weeklyEnabled=v),
             ),

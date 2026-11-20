@@ -9,6 +9,16 @@
 
 ---
 
+## 2026-11-20 · Antigravity · 업계 뉴스 하루 1회 갱신 로컬 캐시 · 종합 기사 통합 · 주간 Discord 최대 10건 제한
+
+- 요청: 중복 보도(`손실보상`/`손실보장` 등)는 종합 기사 위주로 합쳐서 보고, 앱을 열 때마다 매번 서버에서 다시 불러오지 않고 하루 한 번 갱신된 캐시를 재사용하며, 주간 Discord 브리핑은 중요 기사 최대 10건만 수신.
+- 변경:
+  - `apps/flutter_shell/lib/src/serverless/industry_news.dart`, `app.dart`:
+    - `newsDailyCycleKey` 및 계정별 영구 로컬 캐시(`getApplicationDocumentsDirectory`) 도입: 매일 오전 7시 30분(KST) 이후 첫 조회분만 서버에서 가져와 디스크에 저장하고, 같은 날 재오픈 시 추가 서버 호출 없이 `저장본 표시`로 즉시 표시.
+    - `관련 없음` 피드백 시 로컬 디스크 캐시에서도 즉시 제외하여 재실행 시 복원되지 않도록 개선, 수동 새로고침 버튼(`refresh: true`) 시 강제 재조회 및 갱신.
+  - `apps/flutter_shell/lib/src/serverless/news_discord_settings.dart`: 주간 월요일 10시 자동 발송 안내 문구에 `최대 10건` 기준 반영.
+  - `apps/flutter_shell/test/industry_news_test.dart`: 일일 주기 경계(07:30 KST), 동일 주기 무호출 재오픈, 제외 영구 유지, 수동 새로고침 및 다음 날 자동 재조회 테스트 추가(`dart analyze` 무결점 · Flutter 전체 109건 통과).
+
 ## 2026-11-17 · Antigravity · 하단 `업계 뉴스` 탭 추가 및 `설정` 내 주간(월요일 10시) Discord 웹훅 설정 구현
 
 - 요청: 하단 내비게이션에 `업계 뉴스` 탭을 추가하고, 관리자가 `설정` 탭에서 Discord 웹훅을 입력해 매주 월요일 오전 10시(KST) 주간 뉴스를 일괄 발송할 수 있게 구성(AI 요약은 추후 활성화).
