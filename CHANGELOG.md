@@ -16,7 +16,11 @@
   - `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`, `apps/flutter_shell/lib/src/demo/erp_report_view.dart`: ERP 입력·재고·결과 헤더의 비핵심 안내 문구(`회사 원장 · 인증된 직원만 조회`, 쉼표/부분 검색 안내, 재고조사 기초값 설명, 열/행 조작 안내, 온라인 결과 `· 회사 자료` 문구)를 제거하고 카드·필드·버튼·헤더 간격을 축소.
   - `apps/flutter_shell/lib/src/market/market_prices.dart`: 시세 화면 상·하단 비핵심 안내 문구(`일부 거래만 조회했습니다...`, 단가 기준/유통·가격 일반 안내 등)를 제거하고(개별 시세의 `(제공가격)`, `등급 미제공`, `(단위 미확인)` 및 빈 목록 안내 유지), 대시보드·차트·시세 카드 여백을 축소.
   - `apps/flutter_shell/lib/src/serverless/app.dart`: 기존 기능·위젯 키·권한 분기는 유지한 채 설정 화면을 계정 요약 카드(아바타·권한 배지)와 그룹형 라운드 메뉴 카드(`앱 · 기기 관리`, `관리자 설정`, 아이콘 배지)로 재구성하고, 비관리자 안내 문구 제거 및 상단 계정 바·하단 내비게이션 바(`height: 64`) 간격 정돈.
-  - `apps/flutter_shell/lib/src/serverless/industry_news.dart`, `apps/flutter_shell/lib/src/market/market_setup.dart`: 헤더·검색·카드 패딩 및 요소 간 여백 축소(`dart analyze` 무결점 · Flutter 전체 113건 통과).
+  - `apps/flutter_shell/lib/src/serverless/industry_news.dart`, `apps/flutter_shell/lib/src/market/market_setup.dart`: 헤더·검색·카드 패딩 및 요소 간 여백 축소.
+  - `apps/flutter_shell/test/industry_news_test.dart`: 디스크 캐시 `flush: true` 실 I/O 완료 대기 안정화(`dart analyze` 무결점 · Flutter 전체 113건 2회 포함 통과).
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`e957bce`, `tag: online-app-20261120-b73`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 73`, `run 44658659495`)**: `Hangyeol-android-0.2.0-73.apk` (`56,263,790` bytes, SHA-256 `e60592dd8f39e60379b6027a2fede28b4f335dbef711d66496c0a9d92137d271`) → https://drive.google.com/file/d/1UhI-Qqoq1JSj0HBKKqDkhJTOx8b4PMWR/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 74`, `run 44658664176`)**: `Hangyeol-windows-0.2.0-74.zip` (`13,880,087` bytes, SHA-256 `2a46893728450dc28cd59543ce1d9c7a50817f75e89a4140b9089dd5fa0abe60`) → https://drive.google.com/file/d/1CwIq-sDzhiqoe8GClGROOT_SOmFqnwb3/view
 
 ## 2026-11-20 · Antigravity · 농산물 시세 설정 화면 카드형 UI 개편 및 초기 개발용 토마토 분류 더미 제거
 
