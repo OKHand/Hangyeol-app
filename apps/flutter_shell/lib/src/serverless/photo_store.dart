@@ -7,6 +7,31 @@ import 'package:uuid/uuid.dart';
 import '../demo/demo_photo_metadata.dart';
 import 'client.dart';
 
+Future<Uint8List?> _quantizedPng(ui.Image source) async {
+  ui.ImmutableBuffer? rawBuffer;
+  ui.ImageDescriptor? rawDesc;
+  ui.Codec? rawCodec;
+  ui.Image? qImage;
+  try {
+    final raw=await source.toByteData(format:ui.ImageByteFormat.rawRgba);
+    if(raw==null){return null;}
+    final pixels=Uint8List.fromList(raw.buffer.asUint8List(raw.offsetInBytes,raw.lengthInBytes));
+    for(var i=0;i+3<pixels.length;i+=4){
+      pixels[i]=(pixels[i]&0xf8)|(pixels[i]>>5);
+      pixels[i+1]=(pixels[i+1]&0xf8)|(pixels[i+1]>>5);
+      pixels[i+2]=(pixels[i+2]&0xf8)|(pixels[i+2]>>5);
+      pixels[i+3]=pixels[i+3]>=240?0xff:(pixels[i+3]&0xf0);
+    }
+    rawBuffer=await ui.ImmutableBuffer.fromUint8List(pixels);
+    rawDesc=ui.ImageDescriptor.raw(rawBuffer,width:source.width,height:source.height,pixelFormat:ui.PixelFormat.rgba8888);
+    rawCodec=await rawDesc.instantiateCodec();
+    qImage=(await rawCodec.getNextFrame()).image;
+    final png=await qImage.toByteData(format:ui.ImageByteFormat.png);
+    return png?.buffer.asUint8List(png.offsetInBytes,png.lengthInBytes);
+  }catch(_){return null;}
+  finally{qImage?.dispose();rawCodec?.dispose();rawDesc?.dispose();rawBuffer?.dispose();}
+}
+
 Future<Uint8List?> createPhotoPreview(Uint8List bytes) async {
   ui.ImmutableBuffer? buffer;
   ui.ImageDescriptor? descriptor;
@@ -15,13 +40,16 @@ Future<Uint8List?> createPhotoPreview(Uint8List bytes) async {
   try {
     buffer=await ui.ImmutableBuffer.fromUint8List(bytes);
     descriptor=await ui.ImageDescriptor.encoded(buffer);
-    final factor=math.min(1.0,240/math.max(descriptor.width,descriptor.height));
+    final factor=math.min(1.0,120/math.max(descriptor.width,descriptor.height));
     codec=await descriptor.instantiateCodec(targetWidth:math.max(1,(descriptor.width*factor).round()),
       targetHeight:math.max(1,(descriptor.height*factor).round()));
     image=(await codec.getNextFrame()).image;
     final data=await image.toByteData(format:ui.ImageByteFormat.png);
-    if(data==null||data.lengthInBytes>262144){return null;}
-    return data.buffer.asUint8List(data.offsetInBytes,data.lengthInBytes);
+    final direct=data?.buffer.asUint8List(data.offsetInBytes,data.lengthInBytes);
+    final quantized=await _quantizedPng(image);
+    final chosen=(quantized!=null&&(direct==null||quantized.length<=direct.length))?quantized:direct;
+    if(chosen==null||chosen.length>65536){return null;}
+    return chosen;
   }catch(_){return null;}
   finally{image?.dispose();codec?.dispose();descriptor?.dispose();buffer?.dispose();}
 }

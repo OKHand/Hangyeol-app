@@ -69,8 +69,38 @@ class _DemoErpPageState extends State<DemoErpPage> {
         Wrap(spacing: 6, runSpacing: 4, children: demoModes.map((mode) => hangyeolChoicePill(label: mode, selected: _mode == mode, onSelected: _busy ? null : (_) => setState(() { _mode = mode; _error = ''; }))).toList()),
         const Divider(height: 18, color: kHangyeolDivider),
         Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Row(children: [
+            if (_mode != '재고') ...[
+              TextButton.icon(
+                style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6)),
+                onPressed: _suggestionsBusy ? null : () => _refreshSuggestions(force: true),
+                icon: const Icon(Icons.refresh, size: 15),
+                label: const Text('추천어 갱신', style: TextStyle(fontSize: 12)),
+              ),
+              const SizedBox(width: 6),
+            ],
+            OutlinedButton(
+              key: const Key('demo-reset'),
+              style: OutlinedButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+              onPressed: _busy ? null : _reset,
+              child: const Text('초기화', style: TextStyle(fontSize: 13)),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: FilledButton.icon(
+                key: const Key('demo-query'),
+                style: FilledButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                onPressed: _busy ? null : _run,
+                icon: const Icon(Icons.search, size: 17),
+                label: Text(_busy ? '조회 중…' : '조회 확인', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ]),
+          if (_error.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_error, style: TextStyle(color: Theme.of(context).colorScheme.error))),
+          const SizedBox(height: 10),
           if (_mode != '재고') ...[
-            Row(children: [const Expanded(child: Text('거래처명', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: kHangyeolInk))), TextButton.icon(style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: const EdgeInsets.symmetric(horizontal: 6)), onPressed: _suggestionsBusy ? null : () => _refreshSuggestions(force:true), icon: const Icon(Icons.refresh, size: 15), label: const Text('추천어 갱신', style: TextStyle(fontSize: 12)))]),
+            const Text('거래처명', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: kHangyeolInk)),
+            const SizedBox(height: 4),
             DemoMultiField(fieldKey: 'customer', controller: _fields['customer']!, options: _suggestions('customer'), hint: '예: 가명A종묘, 가명C종묘', label: '거래처명'),
             const SizedBox(height: 10), const Text('날짜 범위', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: kHangyeolInk)), const SizedBox(height: 5),
             Row(children: [Expanded(child: OutlinedButton(onPressed: () => _date(true), child: Text(_start == null ? '시작일 전체' : demoDay(_start!), style: const TextStyle(fontSize: 12)))), const Padding(padding: EdgeInsets.symmetric(horizontal: 6), child: Text('~', style: TextStyle(color: kHangyeolMuted))), Expanded(child: OutlinedButton(onPressed: () => _date(false), child: Text(_end == null ? '종료일 전체' : demoDay(_end!), style: const TextStyle(fontSize: 12))))]),
@@ -84,11 +114,9 @@ class _DemoErpPageState extends State<DemoErpPage> {
             DropdownButtonFormField<String>(key: ValueKey('stock-$_stock'), initialValue: _stock, decoration: const InputDecoration(labelText: '재고 조회 방식'), items: const [DropdownMenuItem(value: '규격별', child: Text('규격별 조회')),DropdownMenuItem(value: '총량', child: Text('총량 환산 조회'))], onChanged: (v) => setState(() => _stock = v!)), const SizedBox(height: 10),
             DropdownButtonFormField<String>(key: ValueKey('group-$_group'), initialValue: _group, decoration: const InputDecoration(labelText: '품종 묶음 기준'), items: const [DropdownMenuItem(value: 'detail', child: Text('판매품종 + 원품종')),DropdownMenuItem(value: 'origin', child: Text('원품종 기준 병합'))], onChanged: (v) => setState(() => _group = v!)),
           ],
-          if (_error.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Text(_error, style: TextStyle(color: Theme.of(context).colorScheme.error))),
-          const SizedBox(height: 12), Row(children: [OutlinedButton(key: const Key('demo-reset'), onPressed: _busy ? null : _reset, child: const Text('초기화')), const SizedBox(width: 8), Expanded(child: FilledButton.icon(key: const Key('demo-query'), onPressed: _busy ? null : _run, icon: const Icon(Icons.search), label: Text(_busy ? '조회 중…' : '조회 확인')))]),
         ]),
         if(!widget.online)...[const SizedBox(height: 12), const Text('빠른 체험', style: TextStyle(fontWeight: FontWeight.w700, color: kHangyeolInk)), const SizedBox(height: 4),
-        Wrap(spacing: 6, runSpacing: 4, children: [ActionChip(label: const Text('가명A종묘 거래'), onPressed: () { _reset(); setState(() { _mode = '출고'; _fields['customer']!.text = '가명A종묘'; }); _run(); }),ActionChip(label: const Text('입금·반품 내역'), onPressed: () { _reset(); setState(() { _mode = '출고'; _fields['div']!.text = '입금, 반품'; }); _run(); }),ActionChip(label: const Text('품목별 수량 집계'), onPressed: () { _reset(); setState(() => _mode = '집계'); _run(); })]),
+        Wrap(spacing: 6, runSpacing: 4, children: [ActionChip(label: const Text('가명A종묘 거래', style: TextStyle(color: kHangyeolInk, fontWeight: FontWeight.w600)), onPressed: () { _reset(); setState(() { _mode = '출고'; _fields['customer']!.text = '가명A종묘'; }); _run(); }),ActionChip(label: const Text('입금·반품 내역', style: TextStyle(color: kHangyeolInk, fontWeight: FontWeight.w600)), onPressed: () { _reset(); setState(() { _mode = '출고'; _fields['div']!.text = '입금, 반품'; }); _run(); }),ActionChip(label: const Text('품목별 수량 집계', style: TextStyle(color: kHangyeolInk, fontWeight: FontWeight.w600)), onPressed: () { _reset(); setState(() => _mode = '집계'); _run(); })]),
         ],
       ]),
     );

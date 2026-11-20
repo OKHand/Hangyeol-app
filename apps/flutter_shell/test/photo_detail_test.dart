@@ -54,4 +54,43 @@ void main(){
     expect(find.byKey(const Key('photo-detail-edit')),findsNothing);expect(client.updates,isEmpty);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+  testWidgets('download icon button sits to the left of fullscreen button and saves original photo to device',(tester) async {
+    tester.view.devicePixelRatio=1;tester.view.physicalSize=const Size(390,844);
+    addTearDown(tester.view.resetDevicePixelRatio);addTearDown(tester.view.resetPhysicalSize);
+    final client=DetailClient()..token='a'*64;final repo=DetailRepository(client);
+    addTearDown(client.close);addTearDown(repo.dispose);
+    String? savedName;
+    String? savedMime;
+    Uint8List? savedBytes;
+    await tester.pumpWidget(MaterialApp(
+      home:PhotoDetailPage(
+        photo:galleryPhoto(0),
+        repository:repo,
+        client:client,
+        canEdit:true,
+        onAuthError:(_)async{},
+        onSaveToDevice:(fileName,mime,bytes)async{
+          savedName=fileName;
+          savedMime=mime;
+          savedBytes=bytes;
+          return 'Downloads/$fileName';
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+    final downloadBtn=find.byKey(const Key('photo-detail-download'));
+    final fullscreenBtn=find.byKey(const Key('photo-detail-fullscreen'));
+    expect(downloadBtn,findsOneWidget);
+    expect(fullscreenBtn,findsOneWidget);
+    expect(tester.getRect(downloadBtn).left,lessThan(tester.getRect(fullscreenBtn).left));
+    expect(find.descendant(of:downloadBtn,matching:find.byType(Text)),findsNothing);
+
+    await tester.tap(downloadBtn);
+    await tester.pumpAndSettle();
+    expect(savedBytes,galleryPng());
+    expect(savedMime,'image/png');
+    expect(savedName,endsWith('.png'));
+    expect(find.textContaining('기기에 사진을 저장했습니다'),findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

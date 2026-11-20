@@ -16,7 +16,7 @@ void main(){
     final original=data.buffer.asUint8List(data.offsetInBytes,data.lengthInBytes),saved=Uint8List.fromList(original);
     final preview=await createPhotoPreview(original);expect(preview,isNotNull);expect(original,saved);
     final codec=await ui.instantiateImageCodec(preview!),frame=await codec.getNextFrame();
-    expect(frame.image.width,240);expect(frame.image.height,160);expect(preview.length,lessThanOrEqualTo(262144));
+    expect(frame.image.width,120);expect(frame.image.height,80);expect(preview.length,lessThanOrEqualTo(65536));
     frame.image.dispose();codec.dispose();image.dispose();picture.dispose();
   });
   test('eleven drafts survive restart with stable batch indexes and clean up only confirmed copies',() async {

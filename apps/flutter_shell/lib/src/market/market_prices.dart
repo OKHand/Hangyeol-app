@@ -896,16 +896,16 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
       key:const Key('market-dashboard-card'),
       margin:const EdgeInsets.symmetric(vertical:6),
       padding:const EdgeInsets.all(10),
-      decoration:BoxDecoration(color:kHangyeolSurface,borderRadius:BorderRadius.circular(16)),
+      decoration:BoxDecoration(color:kHangyeolSurface,borderRadius:BorderRadius.circular(16),border:Border.all(color:kHangyeolBorder)),
       child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
         if(_loadingSummary)const Padding(padding:EdgeInsets.only(bottom:6),child:LinearProgressIndicator(minHeight:2)),
         Row(children:[
           Expanded(child:Container(
             key:const Key('market-avg-price-card'),
             padding:const EdgeInsets.symmetric(vertical:10,horizontal:10),
-            decoration:BoxDecoration(color:kHangyeolCanvas,borderRadius:BorderRadius.circular(12)),
+            decoration:BoxDecoration(color:kHangyeolCanvas,borderRadius:BorderRadius.circular(12),border:Border.all(color:kHangyeolDivider)),
             child:Column(children:[
-              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.monetization_on,size:17,color:Color(0xfff59e0b)),SizedBox(width:4),Text('평균가격',style:TextStyle(fontSize:12,fontWeight:FontWeight.w600,color:kHangyeolMuted))]),
+              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.monetization_on,size:17,color:Color(0xfff59e0b)),SizedBox(width:4),Text('평균가격',style:TextStyle(fontSize:12,fontWeight:FontWeight.w700,color:kHangyeolInk))]),
               const SizedBox(height:4),
               Text(_loadingSummary&&primaryPrice=='-'?'불러오는 중…':primaryPrice,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w700,color:kHangyeolInk)),
             ]),
@@ -914,9 +914,9 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
           Expanded(child:Container(
             key:const Key('market-total-volume-card'),
             padding:const EdgeInsets.symmetric(vertical:10,horizontal:10),
-            decoration:BoxDecoration(color:kHangyeolCanvas,borderRadius:BorderRadius.circular(12)),
+            decoration:BoxDecoration(color:kHangyeolCanvas,borderRadius:BorderRadius.circular(12),border:Border.all(color:kHangyeolDivider)),
             child:Column(children:[
-              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.local_shipping,size:17,color:Color(0xff3b82f6)),SizedBox(width:4),Text('거래량',style:TextStyle(fontSize:12,fontWeight:FontWeight.w600,color:kHangyeolMuted))]),
+              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.local_shipping,size:17,color:Color(0xff3b82f6)),SizedBox(width:4),Text('거래량',style:TextStyle(fontSize:12,fontWeight:FontWeight.w700,color:kHangyeolInk))]),
               const SizedBox(height:4),
               Text(_loadingSummary&&totalKg==0&&totalQty==0?'불러오는 중…':(totalKg>0?'${marketMoney(totalKg)}kg':totalQty>0?'${marketMoney(totalQty)}건':'0kg'),style:const TextStyle(fontSize:18,fontWeight:FontWeight.w700,color:kHangyeolInk)),
             ]),
@@ -1050,7 +1050,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         ])),
         const SizedBox(height:8),
         Padding(padding:const EdgeInsets.only(bottom:8),child:Row(children:[
-          Expanded(child:TextField(key:const Key('market-item-search'),controller:_searchController,onChanged:(v)=>setState(()=>_searchQuery=v),decoration:InputDecoration(labelText:'품목·품종·코드 검색',hintText:'예: 오이, 호박, 수박, 대파, 청양, 대저, 08:03',filled:true,fillColor:kHangyeolSurface,isDense:true,border:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none),enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none),focusedBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:kHangyeolPrimary,width:1.4)),suffixIcon:_searchQuery.isEmpty?const Icon(Icons.search):IconButton(icon:const Icon(Icons.clear),onPressed:(){_searchController.clear();setState(()=>_searchQuery='');})))),
+          Expanded(child:TextField(key:const Key('market-item-search'),controller:_searchController,onChanged:(v)=>setState(()=>_searchQuery=v),decoration:InputDecoration(labelText:'품목·품종·코드 검색',hintText:'예: 오이, 호박, 수박, 대파, 청양, 대저, 08:03',filled:true,fillColor:kHangyeolSurface,isDense:true,border:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:kHangyeolBorder)),enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:kHangyeolBorder)),focusedBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:kHangyeolPrimary,width:1.4)),suffixIcon:_searchQuery.isEmpty?const Icon(Icons.search,color:kHangyeolInk):IconButton(icon:const Icon(Icons.clear,color:kHangyeolInk),onPressed:(){_searchController.clear();setState(()=>_searchQuery='');})))),
           if(widget.client!=null)...[
             const SizedBox(width:8),
             OutlinedButton.icon(key:const Key('market-sync-codes'),onPressed:_syncingCodes||_loading?null:_syncCatalogue,icon:const Icon(Icons.sync,size:16),label:Text(_syncingCodes?'불러오는 중…':'품목 코드 API')),
@@ -1058,8 +1058,8 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         ])),
         if(_codeError.isNotEmpty)Padding(padding:const EdgeInsets.only(bottom:8),child:Text(_codeError,style:TextStyle(fontSize:12,color:Theme.of(context).colorScheme.error))),
         SingleChildScrollView(scrollDirection:Axis.horizontal,child:Row(children:[
-          Padding(padding:const EdgeInsets.only(right:6),child:FilterChip(showCheckmark:false,shape:const StadiumBorder(),side:BorderSide.none,selectedColor:kHangyeolPrimary,backgroundColor:kHangyeolSurface,labelStyle:TextStyle(fontSize:12,fontWeight:_largeFilter.isEmpty?FontWeight.w700:FontWeight.w500,color:_largeFilter.isEmpty?Colors.white:const Color(0xff425249)),label:const Text('전체 부류'),selected:_largeFilter.isEmpty,onSelected:(_)=>setState(()=>_largeFilter=''))),
-          for(final entry in lclasses.entries)Padding(padding:const EdgeInsets.only(right:6),child:FilterChip(showCheckmark:false,shape:const StadiumBorder(),side:BorderSide.none,selectedColor:kHangyeolPrimary,backgroundColor:kHangyeolSurface,labelStyle:TextStyle(fontSize:12,fontWeight:_largeFilter==entry.key?FontWeight.w700:FontWeight.w500,color:_largeFilter==entry.key?Colors.white:const Color(0xff425249)),label:Text('${entry.value}(${entry.key})'),selected:_largeFilter==entry.key,onSelected:(_)=>setState(()=>_largeFilter=_largeFilter==entry.key?'':entry.key))),
+          Padding(padding:const EdgeInsets.only(right:6),child:FilterChip(showCheckmark:false,shape:const StadiumBorder(),side:BorderSide(color:_largeFilter.isEmpty?kHangyeolPrimary:kHangyeolChipBorder),selectedColor:kHangyeolPrimary,backgroundColor:kHangyeolChipUnselected,labelStyle:TextStyle(fontSize:12,fontWeight:_largeFilter.isEmpty?FontWeight.w700:FontWeight.w600,color:_largeFilter.isEmpty?Colors.white:kHangyeolInk),label:Text('전체 부류',style:TextStyle(fontSize:12,fontWeight:_largeFilter.isEmpty?FontWeight.w700:FontWeight.w600,color:_largeFilter.isEmpty?Colors.white:kHangyeolInk)),selected:_largeFilter.isEmpty,onSelected:(_)=>setState(()=>_largeFilter=''))),
+          for(final entry in lclasses.entries)Padding(padding:const EdgeInsets.only(right:6),child:FilterChip(showCheckmark:false,shape:const StadiumBorder(),side:BorderSide(color:_largeFilter==entry.key?kHangyeolPrimary:kHangyeolChipBorder),selectedColor:kHangyeolPrimary,backgroundColor:kHangyeolChipUnselected,labelStyle:TextStyle(fontSize:12,fontWeight:_largeFilter==entry.key?FontWeight.w700:FontWeight.w600,color:_largeFilter==entry.key?Colors.white:kHangyeolInk),label:Text('${entry.value}(${entry.key})',style:TextStyle(fontSize:12,fontWeight:_largeFilter==entry.key?FontWeight.w700:FontWeight.w600,color:_largeFilter==entry.key?Colors.white:kHangyeolInk)),selected:_largeFilter==entry.key,onSelected:(_)=>setState(()=>_largeFilter=_largeFilter==entry.key?'':entry.key))),
         ])),
         const SizedBox(height:8),
         ConstrainedBox(constraints:const BoxConstraints(maxHeight:260),child:ListView(shrinkWrap:true,children:[
@@ -1067,8 +1067,8 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             Text('${group.value.first['largeName']} > ${group.value.first['midName']} (${group.key})',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w700,color:kHangyeolInk)),
             const SizedBox(height:4),
             Wrap(spacing:6,runSpacing:4,children:[
-              ActionChip(key:ValueKey('market-code-${group.key}'),shape:const StadiumBorder(),side:BorderSide.none,backgroundColor:kHangyeolSurface,label:Text('${group.value.first['midName']} 전체'),onPressed:_loading?null:()=>_selectCode(large:group.value.first['large']!,mid:group.value.first['mid']!,midName:group.value.first['midName']!)),
-              for(final item in group.value)ActionChip(key:ValueKey('market-code-${item['id']}'),shape:const StadiumBorder(),side:BorderSide.none,backgroundColor:kHangyeolSurface,label:Text('${item['goodName']} (${item['small']})'),onPressed:_loading?null:()=>_selectCode(large:item['large']!,mid:item['mid']!,midName:item['midName']!,small:item['small']!,goodName:item['goodName']!)),
+              ActionChip(key:ValueKey('market-code-${group.key}'),shape:const StadiumBorder(),side:const BorderSide(color:Color(0xff9fc2ae)),backgroundColor:const Color(0xffdcece3),labelStyle:const TextStyle(fontSize:12,fontWeight:FontWeight.w700,color:kHangyeolPrimary),label:Text('${group.value.first['midName']} 전체',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w700,color:kHangyeolPrimary)),onPressed:_loading?null:()=>_selectCode(large:group.value.first['large']!,mid:group.value.first['mid']!,midName:group.value.first['midName']!)),
+              for(final item in group.value)ActionChip(key:ValueKey('market-code-${item['id']}'),shape:const StadiumBorder(),side:const BorderSide(color:Color(0xffc6d4cc)),backgroundColor:const Color(0xffedf2ef),labelStyle:const TextStyle(fontSize:12,fontWeight:FontWeight.w600,color:kHangyeolInk),label:Text('${item['goodName']} (${item['small']})',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w600,color:kHangyeolInk)),onPressed:_loading?null:()=>_selectCode(large:item['large']!,mid:item['mid']!,midName:item['midName']!,small:item['small']!,goodName:item['goodName']!)),
             ]),
           ])),
         ])),

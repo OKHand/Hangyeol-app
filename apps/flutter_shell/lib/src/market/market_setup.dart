@@ -343,12 +343,15 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                             showCheckmark:false,
                             visualDensity:VisualDensity.compact,
                             shape:const StadiumBorder(),
-                            side:BorderSide.none,
-                            label:Text(e.value),
+                            side:BorderSide(color:_prefVisible.contains(e.key)?_primary:kHangyeolChipBorder),
+                            label:Text(
+                              e.value,
+                              style:TextStyle(fontSize:13,fontWeight:_prefVisible.contains(e.key)?FontWeight.w700:FontWeight.w600,color:_prefVisible.contains(e.key)?Colors.white:kHangyeolInk),
+                            ),
                             selected:_prefVisible.contains(e.key),
                             selectedColor:_primary,
                             backgroundColor:kHangyeolCanvas,
-                            labelStyle:TextStyle(fontSize:13,fontWeight:_prefVisible.contains(e.key)?FontWeight.w700:FontWeight.w500,color:_prefVisible.contains(e.key)?Colors.white:const Color(0xff425249)),
+                            labelStyle:TextStyle(fontSize:13,fontWeight:_prefVisible.contains(e.key)?FontWeight.w700:FontWeight.w600,color:_prefVisible.contains(e.key)?Colors.white:kHangyeolInk),
                             onSelected:(selected){
                               setState((){
                                 if(selected){_prefVisible.add(e.key);}

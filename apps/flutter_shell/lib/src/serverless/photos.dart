@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:path_provider/path_provider.dart';
 import 'client.dart';
 import 'photo_store.dart';
 import 'photo_bulk_edit.dart';
@@ -12,6 +13,34 @@ import 'photo_repository.dart';
 import '../ui/hangyeol_theme.dart';
 export 'photo_store.dart';
 export 'photo_repository.dart';
+
+const _mediaChannel=MethodChannel('com.hangyeolseed.platform/media');
+
+Future<String?> savePhotoToDevice({required String fileName,required String mime,required Uint8List bytes}) async {
+  if(Platform.isAndroid){
+    try{
+      final saved=await _mediaChannel.invokeMethod<String>('savePhoto',{'fileName':fileName,'mime':mime,'bytes':bytes});
+      if(saved!=null&&saved.isNotEmpty){return saved;}
+    }catch(_){}
+    final dir=await getExternalStorageDirectory()??await getApplicationDocumentsDirectory();
+    final target=File('${dir.path}${Platform.pathSeparator}$fileName');
+    await target.writeAsBytes(bytes,flush:true);
+    return target.path;
+  }
+  final ext=fileName.contains('.')?fileName.split('.').last:'jpg';
+  try{
+    final loc=await getSaveLocation(suggestedName:fileName,acceptedTypeGroups:[XTypeGroup(label:'사진',extensions:[ext])]);
+    if(loc==null){return null;}
+    final target=File(loc.path);
+    await target.writeAsBytes(bytes,flush:true);
+    return target.path;
+  }catch(_){
+    final dir=await getDownloadsDirectory()??await getApplicationDocumentsDirectory();
+    final target=File('${dir.path}${Platform.pathSeparator}$fileName');
+    await target.writeAsBytes(bytes,flush:true);
+    return target.path;
+  }
+}
 
 String photoNotificationLabel(String? value)=>const {'pending':'Discord 전송 대기','sending':'Discord 전송 확인 중','sent':'Discord 알림 완료','failed':'Discord 전송 실패','uncertain':'Discord 채널 확인 필요','not_applicable':'Discord에서 가져옴'}[value]??'알림 대기';
 
@@ -324,13 +353,14 @@ class _OnlinePhotosPageState extends State<OnlinePhotosPage> {
   )))]));}
 }
 class PhotoDetailPage extends StatefulWidget {
-  const PhotoDetailPage({super.key,required this.photo,required this.repository,required this.client,required this.canEdit,required this.onAuthError,this.onBrowse});
+  const PhotoDetailPage({super.key,required this.photo,required this.repository,required this.client,required this.canEdit,required this.onAuthError,this.onBrowse,this.onSaveToDevice});
   final Map<String,dynamic> photo;
   final PhotoRepository repository;
   final AppsScriptPlatformClient client;
   final bool canEdit;
   final Future<void> Function(String field,String value)? onBrowse;
   final Future<void> Function(Object) onAuthError;
+  final Future<String?> Function(String fileName,String mime,Uint8List bytes)? onSaveToDevice;
   @override
   State<PhotoDetailPage> createState()=>_PhotoDetailPageState();
 }
@@ -338,10 +368,47 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
   late Map<String,dynamic> _photo;
   late Future<Uint8List> _image;
   bool _photoOnly=false;
+  bool _downloading=false;
   @override
   void initState(){super.initState();_photo=Map.from(widget.photo);_image=_load();}
   Future<Uint8List> _load() async {
     try{return await widget.repository.original(_photo);}catch(e){await widget.onAuthError(e);rethrow;}
+  }
+  String _detectMime(Uint8List bytes){
+    final hex=bytes.take(16).map((b)=>b.toRadixString(16).padLeft(2,'0')).join();
+    if(hex.startsWith('89504e470d0a1a0a')){return 'image/png';}
+    if(hex.startsWith('ffd8ff')){return 'image/jpeg';}
+    if(hex.startsWith('52494646')&&hex.length>=24&&hex.substring(16,24)=='57454250'){return 'image/webp';}
+    if(hex.length>=24&&hex.substring(8,16)=='66747970'&&RegExp('68656963|68656978|6d696631').hasMatch(hex.substring(16))){return 'image/heic';}
+    final raw='${_photo['mime']??''}'.trim();
+    return raw.isNotEmpty?raw:'image/jpeg';
+  }
+  String _buildFileName(String mime){
+    final ext=const {'image/png':'png','image/webp':'webp','image/heic':'heic'}[mime]??'jpg';
+    String clean(Object? v)=>'${v??''}'.trim().replaceAll(RegExp(r'[\\/:*?"<>|\s]+'),'_');
+    final parts=['한결씨드',clean(_photo['farm']),clean(_photo['crop']),clean(_photo['date'])].where((s)=>s.isNotEmpty).toList();
+    final id=clean(_photo['id']);
+    if(id.isNotEmpty){parts.add(id.length>8?id.substring(0,8):id);}
+    return '${parts.join('_')}.$ext';
+  }
+  Future<void> _download() async {
+    if(_downloading){return;}
+    setState(()=>_downloading=true);
+    try{
+      final bytes=await _image;
+      final mime=_detectMime(bytes);
+      final fileName=_buildFileName(mime);
+      final saver=widget.onSaveToDevice??((String name,String m,Uint8List b)=>savePhotoToDevice(fileName:name,mime:m,bytes:b));
+      final saved=await saver(fileName,mime,bytes);
+      if(!mounted||saved==null){return;}
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('기기에 사진을 저장했습니다. ($saved)')));
+    }catch(_){
+      if(mounted){
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('사진을 기기에 저장하지 못했습니다. 다시 시도해 주세요.')));
+      }
+    }finally{
+      if(mounted){setState(()=>_downloading=false);}
+    }
   }
   Future<void> _edit() async {
     final saved=await Navigator.of(context).push<Map<String,dynamic>>(MaterialPageRoute(builder:(_)=>_PhotoForm(count:1,initial:_photo,onSave:(values) async {
@@ -377,6 +444,7 @@ class _PhotoDetailPageState extends State<PhotoDetailPage> {
   ]));
   @override
   Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('사진 상세'),actions:[
+    IconButton(key:const Key('photo-detail-download'),tooltip:'기기에 사진 저장',onPressed:_downloading?null:_download,icon:const Icon(Icons.download_outlined)),
     IconButton(key:const Key('photo-detail-fullscreen'),tooltip:_photoOnly?'사진 정보 표시':'사진 크게 보기',onPressed:()=>setState(()=>_photoOnly=!_photoOnly),icon:Icon(_photoOnly?Icons.fullscreen_exit:Icons.fullscreen)),
     if(widget.canEdit)IconButton(key:const Key('photo-detail-edit'),tooltip:'사진 정보 수정',onPressed:_edit,icon:const Icon(Icons.edit_outlined)),
   ]),body:SafeArea(child:LayoutBuilder(builder:(context,size){
@@ -399,7 +467,7 @@ class _PhotoThumbnailState extends State<_PhotoThumbnail>{
   @override
   Widget build(BuildContext context)=>FutureBuilder<Uint8List?>(future:_bytes,builder:(context,snapshot){
     if(snapshot.connectionState!=ConnectionState.done){return const ColoredBox(color:Color(0xffe7efe9),child:Center(child:SizedBox(width:18,height:18,child:CircularProgressIndicator(strokeWidth:2))));}
-    if(snapshot.data!=null){return Image.memory(snapshot.data!,key:const Key('photo-thumbnail-image'),fit:BoxFit.cover,cacheWidth:240,
+    if(snapshot.data!=null){return Image.memory(snapshot.data!,key:const Key('photo-thumbnail-image'),fit:BoxFit.cover,cacheWidth:120,
       errorBuilder:(context,error,stack)=>const Icon(Icons.broken_image_outlined));}
     return InkWell(onTap:()=>setState(()=>_bytes=widget.repository.thumbnail(widget.photo)),child:const Tooltip(message:'미리보기 다시 불러오기',child:Icon(Icons.photo_outlined)));
   });

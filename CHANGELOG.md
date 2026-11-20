@@ -9,6 +9,19 @@
 
 ---
 
+## 2026-11-20 · Antigravity · ERP 조회 상단 액션바 이동 · 사진 상세 기기 다운로드 · 썸네일 경량화 · 농산물 시세 시인성 개선
+
+- 요청:
+  1. ERP 조회의 `초기화`, `조회 확인` 버튼을 `추천어 갱신` 옆 상단 액션 영역으로 자연스럽게 이동.
+  2. 작황 사진 상세 화면의 `사진 크게 보기` 버튼 왼쪽에 아이콘 전용 다운로드 버튼을 추가하고 기기 저장 기능 연결.
+  3. 작황 사진 썸네일 파일 용량 대폭 축소.
+  4. 농산물 시세 화면의 칩·품목 코드 버튼·입력창 배경과 글자 대비를 높여 시인성 개선.
+- 변경:
+  - `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`: `추천어 갱신`, `초기화`, `조회 확인` 버튼을 모드 선택 칩 바로 아래 상단 액션 행으로 통합 배치.
+  - `apps/flutter_shell/lib/src/serverless/photos.dart`, `apps/flutter_shell/android/app/src/main/kotlin/com/hangyeolseed/hangyeol_platform/MainActivity.kt`, `apps/flutter_shell/test/photo_detail_test.dart`: `PhotoDetailPage` 상단 바 `사진 크게 보기` 왼쪽에 아이콘 전용 다운로드 버튼(`photo-detail-download`)을 추가하고 Windows(저장 위치 대화상자/Downloads)·Android(`MediaStore` `Pictures/HangyeolSeed`) 기기 저장 구현 및 테스트 추가.
+  - `apps/flutter_shell/lib/src/serverless/photo_store.dart`, `apps/flutter_shell/test/photo_batch_store_test.dart`: 썸네일 최대 해상도를 `240px` → `120px`(`cacheWidth: 120`)로 줄이고 5비트 RGB 채널 양자화 PNG 압축 및 `64KB` 상한을 적용해 용량 대폭 절감.
+  - `apps/flutter_shell/lib/src/ui/hangyeol_theme.dart`, `apps/flutter_shell/lib/src/market/market_prices.dart`, `apps/flutter_shell/lib/src/market/market_setup.dart`: 텍스트·칩·입력창 대비를 높이고(`#141E18` 진한 텍스트, `#E8EFEB` 미선택 칩 배경 + `#C9D7CF` 테두리), Material 3 `ActionChip` 글자색이 흐려지던 문제를 해결해 부류·품종 코드 선택 칩과 대시보드 시인성 개선 (`dart analyze` 무결점 · Flutter 전체 114건 통과).
+
 ## 2026-11-20 · Antigravity · 기존 녹색 색감 유지 · 카카오톡 스타일 플랫 UI 전면 개편 (기능 변경 없음)
 
 - 요청: 앱의 기존 기능·권한·서버 연동은 전혀 변경하지 않고, 기존 한결씨드 녹색 색감(`#1E6247`)을 유지하면서 전체 UI를 카카오톡과 유사한 순백 캔버스·플랫 목록·캡슐형 탭 감성으로 개편.

@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 
 const kHangyeolPrimary = Color(0xff1e6247);
-const kHangyeolInk = Color(0xff19231d);
-const kHangyeolMuted = Color(0xff6b7871);
-const kHangyeolSubtle = Color(0xff98a49d);
+const kHangyeolInk = Color(0xff141e18);
+const kHangyeolMuted = Color(0xff48574e);
+const kHangyeolSubtle = Color(0xff68776e);
 const kHangyeolCanvas = Color(0xffffffff);
-const kHangyeolSurface = Color(0xfff4f6f5);
-const kHangyeolTint = Color(0xffe7efe9);
-const kHangyeolDivider = Color(0xffeef1ef);
-const kHangyeolBorder = Color(0xffe2e8e4);
+const kHangyeolSurface = Color(0xffeef3f0);
+const kHangyeolChipUnselected = Color(0xffe8efeb);
+const kHangyeolChipBorder = Color(0xffc9d7cf);
+const kHangyeolTint = Color(0xffdfece3);
+const kHangyeolDivider = Color(0xffe6ece8);
+const kHangyeolBorder = Color(0xffd2ddd6);
 
-/// 한결씨드 고유 녹색 팔레트를 유지하면서 플랫하고 정돈된 UI 톤을 구성하는 공통 테마.
+/// 한결씨드 고유 녹색 팔레트를 유지하면서 시인성이 높고 정돈된 플랫 UI 톤을 구성하는 공통 테마.
 ThemeData buildHangyeolTheme() {
   final scheme = ColorScheme.fromSeed(
     seedColor: kHangyeolPrimary,
     surface: kHangyeolCanvas,
+    onSurface: kHangyeolInk,
     surfaceContainerLowest: kHangyeolCanvas,
     surfaceContainerLow: kHangyeolSurface,
     surfaceContainer: kHangyeolSurface,
@@ -39,23 +42,27 @@ ThemeData buildHangyeolTheme() {
       ),
       iconTheme: IconThemeData(color: kHangyeolInk, size: 22),
     ),
-    chipTheme: ChipThemeData(
+    chipTheme: const ChipThemeData(
       showCheckmark: false,
-      shape: const StadiumBorder(),
-      side: BorderSide.none,
+      shape: StadiumBorder(),
+      side: BorderSide(color: kHangyeolChipBorder),
       elevation: 0,
       pressElevation: 0,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      labelPadding: const EdgeInsets.symmetric(horizontal: 2),
-      color: WidgetStateProperty.resolveWith(
-        (states) => states.contains(WidgetState.selected) ? kHangyeolPrimary : kHangyeolSurface,
+      backgroundColor: kHangyeolChipUnselected,
+      disabledColor: kHangyeolSurface,
+      selectedColor: kHangyeolPrimary,
+      secondarySelectedColor: kHangyeolPrimary,
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      labelPadding: EdgeInsets.symmetric(horizontal: 2),
+      labelStyle: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: kHangyeolInk,
       ),
-      labelStyle: WidgetStateTextStyle.resolveWith(
-        (states) => TextStyle(
-          fontSize: 13,
-          fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
-          color: states.contains(WidgetState.selected) ? Colors.white : const Color(0xff425249),
-        ),
+      secondaryLabelStyle: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
       ),
     ),
     cardTheme: CardThemeData(
@@ -75,19 +82,19 @@ ThemeData buildHangyeolTheme() {
       fillColor: kHangyeolSurface,
       isDense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-      hintStyle: const TextStyle(fontSize: 13, color: Color(0xff929e97)),
-      labelStyle: const TextStyle(fontSize: 13, color: kHangyeolMuted),
+      hintStyle: const TextStyle(fontSize: 13, color: Color(0xff5f6f65)),
+      labelStyle: const TextStyle(fontSize: 13, color: kHangyeolMuted, fontWeight: FontWeight.w500),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: kHangyeolBorder),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+        borderSide: const BorderSide(color: kHangyeolBorder),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: kHangyeolPrimary, width: 1.4),
+        borderSide: const BorderSide(color: kHangyeolPrimary, width: 1.5),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -102,7 +109,7 @@ ThemeData buildHangyeolTheme() {
       style: OutlinedButton.styleFrom(
         foregroundColor: kHangyeolInk,
         backgroundColor: Colors.white,
-        side: const BorderSide(color: kHangyeolBorder),
+        side: const BorderSide(color: kHangyeolChipBorder),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
@@ -121,14 +128,14 @@ ThemeData buildHangyeolTheme() {
       iconTheme: WidgetStateProperty.resolveWith(
         (states) => IconThemeData(
           size: 23,
-          color: states.contains(WidgetState.selected) ? kHangyeolPrimary : const Color(0xffa4afa9),
+          color: states.contains(WidgetState.selected) ? kHangyeolPrimary : const Color(0xff7f8d85),
         ),
       ),
       labelTextStyle: WidgetStateProperty.resolveWith(
         (states) => TextStyle(
           fontSize: 11,
           fontWeight: states.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w500,
-          color: states.contains(WidgetState.selected) ? kHangyeolPrimary : const Color(0xff8e9a93),
+          color: states.contains(WidgetState.selected) ? kHangyeolPrimary : const Color(0xff68776e),
         ),
       ),
     ),
@@ -150,20 +157,20 @@ ThemeData buildHangyeolTheme() {
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.all(Colors.white),
       trackColor: WidgetStateProperty.resolveWith(
-        (states) => states.contains(WidgetState.selected) ? kHangyeolPrimary : const Color(0xffdde3df),
+        (states) => states.contains(WidgetState.selected) ? kHangyeolPrimary : const Color(0xffcbd5cf),
       ),
       trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
     ),
   );
 }
 
-/// 독립 위젯 테스트를 포함해 일관된 캡슐형 필터 칩을 그리는 공용 헬퍼.
+/// 독립 위젯 테스트를 포함해 시인성 높은 캡슐형 필터 칩을 그리는 공용 헬퍼.
 ChoiceChip hangyeolChoicePill({
   Key? key,
   required String label,
   required bool selected,
   required ValueChanged<bool>? onSelected,
-  Color unselectedBackground = kHangyeolSurface,
+  Color unselectedBackground = kHangyeolChipUnselected,
   EdgeInsetsGeometry? labelPadding,
 }) =>
     ChoiceChip(
@@ -171,16 +178,23 @@ ChoiceChip hangyeolChoicePill({
       showCheckmark: false,
       visualDensity: VisualDensity.compact,
       shape: const StadiumBorder(),
-      side: BorderSide.none,
+      side: BorderSide(color: selected ? kHangyeolPrimary : kHangyeolChipBorder),
       selectedColor: kHangyeolPrimary,
       backgroundColor: unselectedBackground,
       disabledColor: unselectedBackground,
       labelPadding: labelPadding ?? const EdgeInsets.symmetric(horizontal: 6),
-      label: Text(label),
+      label: Text(
+        label,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+          color: selected ? Colors.white : kHangyeolInk,
+        ),
+      ),
       labelStyle: TextStyle(
         fontSize: 13,
-        fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-        color: selected ? Colors.white : const Color(0xff425249),
+        fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+        color: selected ? Colors.white : kHangyeolInk,
       ),
       selected: selected,
       onSelected: onSelected,
