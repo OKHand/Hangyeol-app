@@ -9,6 +9,17 @@
 
 ---
 
+## 2026-11-20 · Antigravity · 안드로이드 기본 화면 ERP 6개 모드 칩 한 줄 배치 및 사진 상세 편집 버튼 상시 복원
+
+- 요청:
+  1. 안드로이드 기본 화면(360dp)에서 ERP 조회의 `입고`~`재고` 6개 탭 칩이 두 줄로 넘어가지 않고 한 줄에 표시되도록 조정.
+  2. 사진 상세 화면에서 다른 계정/Discord 수집 사진을 직원(`member`) 계정으로 열었을 때도 `사진 크게 보기` 옆의 편집 아이콘 버튼(`photo-detail-edit`)이 항상 표시되도록 복원.
+  3. 전반적인 기존 기능 누락 여부 전수 점검.
+- 변경:
+  - `apps/flutter_shell/lib/src/ui/hangyeol_theme.dart`, `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`: `hangyeolChoicePill`에 컴팩트 패딩·밀도 옵션을 추가하고 ERP 모드 칩 간격(`spacing: 4`)과 패딩을 조정해 360px 안드로이드 기본 화면에서도 6개 칩이 모두 첫 줄에 들어가도록 개선.
+  - `apps/flutter_shell/lib/src/serverless/photos.dart`: `OnlinePhotosPage._view`에서 `PhotoDetailPage`의 `canEdit`을 `_canEdit(photo)` 대신 `widget.canCreate`로 전달(`_library`와 동일)해 직원(`member`) 계정으로 열람할 때도 `[다운로드] [사진 크게 보기] [사진 정보 수정]` 3개 아이콘 버튼이 모두 표시되도록 복원.
+  - `apps/flutter_shell/test/erp_interaction_test.dart`, `apps/flutter_shell/test/photo_detail_test.dart`: 360px 화면 6개 ERP 모드 칩 단일 행 배치 및 사진 상세 상단 바 3개 아이콘 순서(`[다운로드] < [크게 보기] < [편집]`) 검증 추가 (`dart analyze` 무결점 · Flutter 전체 115건 통과).
+
 ## 2026-11-20 · Antigravity · ERP 조회 상단 액션바 이동 · 사진 상세 기기 다운로드 · 썸네일 경량화 · 농산물 시세 시인성 개선
 
 - 요청:

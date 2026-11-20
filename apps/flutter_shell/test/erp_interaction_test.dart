@@ -102,4 +102,22 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   }, variant: TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
+
+  testWidgets('all six ERP mode chips fit on a single horizontal row on standard 360px Android screen', (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: DemoErpPage())));
+    await tester.pumpAndSettle();
+
+    final firstTop = tester.getRect(find.widgetWithText(ChoiceChip, '입고')).top;
+    for (final mode in ['출고', '통합', '요약', '집계', '재고']) {
+      final top = tester.getRect(find.widgetWithText(ChoiceChip, mode)).top;
+      expect(top, closeTo(firstTop, 0.5), reason: 'Expected $mode chip to remain on the first row at 360px width');
+    }
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

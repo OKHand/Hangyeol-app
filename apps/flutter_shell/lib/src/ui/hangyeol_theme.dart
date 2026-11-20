@@ -171,17 +171,21 @@ ChoiceChip hangyeolChoicePill({
   required bool selected,
   required ValueChanged<bool>? onSelected,
   Color unselectedBackground = kHangyeolChipUnselected,
+  EdgeInsetsGeometry? padding,
   EdgeInsetsGeometry? labelPadding,
+  VisualDensity? visualDensity,
 }) =>
     ChoiceChip(
       key: key,
       showCheckmark: false,
-      visualDensity: VisualDensity.compact,
+      visualDensity: visualDensity ?? VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       shape: const StadiumBorder(),
       side: BorderSide(color: selected ? kHangyeolPrimary : kHangyeolChipBorder),
       selectedColor: kHangyeolPrimary,
       backgroundColor: unselectedBackground,
       disabledColor: unselectedBackground,
+      padding: padding,
       labelPadding: labelPadding ?? const EdgeInsets.symmetric(horizontal: 6),
       label: Text(
         label,

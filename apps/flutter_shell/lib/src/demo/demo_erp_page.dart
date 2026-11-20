@@ -62,11 +62,24 @@ class _DemoErpPageState extends State<DemoErpPage> {
     if (result != null) { return _results(result); }
     return ColoredBox(
       color: kHangyeolCanvas,
-      child: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), children: [
+      child: ListView(padding: const EdgeInsets.fromLTRB(12, 10, 12, 16), children: [
         const Text('ERP 조회', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: kHangyeolInk, letterSpacing: -0.3)),
         if (!widget.online) ...[const SizedBox(height: 2), const Text('가상 원장 21건 · 체험 기준일 2026-11-10', style: TextStyle(fontSize: 12, color: kHangyeolMuted))],
         const SizedBox(height: 8),
-        Wrap(spacing: 6, runSpacing: 4, children: demoModes.map((mode) => hangyeolChoicePill(label: mode, selected: _mode == mode, onSelected: _busy ? null : (_) => setState(() { _mode = mode; _error = ''; }))).toList()),
+        Wrap(
+          spacing: 4,
+          runSpacing: 4,
+          children: demoModes
+              .map((mode) => hangyeolChoicePill(
+                    label: mode,
+                    selected: _mode == mode,
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 2),
+                    visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+                    onSelected: _busy ? null : (_) => setState(() { _mode = mode; _error = ''; }),
+                  ))
+              .toList(),
+        ),
         const Divider(height: 18, color: kHangyeolDivider),
         Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Row(children: [

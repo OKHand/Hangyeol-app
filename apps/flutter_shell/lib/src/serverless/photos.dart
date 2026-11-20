@@ -232,7 +232,7 @@ class _OnlinePhotosPageState extends State<OnlinePhotosPage> {
     if(_viewing){return;}setState(()=>_viewing=true);
     try{await Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>PhotoDetailPage(
       photo:photo,repository:_repository,client:widget.client,onAuthError:widget.onAuthError,onBrowse:_browse,
-      canEdit:_canEdit(photo))));
+      canEdit:widget.canCreate)));
       if(mounted){await _refresh(force:true);}
     }catch(e){await _fail(e);}finally{if(mounted){setState(()=>_viewing=false);}}
   }

@@ -80,9 +80,12 @@ void main(){
     await tester.pumpAndSettle();
     final downloadBtn=find.byKey(const Key('photo-detail-download'));
     final fullscreenBtn=find.byKey(const Key('photo-detail-fullscreen'));
+    final editBtn=find.byKey(const Key('photo-detail-edit'));
     expect(downloadBtn,findsOneWidget);
     expect(fullscreenBtn,findsOneWidget);
+    expect(editBtn,findsOneWidget);
     expect(tester.getRect(downloadBtn).left,lessThan(tester.getRect(fullscreenBtn).left));
+    expect(tester.getRect(fullscreenBtn).left,lessThan(tester.getRect(editBtn).left));
     expect(find.descendant(of:downloadBtn,matching:find.byType(Text)),findsNothing);
 
     await tester.tap(downloadBtn);
