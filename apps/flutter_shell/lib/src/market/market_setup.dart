@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../serverless/client.dart';
 
 const marketOrderedProducts=<String,String>{
@@ -64,15 +63,16 @@ class MarketSetupPage extends StatefulWidget {
   @override
   State<MarketSetupPage> createState()=>_MarketSetupPageState();
 }
+
 class _MarketSetupPageState extends State<MarketSetupPage> {
-  final _market=TextEditingController(text:'110001');
-  final _items=<String,Map<String,dynamic>>{};
-  final _choices=<String,String>{};
-  final _operation=const Uuid().v4();
-  Map<String,dynamic>? _settings,_pendingSave;
-  bool _busy=false,_allowHttp=false,_started=false,_dailyWarm=false;
-  int? _next=1;
-  int _scanned=0;
+  static const _primary=Color(0xff1e6247);
+  static const _surfaceBg=Color(0xfff5f8f5);
+  static const _cardBorder=Color(0xffdce5df);
+  static const _chipSelected=Color(0xffe6f0ea);
+  static const _mutedText=Color(0xff52685c);
+
+  Map<String,dynamic>? _settings;
+  bool _busy=false,_dailyWarm=false;
   String _error='';
 
   late String _prefMarketCode;
@@ -83,7 +83,6 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
   late bool _prefAutoGrades;
   late bool _prefShowMonthly;
 
-  static const products={'chal-tomato':'찰토마토','date-cherry-tomato':'대추방울토마토'};
   @override
   void initState(){
     super.initState();
@@ -97,6 +96,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
     _prefShowMonthly=p.showMonthlyTrend;
     if(widget.canManage){_load();}
   }
+
   void _applyPreferences(){
     if(_prefVisible.isEmpty){_prefVisible.add(_prefDefaultProduct);}
     if(!_prefVisible.contains(_prefDefaultProduct)){_prefDefaultProduct=_prefVisible.first;}
@@ -110,134 +110,325 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
       ..showMonthlyTrend=_prefShowMonthly;
     Navigator.pop(context,true);
   }
+
   Future<void> _work(Future<void> Function() run) async {
-    if(_busy){return;}setState((){_busy=true;_error='';});
-    try{await run();}catch(e){if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){await widget.onAuthError?.call(e);}if(mounted){setState(()=>_error=e is PlatformAuthFailure?e.message:'연결 설정을 확인하지 못했습니다.');}}
-    finally{if(mounted){setState(()=>_busy=false);}}
+    if(_busy){return;}
+    setState((){_busy=true;_error='';});
+    try{
+      await run();
+    }catch(e){
+      if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){
+        await widget.onAuthError?.call(e);
+      }
+      if(mounted){
+        setState(()=>_error=e is PlatformAuthFailure?e.message:'설정을 확인하지 못했습니다. 다시 시도해 주세요.');
+      }
+    }finally{
+      if(mounted){setState(()=>_busy=false);}
+    }
   }
-  Future<void> _load()=>_work(() async {final data=await widget.client.call('market.settings');if(mounted){setState((){_settings=data;_market.text=data['marketCode'] as String? ?? '110001';_allowHttp=data['allowPlainHttp']==true;_dailyWarm=data['dailyWarmEnabled']==true;});}});
+
+  Future<void> _load()=>_work(() async {
+    final data=await widget.client.call('market.settings');
+    if(mounted){
+      setState((){
+        _settings=data;
+        _dailyWarm=data['dailyWarmEnabled']==true;
+      });
+    }
+  });
+
   Future<void> _toggleDailyWarm(bool enabled)=>_work(() async {
     final res=await widget.client.call('market.warm',params:{'enabled':enabled,'marketCode':_prefMarketCode});
-    if(mounted){setState((){_settings=res;_dailyWarm=res['dailyWarmEnabled']==true;});}
+    if(mounted){
+      setState((){
+        _settings=res;
+        _dailyWarm=res['dailyWarmEnabled']==true;
+      });
+    }
   });
-  Future<void> _discover()=>_work(() async {
-    final result=await widget.client.call('market.catalogue',params:{'marketCode':_market.text.trim(),'start':_next,'allowPlainHttp':_allowHttp});
-    if(!mounted){return;}setState((){for(final item in List<Map<String,dynamic>>.from(result['items'] as List)){_items[item['id'] as String]=item;}_scanned+=result['scanned'] as int;_next=result['nextStart'] as int?;_started=true;});
-  });
-  Future<void> _save()=>_work(() async {
-    _pendingSave??={'operationId':_operation,'expectedVersion':_settings!['version'],'confirmMapping':true,'allowPlainHttp':_allowHttp,'receipts':{for(final p in products.keys)p:_items[_choices[p]]!['receipt']}};
-    await widget.client.call('market.configure',params:_pendingSave);if(mounted){Navigator.pop(context,true);}
-  });
+
+  String _formatWarmAt(String raw){
+    final dt=DateTime.tryParse(raw)?.toUtc().add(const Duration(hours:9));
+    if(dt==null){return '';}
+    final mm=dt.month.toString().padLeft(2,'0');
+    final dd=dt.day.toString().padLeft(2,'0');
+    final hh=dt.hour.toString().padLeft(2,'0');
+    final min=dt.minute.toString().padLeft(2,'0');
+    return '$mm.$dd $hh:$min';
+  }
+
+  InputDecoration _fieldDecoration(String label)=>InputDecoration(
+    labelText:label,
+    filled:true,
+    fillColor:const Color(0xfff8faf8),
+    isDense:true,
+    contentPadding:const EdgeInsets.symmetric(horizontal:12,vertical:12),
+    border:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:_cardBorder)),
+    enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:_cardBorder)),
+  );
+
+  Widget _sectionCard({required IconData icon,required String title,Widget? trailing,required List<Widget> children}){
+    return Container(
+      padding:const EdgeInsets.all(16),
+      decoration:BoxDecoration(
+        color:Colors.white,
+        borderRadius:BorderRadius.circular(16),
+        border:Border.all(color:_cardBorder),
+      ),
+      child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+        Row(children:[
+          Icon(icon,size:19,color:_primary),
+          const SizedBox(width:8),
+          Expanded(child:Text(title,style:const TextStyle(fontSize:15,fontWeight:FontWeight.w700,color:Color(0xff1b3a2b)))),
+          if(trailing!=null)trailing,
+        ]),
+        const SizedBox(height:14),
+        ...children,
+      ]),
+    );
+  }
+
+  Widget _styledChoice({required Key chipKey,required String label,required bool selected,required VoidCallback? onSelected}){
+    return ChoiceChip(
+      key:chipKey,
+      label:Text(label),
+      selected:selected,
+      selectedColor:_chipSelected,
+      backgroundColor:const Color(0xfff8faf8),
+      side:BorderSide(color:selected?_primary:_cardBorder),
+      labelStyle:TextStyle(fontSize:13,fontWeight:selected?FontWeight.w600:FontWeight.normal,color:selected?_primary:const Color(0xff233329)),
+      onSelected:onSelected==null?null:(_)=>onSelected(),
+    );
+  }
+
   @override
-  void dispose(){_market.dispose();super.dispose();}
-  @override
-  Widget build(BuildContext context)=>PopScope(canPop:!_busy,child:Scaffold(
-    appBar:AppBar(title:const Text('농산물 시세 설정'),actions:[
-      TextButton(key:const Key('market-prefs-apply'),onPressed:_busy?null:_applyPreferences,child:const Text('설정 적용')),
-      if(widget.canManage)TextButton(key:const Key('market-setup-save'),onPressed:_busy||_choices.length!=2||_settings==null?null:_save,child:const Text('연결 저장')),
-    ]),
-    body:SafeArea(child:SingleChildScrollView(padding:const EdgeInsets.all(16),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-      if(_busy)const LinearProgressIndicator(),
-      if(_error.isNotEmpty)Padding(padding:const EdgeInsets.only(bottom:12),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),
-      const Text('시세 조회 기본 설정',style:TextStyle(fontSize:16,fontWeight:FontWeight.bold)),
-      const SizedBox(height:10),
-      DropdownButtonFormField<String>(
-        key:const Key('market-pref-market'),
-        initialValue:_prefMarketCode,
-        isExpanded:true,
-        decoration:const InputDecoration(labelText:'기본 공영도매시장'),
-        items:[for(final m in marketStandardMarkets)DropdownMenuItem(value:m['code']!,child:Text('${m['name']} (${m['code']})'))],
-        onChanged:(v){if(v!=null){setState(()=>_prefMarketCode=v);}},
-      ),
-      const SizedBox(height:12),
-      DropdownButtonFormField<String>(
-        key:const Key('market-pref-default-product'),
-        initialValue:_prefDefaultProduct,
-        isExpanded:true,
-        decoration:const InputDecoration(labelText:'시세 화면 첫 시작 품목'),
-        items:[for(final e in marketOrderedProducts.entries)DropdownMenuItem(value:e.key,child:Text(e.value))],
-        onChanged:(v){if(v!=null){setState((){_prefDefaultProduct=v;_prefVisible.add(v);});}},
-      ),
-      const SizedBox(height:14),
-      const Text('일별 시세 추이 그래프 기간',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600)),
-      const SizedBox(height:6),
-      Wrap(spacing:8,children:[
-        for(final days in const [(7,'최근 1주 (7일)'),(14,'최근 2주 (14일)'),(21,'최근 3주 (21일)')])
-          ChoiceChip(key:ValueKey('market-pref-days-${days.$1}'),label:Text(days.$2),selected:_prefTrendDays==days.$1,onSelected:(_)=>setState(()=>_prefTrendDays=days.$1)),
-      ]),
-      const SizedBox(height:14),
-      const Text('대표 가격 표시 기준',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600)),
-      const SizedBox(height:6),
-      Wrap(spacing:8,children:[
-        ChoiceChip(key:const Key('market-pref-unit-kg'),label:const Text('kg당 단가(원/kg) 우선'),selected:_prefPerKg,onSelected:(_)=>setState(()=>_prefPerKg=true)),
-        ChoiceChip(key:const Key('market-pref-unit-pkg'),label:const Text('규격(상자)당 경락가 우선'),selected:!_prefPerKg,onSelected:(_)=>setState(()=>_prefPerKg=false)),
-      ]),
-      SwitchListTile(
-        key:const Key('market-pref-auto-grades'),
-        contentPadding:EdgeInsets.zero,
-        title:const Text('등급별·규격별 평균가 자동 펼치기'),
-        subtitle:const Text('시세 화면을 열 때 등급별 가격표를 바로 펼쳐서 표시합니다.'),
-        value:_prefAutoGrades,
-        onChanged:(v)=>setState(()=>_prefAutoGrades=v),
-      ),
-      SwitchListTile(
-        key:const Key('market-pref-monthly-trend'),
-        contentPadding:EdgeInsets.zero,
-        title:const Text('KAMIS 월별 시세 추이 그래프 표시'),
-        subtitle:const Text('일별 시세 추이 아래에 최근 12개월 월평균 도매 시세를 함께 표시합니다.'),
-        value:_prefShowMonthly,
-        onChanged:(v)=>setState(()=>_prefShowMonthly=v),
-      ),
-      const Divider(height:24),
-      Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
-        const Text('상단 빠른 선택 품목 관리',style:TextStyle(fontSize:15,fontWeight:FontWeight.bold)),
-        TextButton(onPressed:()=>setState(()=>_prefVisible=marketOrderedProducts.keys.toSet()),child:const Text('전체 선택')),
-      ]),
-      const Text('자주 보는 품목 탭에 표시할 작물을 선택하세요.',style:TextStyle(fontSize:12)),
-      const SizedBox(height:6),
-      Wrap(spacing:6,runSpacing:4,children:[
-        for(final e in marketOrderedProducts.entries)
-          FilterChip(
-            key:ValueKey('market-pref-crop-${e.key}'),
-            label:Text(e.value),
-            selected:_prefVisible.contains(e.key),
-            onSelected:(selected){
-              setState((){
-                if(selected){_prefVisible.add(e.key);}
-                else if(_prefVisible.length>1){_prefVisible.remove(e.key);}
-              });
-            },
-          ),
-      ]),
-      const SizedBox(height:16),
-      FilledButton.icon(key:const Key('market-prefs-save-button'),onPressed:_busy?null:_applyPreferences,icon:const Icon(Icons.check),label:const Text('시세 설정 저장 및 적용')),
-      if(widget.canManage)...[
-        const Divider(height:32),
-        const Text('서버 API 코드 검증 · 연결 설정 (관리자)',style:TextStyle(fontSize:15,fontWeight:FontWeight.bold)),
-        const SizedBox(height:8),
-        SwitchListTile(
-          key:const Key('market-daily-warm-switch'),
-          contentPadding:EdgeInsets.zero,
-          title:const Text('매일 오전 8시 서버 시세 사전 준비'),
-          subtitle:const Text('아침 경매 정산 후 주요 11개 품목 시세를 서버 캐시에 미리 불러옵니다.'),
-          value:_dailyWarm,
-          onChanged:_busy||_settings==null?null:_toggleDailyWarm,
+  Widget build(BuildContext context){
+    final warmStamp=_formatWarmAt('${_settings?['warmLastAt']??''}');
+    return PopScope(
+      canPop:!_busy,
+      child:Scaffold(
+        backgroundColor:_surfaceBg,
+        appBar:AppBar(
+          backgroundColor:_surfaceBg,
+          surfaceTintColor:Colors.transparent,
+          title:const Text('농산물 시세 설정',style:TextStyle(fontWeight:FontWeight.w600)),
+          actions:[
+            TextButton(
+              key:const Key('market-prefs-apply'),
+              onPressed:_busy?null:_applyPreferences,
+              child:const Text('적용',style:TextStyle(fontWeight:FontWeight.w600)),
+            ),
+            const SizedBox(width:4),
+          ],
         ),
-        const SizedBox(height:4),
-        Text(_settings?['keyConfigured']==true?'서버에 API 이용키가 등록돼 있습니다.':'서버 이용키 등록을 확인해 주세요.'),
-        const Padding(padding:EdgeInsets.symmetric(vertical:8),child:Text('공식 품목 코드 API에서 사용 중인 품종을 찾아 연결합니다. 거래가 없는 날짜에도 품목 코드를 확인할 수 있습니다.',style:TextStyle(fontSize:12))),
-        TextField(key:const Key('market-setup-code'),controller:_market,enabled:!_busy&&!_started,keyboardType:TextInputType.number,maxLength:6,decoration:const InputDecoration(labelText:'도매시장 코드',helperText:'110001 = 서울가락 (제공된 샘플 기준)')),
-        CheckboxListTile(key:const Key('market-setup-http'),contentPadding:EdgeInsets.zero,title:const Text('제공처의 HTTP 연결 방식 확인'),subtitle:const Text('명세의 HTTP 주소로 서버의 API 이용키를 전송합니다. 암호화되지 않은 연결임을 확인하고 선택하세요.'),value:_allowHttp,onChanged:_busy||_started?null:(v)=>setState(()=>_allowHttp=v==true)),
-        FilledButton.icon(key:const Key('market-discover'),onPressed:_busy||!_allowHttp||_settings?['keyConfigured']!=true||_next==null||_pendingSave!=null?null:_discover,icon:const Icon(Icons.search),label:Text(_started?'다음 코드에서 품목 찾기':'공식 코드에서 품목 찾기')),
-        Text('조회한 코드 $_scanned건 · 찾은 토마토 분류 ${_items.length}개',style:const TextStyle(fontSize:12)),
-        if(_started)TextButton(onPressed:_busy||_pendingSave!=null?null:()=>setState((){_started=false;_next=1;_scanned=0;_items.clear();_choices.clear();}),child:const Text('시장·분류 다시 선택')),
-        for(final product in products.entries)...[
-          Padding(padding:const EdgeInsets.only(top:12,bottom:6),child:Text('${product.value}에 연결할 실제 분류',style:const TextStyle(fontWeight:FontWeight.bold))),
-          if(!_items.values.any((i)=>(i['eligible'] as List).contains(product.key)))const Text('현재 자료에서 정확히 해당하는 명칭을 찾지 못했습니다.',style:TextStyle(fontSize:12)),
-          for(final item in _items.values.where((i)=>(i['eligible'] as List).contains(product.key)))ListTile(key:ValueKey('market-choice-${product.key}-${item['id']}'),dense:true,selected:_choices[product.key]==item['id'],leading:Icon(_choices[product.key]==item['id']?Icons.radio_button_checked:Icons.radio_button_off),title:Text('${item['category']} / ${item['variety']}'),subtitle:Text(item['id'] as String),onTap:_busy||_pendingSave!=null?null:()=>setState(()=>_choices[product.key]=item['id'] as String)),
-        ],
-        if(_items.isNotEmpty)ExpansionTile(title:const Text('조회된 다른 토마토 분류'),children:[for(final item in _items.values.where((i)=>(i['eligible'] as List).isEmpty))ListTile(dense:true,title:Text('${item['category']} / ${item['variety']}'),subtitle:Text(item['id'] as String))]),
-      ],
-    ]))),
-  ));
+        body:SafeArea(
+          child:Align(
+            alignment:Alignment.topCenter,
+            child:ConstrainedBox(
+              constraints:const BoxConstraints(maxWidth:680),
+              child:SingleChildScrollView(
+                padding:const EdgeInsets.fromLTRB(16,8,16,24),
+                child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+                  if(_busy)const Padding(padding:EdgeInsets.only(bottom:12),child:LinearProgressIndicator(minHeight:2)),
+                  if(_error.isNotEmpty)Container(
+                    margin:const EdgeInsets.only(bottom:12),
+                    padding:const EdgeInsets.all(12),
+                    decoration:BoxDecoration(color:const Color(0xfffff0f0),borderRadius:BorderRadius.circular(12),border:Border.all(color:Theme.of(context).colorScheme.error.withValues(alpha:0.35))),
+                    child:Text(_error,style:TextStyle(fontSize:13,color:Theme.of(context).colorScheme.error)),
+                  ),
+                  _sectionCard(
+                    icon:Icons.storefront_outlined,
+                    title:'기본 조회 조건',
+                    children:[
+                      LayoutBuilder(builder:(context,constraints){
+                        final marketField=DropdownButtonFormField<String>(
+                          key:const Key('market-pref-market'),
+                          initialValue:_prefMarketCode,
+                          isExpanded:true,
+                          decoration:_fieldDecoration('기본 공영도매시장'),
+                          items:[for(final m in marketStandardMarkets)DropdownMenuItem(value:m['code']!,child:Text('${m['name']} (${m['code']})'))],
+                          onChanged:(v){if(v!=null){setState(()=>_prefMarketCode=v);}},
+                        );
+                        final productField=DropdownButtonFormField<String>(
+                          key:const Key('market-pref-default-product'),
+                          initialValue:_prefDefaultProduct,
+                          isExpanded:true,
+                          decoration:_fieldDecoration('시세 화면 첫 시작 품목'),
+                          items:[for(final e in marketOrderedProducts.entries)DropdownMenuItem(value:e.key,child:Text(e.value))],
+                          onChanged:(v){if(v!=null){setState((){_prefDefaultProduct=v;_prefVisible.add(v);});}},
+                        );
+                        if(constraints.maxWidth>=480){
+                          return Row(children:[Expanded(child:marketField),const SizedBox(width:12),Expanded(child:productField)]);
+                        }
+                        return Column(children:[marketField,const SizedBox(height:12),productField]);
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height:14),
+                  _sectionCard(
+                    icon:Icons.insights_outlined,
+                    title:'화면 및 차트 표시',
+                    children:[
+                      const Text('일별 시세 추이 기간',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600,color:Color(0xff233329))),
+                      const SizedBox(height:8),
+                      Wrap(spacing:8,runSpacing:8,children:[
+                        for(final days in const [(7,'최근 1주 (7일)'),(14,'최근 2주 (14일)'),(21,'최근 3주 (21일)')])
+                          _styledChoice(
+                            chipKey:ValueKey('market-pref-days-${days.$1}'),
+                            label:days.$2,
+                            selected:_prefTrendDays==days.$1,
+                            onSelected:()=>setState(()=>_prefTrendDays=days.$1),
+                          ),
+                      ]),
+                      const SizedBox(height:14),
+                      const Text('대표 가격 표시 기준',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600,color:Color(0xff233329))),
+                      const SizedBox(height:8),
+                      Wrap(spacing:8,runSpacing:8,children:[
+                        _styledChoice(
+                          chipKey:const Key('market-pref-unit-kg'),
+                          label:'kg당 단가(원/kg) 우선',
+                          selected:_prefPerKg,
+                          onSelected:()=>setState(()=>_prefPerKg=true),
+                        ),
+                        _styledChoice(
+                          chipKey:const Key('market-pref-unit-pkg'),
+                          label:'규격(상자)당 경락가 우선',
+                          selected:!_prefPerKg,
+                          onSelected:()=>setState(()=>_prefPerKg=false),
+                        ),
+                      ]),
+                      const Divider(height:24,color:Color(0xffe7eee9)),
+                      SwitchListTile(
+                        key:const Key('market-pref-auto-grades'),
+                        contentPadding:EdgeInsets.zero,
+                        visualDensity:VisualDensity.compact,
+                        title:const Text('등급별·규격별 평균가 자동 펼치기',style:TextStyle(fontSize:14,fontWeight:FontWeight.w500)),
+                        subtitle:const Text('시세 화면을 열 때 등급별 가격표를 바로 펼쳐서 표시합니다.',style:TextStyle(fontSize:12,color:_mutedText)),
+                        value:_prefAutoGrades,
+                        onChanged:(v)=>setState(()=>_prefAutoGrades=v),
+                      ),
+                      const SizedBox(height:4),
+                      SwitchListTile(
+                        key:const Key('market-pref-monthly-trend'),
+                        contentPadding:EdgeInsets.zero,
+                        visualDensity:VisualDensity.compact,
+                        title:const Text('KAMIS 월별 시세 추이 그래프 표시',style:TextStyle(fontSize:14,fontWeight:FontWeight.w500)),
+                        subtitle:const Text('일별 시세 추이 아래에 최근 12개월 월평균 도매 시세를 함께 표시합니다.',style:TextStyle(fontSize:12,color:_mutedText)),
+                        value:_prefShowMonthly,
+                        onChanged:(v)=>setState(()=>_prefShowMonthly=v),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height:14),
+                  _sectionCard(
+                    icon:Icons.eco_outlined,
+                    title:'상단 빠른 선택 품목',
+                    trailing:Row(mainAxisSize:MainAxisSize.min,children:[
+                      Container(
+                        padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
+                        decoration:BoxDecoration(color:_chipSelected,borderRadius:BorderRadius.circular(12)),
+                        child:Text('${_prefVisible.length}/${marketOrderedProducts.length}',style:const TextStyle(fontSize:11,fontWeight:FontWeight.w600,color:_primary)),
+                      ),
+                      const SizedBox(width:4),
+                      TextButton(
+                        style:TextButton.styleFrom(visualDensity:VisualDensity.compact,padding:const EdgeInsets.symmetric(horizontal:8)),
+                        onPressed:_busy?null:()=>setState(()=>_prefVisible=marketOrderedProducts.keys.toSet()),
+                        child:const Text('전체 선택',style:TextStyle(fontSize:12)),
+                      ),
+                    ]),
+                    children:[
+                      const Text('시세 화면 상단 탭에 바로 표시할 작물을 선택하세요. (최소 1개)',style:TextStyle(fontSize:12,color:_mutedText)),
+                      const SizedBox(height:10),
+                      Wrap(spacing:8,runSpacing:8,children:[
+                        for(final e in marketOrderedProducts.entries)
+                          FilterChip(
+                            key:ValueKey('market-pref-crop-${e.key}'),
+                            label:Text(e.value),
+                            selected:_prefVisible.contains(e.key),
+                            selectedColor:_chipSelected,
+                            backgroundColor:const Color(0xfff8faf8),
+                            side:BorderSide(color:_prefVisible.contains(e.key)?_primary:_cardBorder),
+                            labelStyle:TextStyle(fontSize:13,fontWeight:_prefVisible.contains(e.key)?FontWeight.w600:FontWeight.normal,color:_prefVisible.contains(e.key)?_primary:const Color(0xff233329)),
+                            onSelected:(selected){
+                              setState((){
+                                if(selected){_prefVisible.add(e.key);}
+                                else if(_prefVisible.length>1){_prefVisible.remove(e.key);}
+                              });
+                            },
+                          ),
+                      ]),
+                    ],
+                  ),
+                  if(widget.canManage)...[
+                    const SizedBox(height:14),
+                    _sectionCard(
+                      icon:Icons.schedule_outlined,
+                      title:'관리자 · 서버 사전 준비',
+                      trailing:_settings==null
+                        ?null
+                        :Container(
+                          padding:const EdgeInsets.symmetric(horizontal:9,vertical:3),
+                          decoration:BoxDecoration(
+                            color:_settings?['keyConfigured']==true?const Color(0xffe6f4ea):const Color(0xfffff4e5),
+                            borderRadius:BorderRadius.circular(12),
+                          ),
+                          child:Text(
+                            _settings?['keyConfigured']==true?'API 연결됨':'이용키 확인 필요',
+                            style:TextStyle(fontSize:11,fontWeight:FontWeight.w600,color:_settings?['keyConfigured']==true?_primary:const Color(0xff8a5300)),
+                          ),
+                        ),
+                      children:[
+                        SwitchListTile(
+                          key:const Key('market-daily-warm-switch'),
+                          contentPadding:EdgeInsets.zero,
+                          visualDensity:VisualDensity.compact,
+                          title:const Text('매일 오전 8시 서버 시세 사전 준비',style:TextStyle(fontSize:14,fontWeight:FontWeight.w500)),
+                          subtitle:const Text('아침 경매 정산 후 주요 11개 품목 시세를 서버 캐시에 미리 불러옵니다.',style:TextStyle(fontSize:12,color:_mutedText)),
+                          value:_dailyWarm,
+                          onChanged:_busy||_settings==null?null:_toggleDailyWarm,
+                        ),
+                        if(warmStamp.isNotEmpty)Padding(
+                          padding:const EdgeInsets.only(top:6),
+                          child:Text('마지막 사전 준비: $warmStamp (${_settings?['warmLastCount']??0}개 품목)',style:const TextStyle(fontSize:12,color:_mutedText)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ]),
+              ),
+            ),
+          ),
+        ),
+        bottomNavigationBar:Container(
+          decoration:const BoxDecoration(color:Colors.white,border:Border(top:BorderSide(color:_cardBorder))),
+          child:SafeArea(
+            child:Center(
+              heightFactor:1,
+              child:ConstrainedBox(
+                constraints:const BoxConstraints(maxWidth:680),
+                child:Padding(
+                  padding:const EdgeInsets.fromLTRB(16,10,16,12),
+                  child:SizedBox(
+                    width:double.infinity,
+                    height:48,
+                    child:FilledButton.icon(
+                      key:const Key('market-prefs-save-button'),
+                      onPressed:_busy?null:_applyPreferences,
+                      style:FilledButton.styleFrom(
+                        backgroundColor:_primary,
+                        shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(12)),
+                      ),
+                      icon:const Icon(Icons.check),
+                      label:const Text('시세 설정 저장 및 적용',style:TextStyle(fontSize:15,fontWeight:FontWeight.w600)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
