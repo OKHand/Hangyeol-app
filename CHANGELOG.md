@@ -20,6 +20,9 @@
   - `apps/flutter_shell/lib/src/ui/hangyeol_theme.dart`, `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`: `hangyeolChoicePill`에 컴팩트 패딩·밀도 옵션을 추가하고 ERP 모드 칩 간격(`spacing: 4`)과 패딩을 조정해 360px 안드로이드 기본 화면에서도 6개 칩이 모두 첫 줄에 들어가도록 개선. ERP 조회 화면 하단에 `180px` 여유 공백과 자동완성 드롭다운 하단 여백을 부여해 `판매품종명`·`원품종명` 추천어 팝업이 하단 바와 겹치지 않도록 개선.
   - `apps/flutter_shell/lib/src/serverless/photos.dart`, `photo_bulk_edit.dart`, `photo_library.dart`, `app.dart`, `company_connections.dart`, `news_discord_settings.dart`, `app_updates.dart`, `industry_news.dart`, `market_prices.dart`, `market_setup.dart`, `demo_photos.dart`: `OnlinePhotosPage._view`에서 `PhotoDetailPage`의 `canEdit`을 `widget.canCreate`로 전달해 `[다운로드] [사진 크게 보기] [사진 정보 수정]` 3개 아이콘 버튼이 모두 표시되도록 복원하고, 모든 서브 화면(`사진 N장 공통 정보` 폼, `사진 일괄 편집`, `사진 정리·Discord 수집`, `직원·권한 관리`, `사진 상세` 등)에 `SafeArea` 및 하단 `48px` 여유 패딩을 공통 적용.
   - `apps/flutter_shell/test/erp_interaction_test.dart`, `apps/flutter_shell/test/photo_detail_test.dart`: 360px 화면 6개 ERP 모드 칩 단일 행 배치 및 사진 상세 상단 바 3개 아이콘 순서(`[다운로드] < [크게 보기] < [편집]`) 검증 추가 (`dart analyze` 무결점 · Flutter 전체 115건 통과).
+  - 정식 릴리스 게시 및 `updates.publish` 등록 완료 (`tag: online-app-20261120-b81`):
+    - Android `0.2.0 · 빌드 81` (`run 44669621132`, `Hangyeol-android-0.2.0-81.apk`, SHA-256 `335e30edac3b2b43ec81ec294d6c5c710220ebed188dabd424f4b4283ba566fb`) → https://drive.google.com/file/d/1Wlnp8PW6crN7icl_ueLl8nlomTDot-SD/view
+    - Windows `0.2.0 · 빌드 82` (`run 44669630881`, `Hangyeol-windows-0.2.0-82.zip`, SHA-256 `bf2aa714db0c6bd2f84ef1ddc29c9c36f8aa7b83449f6375fe3a2f152eb78ce9`) → https://drive.google.com/file/d/190xbaE8Kgkg7AZC8ZxvjJbzyagK8vdfK/view
 
 ## 2026-11-20 · Antigravity · ERP 조회 상단 액션바 이동 · 사진 상세 기기 다운로드 · 썸네일 경량화 · 농산물 시세 시인성 개선
 

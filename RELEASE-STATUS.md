@@ -2,15 +2,15 @@
 
 The formal release transition has been updated and verified on 2026-11-20:
 
-- **Android Official Release (`0.2.0 · build 77`, `run 44665368817`)**:
+- **Android Official Release (`0.2.0 · build 81`, `run 44669621132`)**:
   - Signed with the established fixed Android signing identity (`certificateSha256: 84fc6fb951f82620868f662a30477a589bf39fc5bc7100d387cb737a8e75e8fc`, package `com.hangyeolseed.platform_online`).
-  - File: `Hangyeol-android-0.2.0-77.apk` (`56,509,802` bytes, SHA-256 `fffa5ad5c50046398f065e89dd423b386f66fbfa96f3c72d1bc63d186bd85448`).
-  - Google Drive: https://drive.google.com/file/d/1h5EAsZSZe48Es1T5c9F6NgtCdvJlIU5R/view
-  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_android`) and recorded in `config/platform-android-signing` (`online-app-20261120-b77`).
+  - File: `Hangyeol-android-0.2.0-81.apk` (`56,509,802` bytes, SHA-256 `335e30edac3b2b43ec81ec294d6c5c710220ebed188dabd424f4b4283ba566fb`).
+  - Google Drive: https://drive.google.com/file/d/1Wlnp8PW6crN7icl_ueLl8nlomTDot-SD/view
+  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_android`) and recorded in `config/platform-android-signing` (`online-app-20261120-b81`).
 
-- **Windows Official Release (`0.2.0 · build 78`, `run 44665372977`)**:
-  - File: `Hangyeol-windows-0.2.0-78.zip` (`13,899,973` bytes, SHA-256 `2a0a3b6bcbe5915b233da2bc8ce9c3ce627e5652265cfc22acd2fc8ce936b159`).
-  - Google Drive: https://drive.google.com/file/d/1Apb_ECDN6z1I7UgbPJtTXtfXV2i-dymK/view
+- **Windows Official Release (`0.2.0 · build 82`, `run 44669630881`)**:
+  - File: `Hangyeol-windows-0.2.0-82.zip` (`13,902,825` bytes, SHA-256 `bf2aa714db0c6bd2f84ef1ddc29c9c36f8aa7b83449f6375fe3a2f152eb78ce9`).
+  - Google Drive: https://drive.google.com/file/d/190xbaE8Kgkg7AZC8ZxvjJbzyagK8vdfK/view
   - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_windows`).
 
 - **Apps Script Server (`api` v53, `login` v24)**:
