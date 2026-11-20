@@ -18,7 +18,10 @@
     - 초기 로딩 이후 표시 중인 다른 작물 시세를 백그라운드에서 순차적으로 미리 캐싱(`_startBackgroundPrefetch`)해 품목 탭 전환 시 대기 없이 바로 조회.
     - 상단 평균시세(`summaryOnly: true`)와 일별·월별 추이 차트를 동시에 시작해 상단 평균시세·차트를 먼저 표시한 뒤, 개별 경락가 항목을 30건(`chunkSize: 30`) 단위로 이어서 로딩.
   - `apps/flutter_shell/lib/src/market/market_setup.dart`: 관리자용 `매일 오전 8시 서버 시세 사전 준비`(`market.warm`) 스케줄 스위치 추가.
-  - `apps/flutter_shell/test/market_prices_test.dart`, `market_setup_test.dart`: 일일 주기(08:00 KST), 병렬 단계 로딩·스트리밍·캐시 재사용·백그라운드 사전 로딩·사전 준비 스위치 테스트 추가.
+  - `apps/flutter_shell/test/market_prices_test.dart`, `market_setup_test.dart`: 일일 주기(08:00 KST), 병렬 단계 로딩·스트리밍·캐시 재사용·백그라운드 사전 로딩·사전 준비 스위치 테스트 추가(`dart analyze` 무결점 · Flutter 전체 112건 통과).
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`4d545a9`, `tag: online-app-20261120-b67`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 67`, `run 44651974138`)**: `Hangyeol-android-0.2.0-67.apk` (`56,279,778` bytes, SHA-256 `b9d58f9b5f46ee9e7557bffc1509a3988a71e6485f9f5022d4beb78fe713d2e2`) → https://drive.google.com/file/d/1nWM8O7Tmefe208xv-OMaA35XzPr7MdPE/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 68`, `run 44651977448`)**: `Hangyeol-windows-0.2.0-68.zip` (`13,885,416` bytes, SHA-256 `617193b6f91646f8ff0193dc65f1684cf0c2b47e217df5a26bc25397a40a4da1`) → https://drive.google.com/file/d/1OsJ_S_E92J0XphCqNni6ck__n3Fk978W/view
 
 ## 2026-11-20 · Antigravity · 업계 뉴스 하루 1회 갱신 로컬 캐시 · 종합 기사 통합 · 주간 Discord 최대 10건 제한
 
