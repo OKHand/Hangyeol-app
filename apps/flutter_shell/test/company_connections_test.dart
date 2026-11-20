@@ -40,6 +40,11 @@ void main(){
     testWidgets('$role sees Settings, only administrators see company and staff controls',(tester) async {
       final client=_Client(role);addTearDown(client.close);
       await tester.pumpWidget(ServerlessApp(apiUrl:client.url.toString(),client:client,vault:_Vault()));await tester.pumpAndSettle();
+      final titleRect=tester.getRect(find.text('한결씨드 온라인'));
+      final accountRect=tester.getRect(find.textContaining('$role@example.com'));
+      final refreshRect=tester.getRect(find.byTooltip('계정·권한 새로 확인'));
+      expect(accountRect.top-titleRect.bottom,lessThan(8));
+      expect((refreshRect.center.dy-accountRect.center.dy).abs(),lessThan(10));
       await tester.tap(find.descendant(of:find.byType(NavigationBar),matching:find.text('설정')));await tester.pumpAndSettle();
       final admin=['owner','admin'].contains(role);
       expect(find.byKey(const Key('settings-app-update')),findsOneWidget);expect(find.byKey(const Key('settings-photo-cache')),findsOneWidget);

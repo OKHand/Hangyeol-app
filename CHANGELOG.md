@@ -9,6 +9,16 @@
 
 ---
 
+## 2026-11-20 · Antigravity · ERP 6개 모드 칩 좌우 균등 정렬 및 상단 앱바 계정 줄·우측 액션 버튼 정렬
+
+- 요청:
+  1. ERP 조회의 `입고`, `출고`, `통합`, `요약`, `집계`, `재고` 6개 탭을 좌우 정렬(`spaceBetween`)로 배치하되, 화면을 축소해 한 줄에 다 들어가지 않을 때는 자연스럽게 다음 줄로 넘어가도록 구성.
+  2. 상단 앱바의 `한결씨드 온라인`과 `이메일 · 권한` 문구 사이 간격을 좁히고, 우측 `새로고침`·`로그아웃` 버튼이 `최초 관리자`가 있는 높이에 맞춰 정렬되도록 조정.
+- 변경:
+  - `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`: 6개 모드 칩 `Wrap`을 `SizedBox(width: double.infinity, child: Wrap(alignment: WrapAlignment.spaceBetween, spacing: 4, runSpacing: 6, ...))`로 감싸 좌우 양끝 정렬과 화면 축소 시 자동 줄바꿈을 동시에 지원.
+  - `apps/flutter_shell/lib/src/serverless/app.dart`: 별도 하단 배너로 분리되어 있던 `이메일 · 권한` 줄을 `AppBar.title` 내부 `Column`(`SizedBox(height: 1)`)으로 통합해 `한결씨드 온라인` 바로 아래에 밀착 배치하고, 우측 `새로고침`·`로그아웃` 아이콘 버튼에 상단 오프셋(`padding: EdgeInsets.only(top: 16, right: 4)`)을 주어 `이메일 · 권한` 줄과 같은 수평선 높이에 정렬.
+  - `apps/flutter_shell/test/erp_interaction_test.dart`, `apps/flutter_shell/test/company_connections_test.dart`: 360px 좌우 균등 정렬(`left: 12`, `right: 348`) 및 290px 축소 화면 자동 줄바꿈, 상단 앱바 타이틀-계정 줄 밀착 및 새로고침 버튼 수직 정렬 테스트 추가 (`dart analyze` 무결점 · Flutter 전체 115건 통과).
+
 ## 2026-11-20 · Antigravity · 안드로이드 기본 화면 ERP 6개 모드 칩 한 줄 배치 · 사진 상세 편집 버튼 상시 복원 · 전체 화면 하단 SafeArea 및 여유 공백 적용
 
 - 요청:

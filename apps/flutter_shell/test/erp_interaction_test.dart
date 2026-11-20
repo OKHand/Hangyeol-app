@@ -112,11 +112,20 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: Scaffold(body: DemoErpPage())));
     await tester.pumpAndSettle();
 
-    final firstTop = tester.getRect(find.widgetWithText(ChoiceChip, '입고')).top;
+    final firstRect = tester.getRect(find.widgetWithText(ChoiceChip, '입고'));
+    final lastRect = tester.getRect(find.widgetWithText(ChoiceChip, '재고'));
+    expect(firstRect.left, closeTo(12.0, 2.0));
+    expect(lastRect.right, closeTo(348.0, 2.0));
     for (final mode in ['출고', '통합', '요약', '집계', '재고']) {
       final top = tester.getRect(find.widgetWithText(ChoiceChip, mode)).top;
-      expect(top, closeTo(firstTop, 0.5), reason: 'Expected $mode chip to remain on the first row at 360px width');
+      expect(top, closeTo(firstRect.top, 0.5), reason: 'Expected $mode chip to remain on the first row at 360px width');
     }
+
+    tester.view.physicalSize = const Size(290, 780);
+    await tester.pumpAndSettle();
+    final wrappedFirstTop = tester.getRect(find.widgetWithText(ChoiceChip, '입고')).top;
+    final wrappedLastTop = tester.getRect(find.widgetWithText(ChoiceChip, '재고')).top;
+    expect(wrappedLastTop, greaterThan(wrappedFirstTop + 10));
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
   });
