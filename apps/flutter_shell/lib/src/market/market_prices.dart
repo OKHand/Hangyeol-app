@@ -893,49 +893,49 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     final primaryPrice=usePerKg&&avgPerKg!=null?'${marketMoney(avgPerKg)}원/kg':avgPkg!=null?'${marketMoney(avgPkg)}원':avgPerKg!=null?'${marketMoney(avgPerKg)}원/kg':'-';
     return Container(
       key:const Key('market-dashboard-card'),
-      margin:const EdgeInsets.symmetric(vertical:8),
-      padding:const EdgeInsets.all(14),
-      decoration:BoxDecoration(color:const Color(0xfff4f6f8),borderRadius:BorderRadius.circular(18)),
+      margin:const EdgeInsets.symmetric(vertical:6),
+      padding:const EdgeInsets.all(10),
+      decoration:BoxDecoration(color:const Color(0xfff4f6f8),borderRadius:BorderRadius.circular(16)),
       child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-        if(_loadingSummary)const Padding(padding:EdgeInsets.only(bottom:8),child:LinearProgressIndicator(minHeight:2)),
+        if(_loadingSummary)const Padding(padding:EdgeInsets.only(bottom:6),child:LinearProgressIndicator(minHeight:2)),
         Row(children:[
           Expanded(child:Container(
             key:const Key('market-avg-price-card'),
-            padding:const EdgeInsets.symmetric(vertical:14,horizontal:12),
-            decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(14)),
+            padding:const EdgeInsets.symmetric(vertical:10,horizontal:10),
+            decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(12)),
             child:Column(children:[
-              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.monetization_on,size:18,color:Color(0xfff59e0b)),SizedBox(width:4),Text('평균가격',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600))]),
-              const SizedBox(height:6),
-              Text(_loadingSummary&&primaryPrice=='-'?'불러오는 중…':primaryPrice,style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.monetization_on,size:17,color:Color(0xfff59e0b)),SizedBox(width:4),Text('평균가격',style:TextStyle(fontSize:12,fontWeight:FontWeight.w600))]),
+              const SizedBox(height:4),
+              Text(_loadingSummary&&primaryPrice=='-'?'불러오는 중…':primaryPrice,style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
             ]),
           )),
-          const SizedBox(width:10),
+          const SizedBox(width:8),
           Expanded(child:Container(
             key:const Key('market-total-volume-card'),
-            padding:const EdgeInsets.symmetric(vertical:14,horizontal:12),
-            decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(14)),
+            padding:const EdgeInsets.symmetric(vertical:10,horizontal:10),
+            decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(12)),
             child:Column(children:[
-              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.local_shipping,size:18,color:Color(0xff3b82f6)),SizedBox(width:4),Text('거래량',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600))]),
-              const SizedBox(height:6),
-              Text(_loadingSummary&&totalKg==0&&totalQty==0?'불러오는 중…':(totalKg>0?'${marketMoney(totalKg)}kg':totalQty>0?'${marketMoney(totalQty)}건':'0kg'),style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+              const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.local_shipping,size:17,color:Color(0xff3b82f6)),SizedBox(width:4),Text('거래량',style:TextStyle(fontSize:12,fontWeight:FontWeight.w600))]),
+              const SizedBox(height:4),
+              Text(_loadingSummary&&totalKg==0&&totalQty==0?'불러오는 중…':(totalKg>0?'${marketMoney(totalKg)}kg':totalQty>0?'${marketMoney(totalQty)}건':'0kg'),style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
             ]),
           )),
         ]),
         if(groups.isNotEmpty)...[
-          const SizedBox(height:10),
+          const SizedBox(height:8),
           Material(color:Colors.white,borderRadius:BorderRadius.circular(12),child:InkWell(
             key:const Key('market-grade-breakdown'),
             borderRadius:BorderRadius.circular(12),
             onTap:()=>setState(()=>_showGrades=!_showGrades),
-            child:Padding(padding:const EdgeInsets.symmetric(vertical:10,horizontal:14),child:Column(children:[
+            child:Padding(padding:const EdgeInsets.symmetric(vertical:8,horizontal:12),child:Column(children:[
               Row(mainAxisAlignment:MainAxisAlignment.center,children:[
                 Text(summary['settlementSource']!=null?'등급별 평균가':'규격·등급별 평균가',style:const TextStyle(fontSize:13,fontWeight:FontWeight.w600)),
                 const SizedBox(width:4),
                 Icon(_showGrades?Icons.expand_less:Icons.chevron_right,size:18),
               ]),
               if(_showGrades)...[
-                const Divider(height:16),
-                for(final g in groups)Padding(padding:const EdgeInsets.symmetric(vertical:3),child:Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
+                const Divider(height:12),
+                for(final g in groups)Padding(padding:const EdgeInsets.symmetric(vertical:2),child:Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
                   Text('${g['label']}',style:const TextStyle(fontSize:12,fontWeight:FontWeight.w600)),
                   Text('${g['avgPricePerKg']!=null?'${marketMoney(g['avgPricePerKg'] as num)}원/kg · ':''}${g['avgPrice']!=null?'평균 ${marketMoney(g['avgPrice'] as num)}원':''}',style:const TextStyle(fontSize:12)),
                 ])),
@@ -944,21 +944,21 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
           )),
         ],
         if(chartPoints.isNotEmpty||_loadingTrend)...[
-          const SizedBox(height:12),
+          const SizedBox(height:8),
           Container(
             key:const Key('market-trend-chart'),
-            padding:const EdgeInsets.fromLTRB(14,14,14,12),
-            decoration:BoxDecoration(color:const Color(0xffe6f7f0),borderRadius:BorderRadius.circular(16)),
+            padding:const EdgeInsets.fromLTRB(10,10,10,8),
+            decoration:BoxDecoration(color:const Color(0xffe6f7f0),borderRadius:BorderRadius.circular(14)),
             child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-              Text('일별 시세 추이 (최근 ${prefs.trendDays}일)',textAlign:TextAlign.center,style:const TextStyle(fontSize:15,fontWeight:FontWeight.bold,color:Color(0xff1b3a2b))),
+              Text('일별 시세 추이 (최근 ${prefs.trendDays}일)',textAlign:TextAlign.center,style:const TextStyle(fontSize:14,fontWeight:FontWeight.bold,color:Color(0xff1b3a2b))),
               Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
                 Text(_loadingTrend?'일별 시세 추이 불러오는 중… ($_trendLoadedBatches/$_totalTrendBatches)':'조회 일수 ${chartPoints.length}일',style:const TextStyle(fontSize:11,color:Color(0xff2b7de9))),
                 Text(usePerKg?'단위 : 원/kg':'단위 : 원',style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
               ]),
               if(_loadingTrend)const Padding(padding:EdgeInsets.only(top:4),child:LinearProgressIndicator(minHeight:2)),
               if(chartPoints.isNotEmpty)...[
-                const SizedBox(height:8),
-                SizedBox(height:170,child:CustomPaint(painter:_MarketTrendPainter(points:chartPoints))),
+                const SizedBox(height:6),
+                SizedBox(height:150,child:CustomPaint(painter:_MarketTrendPainter(points:chartPoints))),
               ],
             ]),
           ),
@@ -996,22 +996,22 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     final maxVal=mPoints.isEmpty?null:mPoints.map((e)=>e.value).reduce(math.max).round();
     return Container(
       key:const Key('market-monthly-trend-chart'),
-      margin:const EdgeInsets.only(top:12),
-      padding:const EdgeInsets.fromLTRB(14,14,14,12),
-      decoration:BoxDecoration(color:const Color(0xffeef4fa),borderRadius:BorderRadius.circular(16)),
+      margin:const EdgeInsets.only(top:8),
+      padding:const EdgeInsets.fromLTRB(10,10,10,8),
+      decoration:BoxDecoration(color:const Color(0xffeef4fa),borderRadius:BorderRadius.circular(14)),
       child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-        Text('월별 시세 추이${mPoints.isNotEmpty?' (최근 ${mPoints.length}개월)':''}',textAlign:TextAlign.center,style:const TextStyle(fontSize:15,fontWeight:FontWeight.bold,color:Color(0xff1e3a4c))),
+        Text('월별 시세 추이${mPoints.isNotEmpty?' (최근 ${mPoints.length}개월)':''}',textAlign:TextAlign.center,style:const TextStyle(fontSize:14,fontWeight:FontWeight.bold,color:Color(0xff1e3a4c))),
         Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
           Flexible(child:Text(subTitle,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:11,color:Color(0xff1e6247)))),
           const SizedBox(width:8),
           Text('단위 : $unitLabel',style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
         ]),
-        if(_loadingMonthly)const Padding(padding:EdgeInsets.only(top:6),child:LinearProgressIndicator(minHeight:2)),
+        if(_loadingMonthly)const Padding(padding:EdgeInsets.only(top:4),child:LinearProgressIndicator(minHeight:2)),
         if(mPoints.isNotEmpty)...[
-          const SizedBox(height:8),
-          SizedBox(height:170,child:CustomPaint(painter:_MarketTrendPainter(points:mPoints,lineColor:const Color(0xff1e6247),gridColor:const Color(0xffd6e2ec)))),
+          const SizedBox(height:6),
+          SizedBox(height:150,child:CustomPaint(painter:_MarketTrendPainter(points:mPoints,lineColor:const Color(0xff1e6247),gridColor:const Color(0xffd6e2ec)))),
           if(minVal!=null&&maxVal!=null)Padding(
-            padding:const EdgeInsets.only(top:6),
+            padding:const EdgeInsets.only(top:4),
             child:Text('최근 ${mPoints.length}개월 평균 범위: 최저 ${marketMoney(minVal)}$unitLabel · 최고 ${marketMoney(maxVal)}$unitLabel',textAlign:TextAlign.center,style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
           ),
         ],
@@ -1083,39 +1083,37 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         if(widget.client!=null)IconButton(key:const Key('market-open-setup'),tooltip:'시세 설정',onPressed:_loading||_loadingSummary?null:_openSettings,icon:const Icon(Icons.settings_outlined)),
         IconButton(key:const Key('market-refresh'),tooltip:'시세 다시 조회',onPressed:_loading||_loadingSummary?null:()=>_load(forceRefresh:true),icon:const Icon(Icons.refresh)),
       ]),
-      body:SafeArea(child:SingleChildScrollView(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-        Wrap(spacing:8,runSpacing:4,children:[
+      body:SafeArea(child:SingleChildScrollView(padding:const EdgeInsets.fromLTRB(10,8,10,12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+        Wrap(spacing:6,runSpacing:2,children:[
           for(final entry in marketProducts.entries)
             if(visibleChips.contains(entry.key)||_product==entry.key)
-              ChoiceChip(key:Key('market-product-${entry.key}'),label:Text(entry.value),selected:_product==entry.key,onSelected:_loading?null:(_)=>_selectPreset(entry.key)),
-          if(!marketProducts.containsKey(_product)&&_customLabel.isNotEmpty)ChoiceChip(key:const Key('market-product-custom'),label:Text(_customLabel),selected:true,onSelected:null),
+              ChoiceChip(key:Key('market-product-${entry.key}'),visualDensity:VisualDensity.compact,label:Text(entry.value),selected:_product==entry.key,onSelected:_loading?null:(_)=>_selectPreset(entry.key)),
+          if(!marketProducts.containsKey(_product)&&_customLabel.isNotEmpty)ChoiceChip(key:const Key('market-product-custom'),visualDensity:VisualDensity.compact,label:Text(_customLabel),selected:true,onSelected:null),
         ]),
         _catalogueSection(),
-        Row(children:[const Icon(Icons.calendar_month_outlined,size:18),const SizedBox(width:6),Expanded(child:Text('거래일 ${_sample?marketSampleDate:marketDay(_date)}')),TextButton(onPressed:_sample||_loading?null:_chooseDate,child:const Text('날짜 변경'))]),
+        Row(children:[const Icon(Icons.calendar_month_outlined,size:17),const SizedBox(width:6),Expanded(child:Text('거래일 ${_sample?marketSampleDate:marketDay(_date)}',style:const TextStyle(fontSize:13))),TextButton(style:TextButton.styleFrom(visualDensity:VisualDensity.compact),onPressed:_sample||_loading?null:_chooseDate,child:const Text('날짜 변경'))]),
         if(_loading)const LinearProgressIndicator(),
-        if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:12),child:Text(_error,key:const Key('market-error'),style:TextStyle(color:Theme.of(context).colorScheme.error))),
+        if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:8),child:Text(_error,key:const Key('market-error'),style:TextStyle(color:Theme.of(context).colorScheme.error))),
         if(_data!=null)...[
           DropdownButtonFormField<String>(key:ValueKey('market-filter-$_product-$_sample'),initialValue:_market,isExpanded:true,decoration:const InputDecoration(labelText:'시장 선택'),items:[const DropdownMenuItem(value:'',child:Text('조회된 시장 전체')),for(final name in markets)DropdownMenuItem(value:name,child:Text(name))],onChanged:(v)=>setState(()=>_market=v??'')),
           _dashboardSection(visible),
-          Padding(padding:const EdgeInsets.symmetric(vertical:10),child:Text('${_data!['source']}\n${stamp==null?(_loadingSummary?'조회 시각 확인 중…':'조회 시각 미상'):'조회 시각 ${marketDay(stamp)} ${stamp.hour.toString().padLeft(2,'0')}:${stamp.minute.toString().padLeft(2,'0')}'}${_fromCache?' · 저장본 표시 (매일 08시 갱신)':(_data!['cached']==true?' · 서버 캐시':'')}',style:const TextStyle(fontSize:12))),
-          if(_prefetching)Padding(padding:const EdgeInsets.only(bottom:6),child:Text('다른 품목 시세 미리 불러오는 중… ($_prefetchDone/$_prefetchTotal)',style:const TextStyle(fontSize:11,color:Color(0xff1e6247)))),
-          if(!_loadingMoreQuotes&&_data!['truncated']==true)const Text('일부 거래만 조회했습니다. 전체 거래의 평균이나 전체 시장 가격으로 해석하지 마세요.'),
-          Text('표시 ${visible.length}건 · ${_data!['priceBasis']=='unconfirmed'?'제공가격의 단가 기준 확인이 필요합니다.':'가격은 해당 거래의 규격당 낙찰가입니다.'}',style:const TextStyle(fontSize:12)),
+          Padding(padding:const EdgeInsets.symmetric(vertical:6),child:Text('${_data!['source']}\n${stamp==null?(_loadingSummary?'조회 시각 확인 중…':'조회 시각 미상'):'조회 시각 ${marketDay(stamp)} ${stamp.hour.toString().padLeft(2,'0')}:${stamp.minute.toString().padLeft(2,'0')}'}${_fromCache?' · 저장본 표시 (매일 08시 갱신)':(_data!['cached']==true?' · 서버 캐시':'')}',style:const TextStyle(fontSize:12,color:Color(0xff52685c)))),
+          if(_prefetching)Padding(padding:const EdgeInsets.only(bottom:4),child:Text('다른 품목 시세 미리 불러오는 중… ($_prefetchDone/$_prefetchTotal)',style:const TextStyle(fontSize:11,color:Color(0xff1e6247)))),
+          Text('표시 ${visible.length}건',style:const TextStyle(fontSize:12,color:Color(0xff52685c))),
           if(_loadingMoreQuotes)...[
             Padding(padding:const EdgeInsets.symmetric(vertical:4),child:Text('개별 경락가 항목을 차례로 불러오는 중…${visible.isNotEmpty?' (${visible.length}건)':''}',style:const TextStyle(fontSize:12,color:Color(0xff2b7de9)))),
             const LinearProgressIndicator(minHeight:2),
           ],
-          if(visible.isEmpty&&!_loadingMoreQuotes)Padding(padding:const EdgeInsets.all(20),child:Text(_data!['truncated']==true?'조회한 일부 거래에서 해당 품목을 찾지 못했습니다. 전체 거래에 자료가 없다는 의미는 아닙니다.':'해당 거래일의 자료가 없습니다. 휴장·수집 지연일 수 있으니 다른 날짜도 확인하세요.')),
-          for(final row in visible)Card(key:ValueKey('market-quote-${row['id']}'),margin:const EdgeInsets.symmetric(vertical:4),child:Padding(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-            Text(row['market'] as String,style:const TextStyle(fontWeight:FontWeight.bold)),
-            Text('${row['productName']} · ${row['grade']} · ${row['package']}',style:const TextStyle(fontSize:13)),
-            Text('${marketMoney(row['price'] as num)}원${row['priceBasis']=='unconfirmed'?' (제공가격)':' / ${row['package']}'}',style:const TextStyle(fontSize:22,fontWeight:FontWeight.bold)),
+          if(visible.isEmpty&&!_loadingMoreQuotes)Padding(padding:const EdgeInsets.all(16),child:Text(_data!['truncated']==true?'조회한 일부 거래에서 해당 품목을 찾지 못했습니다. 전체 거래에 자료가 없다는 의미는 아닙니다.':'해당 거래일의 자료가 없습니다. 휴장·수집 지연일 수 있으니 다른 날짜도 확인하세요.')),
+          for(final row in visible)Card(key:ValueKey('market-quote-${row['id']}'),margin:const EdgeInsets.symmetric(vertical:3),child:Padding(padding:const EdgeInsets.symmetric(horizontal:12,vertical:9),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+            Text(row['market'] as String,style:const TextStyle(fontWeight:FontWeight.bold,fontSize:13)),
+            Text('${row['productName']} · ${row['grade']} · ${row['package']}',style:const TextStyle(fontSize:12,color:Color(0xff52685c))),
+            Text('${marketMoney(row['price'] as num)}원${row['priceBasis']=='unconfirmed'?' (제공가격)':' / ${row['package']}'}',style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
             if(row['pricePerKg'] is num)Text('kg당 ${marketMoney(row['pricePerKg'] as num)}원',style:const TextStyle(fontSize:12)),
             if(row['company'] is String)Text('${row['company']} · ${row['auctionTime']??''}',style:const TextStyle(fontSize:12)),
             Text('거래 수량 ${row['quantity']??'미제공'}${row['quantityUnitConfirmed']==false?' (단위 미확인)':''} · ${row['date']}',style:const TextStyle(fontSize:12)),
           ]))),
         ],
-        const Padding(padding:EdgeInsets.symmetric(vertical:12),child:Text('같은 품목이라도 등급·포장 중량이 다르면 가격이 다릅니다. 개별 거래를 단순 평균해 대표 시세로 표시하지 않습니다.',style:TextStyle(fontSize:12))),
       ]))),
     );
   }

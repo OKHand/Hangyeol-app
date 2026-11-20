@@ -241,19 +241,17 @@ class _ErpReportViewState extends State<ErpReportView> {
             ]),
           ],
         ))),
-      Container(width: double.infinity, margin: const EdgeInsets.symmetric(horizontal: 14),
-        padding: const EdgeInsets.all(10),
+      Container(width: double.infinity, margin: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(color: const Color(0xffe7efe9), borderRadius: BorderRadius.circular(8)),
         child: Text(widget.condition, style: const TextStyle(fontSize: 12))),
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [
-        Expanded(child: Text('결과 ${widget.report.rows.where((r) => r.first != '[ 총 합 계 ]').length}건 · ${widget.online ? "회사 자료" : "샘플 자료"}',
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Row(children: [
+        Expanded(child: Text('결과 ${widget.report.rows.where((r) => r.first != '[ 총 합 계 ]').length}건${widget.online ? "" : " · 샘플 자료"}',
           style: const TextStyle(fontSize: 12))),
         TextButton.icon(key: const Key('erp-open-find'), onPressed: widget.report.rows.isEmpty ? null : _openFind,
           icon: const Icon(Icons.search, size: 18), label: const Text('찾기')),
       ])),
-      if (_findOpen) _findBar() else const Padding(padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
-        child: Align(alignment: Alignment.centerLeft,
-          child: Text('좌우로 밀어 전체 열 보기 · 행을 눌러 상세 보기', style: TextStyle(fontSize: 12)))),
+      if (_findOpen) _findBar(),
     ]);
     return CallbackShortcuts(bindings: {
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): _openFind,

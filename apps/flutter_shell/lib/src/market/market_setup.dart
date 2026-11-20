@@ -170,20 +170,20 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
 
   Widget _sectionCard({required IconData icon,required String title,Widget? trailing,required List<Widget> children}){
     return Container(
-      padding:const EdgeInsets.all(16),
+      padding:const EdgeInsets.all(13),
       decoration:BoxDecoration(
         color:Colors.white,
-        borderRadius:BorderRadius.circular(16),
+        borderRadius:BorderRadius.circular(14),
         border:Border.all(color:_cardBorder),
       ),
       child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
         Row(children:[
-          Icon(icon,size:19,color:_primary),
-          const SizedBox(width:8),
-          Expanded(child:Text(title,style:const TextStyle(fontSize:15,fontWeight:FontWeight.w700,color:Color(0xff1b3a2b)))),
+          Icon(icon,size:18,color:_primary),
+          const SizedBox(width:6),
+          Expanded(child:Text(title,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w700,color:Color(0xff1b3a2b)))),
           if(trailing!=null)trailing,
         ]),
-        const SizedBox(height:14),
+        const SizedBox(height:10),
         ...children,
       ]),
     );
@@ -228,12 +228,12 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
             child:ConstrainedBox(
               constraints:const BoxConstraints(maxWidth:680),
               child:SingleChildScrollView(
-                padding:const EdgeInsets.fromLTRB(16,8,16,24),
+                padding:const EdgeInsets.fromLTRB(12,6,12,16),
                 child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-                  if(_busy)const Padding(padding:EdgeInsets.only(bottom:12),child:LinearProgressIndicator(minHeight:2)),
+                  if(_busy)const Padding(padding:EdgeInsets.only(bottom:10),child:LinearProgressIndicator(minHeight:2)),
                   if(_error.isNotEmpty)Container(
-                    margin:const EdgeInsets.only(bottom:12),
-                    padding:const EdgeInsets.all(12),
+                    margin:const EdgeInsets.only(bottom:10),
+                    padding:const EdgeInsets.all(10),
                     decoration:BoxDecoration(color:const Color(0xfffff0f0),borderRadius:BorderRadius.circular(12),border:Border.all(color:Theme.of(context).colorScheme.error.withValues(alpha:0.35))),
                     child:Text(_error,style:TextStyle(fontSize:13,color:Theme.of(context).colorScheme.error)),
                   ),
@@ -259,20 +259,20 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                           onChanged:(v){if(v!=null){setState((){_prefDefaultProduct=v;_prefVisible.add(v);});}},
                         );
                         if(constraints.maxWidth>=480){
-                          return Row(children:[Expanded(child:marketField),const SizedBox(width:12),Expanded(child:productField)]);
+                          return Row(children:[Expanded(child:marketField),const SizedBox(width:10),Expanded(child:productField)]);
                         }
-                        return Column(children:[marketField,const SizedBox(height:12),productField]);
+                        return Column(children:[marketField,const SizedBox(height:10),productField]);
                       }),
                     ],
                   ),
-                  const SizedBox(height:14),
+                  const SizedBox(height:10),
                   _sectionCard(
                     icon:Icons.insights_outlined,
                     title:'화면 및 차트 표시',
                     children:[
                       const Text('일별 시세 추이 기간',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600,color:Color(0xff233329))),
-                      const SizedBox(height:8),
-                      Wrap(spacing:8,runSpacing:8,children:[
+                      const SizedBox(height:6),
+                      Wrap(spacing:6,runSpacing:6,children:[
                         for(final days in const [(7,'최근 1주 (7일)'),(14,'최근 2주 (14일)'),(21,'최근 3주 (21일)')])
                           _styledChoice(
                             chipKey:ValueKey('market-pref-days-${days.$1}'),
@@ -281,10 +281,10 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                             onSelected:()=>setState(()=>_prefTrendDays=days.$1),
                           ),
                       ]),
-                      const SizedBox(height:14),
+                      const SizedBox(height:10),
                       const Text('대표 가격 표시 기준',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600,color:Color(0xff233329))),
-                      const SizedBox(height:8),
-                      Wrap(spacing:8,runSpacing:8,children:[
+                      const SizedBox(height:6),
+                      Wrap(spacing:6,runSpacing:6,children:[
                         _styledChoice(
                           chipKey:const Key('market-pref-unit-kg'),
                           label:'kg당 단가(원/kg) 우선',
@@ -298,7 +298,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                           onSelected:()=>setState(()=>_prefPerKg=false),
                         ),
                       ]),
-                      const Divider(height:24,color:Color(0xffe7eee9)),
+                      const Divider(height:18,color:Color(0xffe7eee9)),
                       SwitchListTile(
                         key:const Key('market-pref-auto-grades'),
                         contentPadding:EdgeInsets.zero,
@@ -308,7 +308,6 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                         value:_prefAutoGrades,
                         onChanged:(v)=>setState(()=>_prefAutoGrades=v),
                       ),
-                      const SizedBox(height:4),
                       SwitchListTile(
                         key:const Key('market-pref-monthly-trend'),
                         contentPadding:EdgeInsets.zero,
@@ -320,7 +319,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height:14),
+                  const SizedBox(height:10),
                   _sectionCard(
                     icon:Icons.eco_outlined,
                     title:'상단 빠른 선택 품목',
@@ -339,8 +338,8 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                     ]),
                     children:[
                       const Text('시세 화면 상단 탭에 바로 표시할 작물을 선택하세요. (최소 1개)',style:TextStyle(fontSize:12,color:_mutedText)),
-                      const SizedBox(height:10),
-                      Wrap(spacing:8,runSpacing:8,children:[
+                      const SizedBox(height:8),
+                      Wrap(spacing:6,runSpacing:6,children:[
                         for(final e in marketOrderedProducts.entries)
                           FilterChip(
                             key:ValueKey('market-pref-crop-${e.key}'),
@@ -361,7 +360,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                     ],
                   ),
                   if(widget.canManage)...[
-                    const SizedBox(height:14),
+                    const SizedBox(height:10),
                     _sectionCard(
                       icon:Icons.schedule_outlined,
                       title:'관리자 · 서버 사전 준비',

@@ -9,6 +9,15 @@
 
 ---
 
+## 2026-11-20 · Antigravity · ERP·농산물 시세 안내 문구 정리, 설정 화면 UI 개편 및 전반적 여백 축소
+
+- 요청: 기능 변경 없이 ERP·농산물 시세 화면의 불필요한 설명·면책 문구를 제거하고, 설정 화면 UI를 보기 좋게 개편하며, 앱 전반의 간격·패딩을 약간 좁혀 시인성 개선.
+- 변경:
+  - `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`, `apps/flutter_shell/lib/src/demo/erp_report_view.dart`: ERP 입력·재고·결과 헤더의 비핵심 안내 문구(`회사 원장 · 인증된 직원만 조회`, 쉼표/부분 검색 안내, 재고조사 기초값 설명, 열/행 조작 안내, 온라인 결과 `· 회사 자료` 문구)를 제거하고 카드·필드·버튼·헤더 간격을 축소.
+  - `apps/flutter_shell/lib/src/market/market_prices.dart`: 시세 화면 상·하단 비핵심 안내 문구(`일부 거래만 조회했습니다...`, 단가 기준/유통·가격 일반 안내 등)를 제거하고(개별 시세의 `(제공가격)`, `등급 미제공`, `(단위 미확인)` 및 빈 목록 안내 유지), 대시보드·차트·시세 카드 여백을 축소.
+  - `apps/flutter_shell/lib/src/serverless/app.dart`: 기존 기능·위젯 키·권한 분기는 유지한 채 설정 화면을 계정 요약 카드(아바타·권한 배지)와 그룹형 라운드 메뉴 카드(`앱 · 기기 관리`, `관리자 설정`, 아이콘 배지)로 재구성하고, 비관리자 안내 문구 제거 및 상단 계정 바·하단 내비게이션 바(`height: 64`) 간격 정돈.
+  - `apps/flutter_shell/lib/src/serverless/industry_news.dart`, `apps/flutter_shell/lib/src/market/market_setup.dart`: 헤더·검색·카드 패딩 및 요소 간 여백 축소(`dart analyze` 무결점 · Flutter 전체 113건 통과).
+
 ## 2026-11-20 · Antigravity · 농산물 시세 설정 화면 카드형 UI 개편 및 초기 개발용 토마토 분류 더미 제거
 
 - 요청: 기능 변경 없이 농산물 시세 설정 화면을 보기 좋게 정돈하고, 하단 초기 개발 과정의 찰토마토·대추방울토마토 분류 연결 더미 UI 제거.

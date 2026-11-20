@@ -198,10 +198,10 @@ class _IndustryNewsPageState extends State<IndustryNewsPage> {
 
     return Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
       Padding(
-        padding:const EdgeInsets.fromLTRB(12,10,12,4),
+        padding:const EdgeInsets.fromLTRB(12,8,12,2),
         child:Row(children:[
           Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-            const Text('종자·농업 업계 뉴스',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
+            const Text('종자·농업 업계 뉴스',style:TextStyle(fontSize:17,fontWeight:FontWeight.bold)),
             if(totalSources>0)Text('활성 매체 $okSources/$totalSources곳 · 매일 오전 7시 갱신 · ${_cached?'저장본 표시':'최신 조회'}${_fetchedAt.isNotEmpty?' (${_formatKst(_fetchedAt)})':''}',style:const TextStyle(fontSize:12,color:Color(0xff52685c))),
           ])),
           IconButton(key:const Key('news-refresh'),tooltip:'뉴스 새로고침',onPressed:_busy?null:()=>_load(refresh:true),icon:const Icon(Icons.refresh)),
@@ -222,7 +222,7 @@ class _IndustryNewsPageState extends State<IndustryNewsPage> {
           ),
         ),
       ),
-      const SizedBox(height:8),
+      const SizedBox(height:6),
       SingleChildScrollView(
         scrollDirection:Axis.horizontal,
         padding:const EdgeInsets.symmetric(horizontal:12),
@@ -244,7 +244,7 @@ class _IndustryNewsPageState extends State<IndustryNewsPage> {
         child:visible.isEmpty&&!_busy
           ?Center(child:Padding(padding:const EdgeInsets.all(24),child:Text(_articles.isEmpty?'수집된 업계 뉴스가 아직 없습니다.\n관리대장 시트에서 수집을 실행하면 여기에 표시됩니다.':'선택한 조건에 맞는 기사가 없습니다.',textAlign:TextAlign.center)))
           :ListView.builder(
-            padding:const EdgeInsets.fromLTRB(12,6,12,16),
+            padding:const EdgeInsets.fromLTRB(12,4,12,12),
             itemCount:visible.length,
             itemBuilder:(context,index){
               final a=visible[index];
@@ -257,8 +257,8 @@ class _IndustryNewsPageState extends State<IndustryNewsPage> {
               final timeLabel=_formatKst('${a['publishedAt']??a['scrapedAt']??''}');
               return Card(
                 key:ValueKey('news-card-$id'),
-                margin:const EdgeInsets.symmetric(vertical:6),
-                child:Padding(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+                margin:const EdgeInsets.symmetric(vertical:4),
+                child:Padding(padding:const EdgeInsets.all(10),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
                   Wrap(spacing:6,runSpacing:4,crossAxisAlignment:WrapCrossAlignment.center,children:[
                     Container(
                       padding:const EdgeInsets.symmetric(horizontal:8,vertical:3),
@@ -305,7 +305,7 @@ class _IndustryNewsPageState extends State<IndustryNewsPage> {
                       ),
                     ),
                   ],
-                  const Divider(height:18),
+                  const Divider(height:12),
                   Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
                     TextButton.icon(
                       key:ValueKey('news-irrelevant-$id'),
