@@ -18,6 +18,9 @@
   - `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`: 6개 모드 칩 `Wrap`을 `SizedBox(width: double.infinity, child: Wrap(alignment: WrapAlignment.spaceBetween, spacing: 4, runSpacing: 6, ...))`로 감싸 좌우 양끝 정렬과 화면 축소 시 자동 줄바꿈을 동시에 지원.
   - `apps/flutter_shell/lib/src/serverless/app.dart`: 별도 하단 배너로 분리되어 있던 `이메일 · 권한` 줄을 `AppBar.title` 내부 `Column`(`SizedBox(height: 1)`)으로 통합해 `한결씨드 온라인` 바로 아래에 밀착 배치하고, 우측 `새로고침`·`로그아웃` 아이콘 버튼에 상단 오프셋(`padding: EdgeInsets.only(top: 16, right: 4)`)을 주어 `이메일 · 권한` 줄과 같은 수평선 높이에 정렬.
   - `apps/flutter_shell/test/erp_interaction_test.dart`, `apps/flutter_shell/test/company_connections_test.dart`: 360px 좌우 균등 정렬(`left: 12`, `right: 348`) 및 290px 축소 화면 자동 줄바꿈, 상단 앱바 타이틀-계정 줄 밀착 및 새로고침 버튼 수직 정렬 테스트 추가 (`dart analyze` 무결점 · Flutter 전체 115건 통과).
+  - 정식 릴리스 게시 및 `updates.publish` 등록 완료 (`tag: online-app-20261120-b83`):
+    - Android `0.2.0 · 빌드 83` (`run 44672890838`, `Hangyeol-android-0.2.0-83.apk`, SHA-256 `df3435b900423530d8333b20849537935442169273a65efcd38edfcb6af79d85`) → https://drive.google.com/file/d/1Cj55GLVnNcrwEKftrFGa3zwCeNgmiAE-/view
+    - Windows `0.2.0 · 빌드 84` (`run 44672899950`, `Hangyeol-windows-0.2.0-84.zip`, SHA-256 `333aebbeb9fe4f1aa7a46e29beb23cee24221dd099de4171a56ac183af8d6eea`) → https://drive.google.com/file/d/1-vvLl0vmx3PsJYqdy8WznY6EOtkWZEYX/view
 
 ## 2026-11-20 · Antigravity · 안드로이드 기본 화면 ERP 6개 모드 칩 한 줄 배치 · 사진 상세 편집 버튼 상시 복원 · 전체 화면 하단 SafeArea 및 여유 공백 적용
 
