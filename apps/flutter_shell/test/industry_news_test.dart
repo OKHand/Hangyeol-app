@@ -183,10 +183,15 @@ void main() {
     expect(newsDailyCycleKey(DateTime.utc(2026, 11, 20, 21, 0)), '2026-11-20');
   });
 
-  Future<void> pumpIoAndSettle(WidgetTester tester) async {
-    for (var i = 0; i < 10; i++) {
+  Future<void> pumpIoAndSettle(WidgetTester tester, {bool Function()? until}) async {
+    for (var i = 0; i < 300; i++) {
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
       await tester.pump();
+      final busy = find.byType(LinearProgressIndicator).evaluate().isNotEmpty;
+      final done = until == null ? i >= 10 : until();
+      if (!busy && done) {
+        break;
+      }
     }
     await tester.pumpAndSettle();
   }
@@ -201,7 +206,13 @@ void main() {
     await tester.runAsync(() async {
       tempDir = await Directory.systemTemp.createTemp('hangyeol-news-cache-');
     });
-    addTearDown(() => tempDir.deleteSync(recursive: true));
+    addTearDown(() {
+      try {
+        if (tempDir.existsSync()) {
+          tempDir.deleteSync(recursive: true);
+        }
+      } catch (_) {}
+    });
     final cacheFile = File('${tempDir.path}${Platform.pathSeparator}news_cache.json');
 
     // Day 1 at 09:00 KST (00:00 UTC) -> fetches once from server and writes disk cache
@@ -228,7 +239,7 @@ void main() {
 
     // Dismiss a2 -> updates both server feedback & local disk cache
     await tester.tap(find.byKey(const ValueKey('news-irrelevant-a2')));
-    await pumpIoAndSettle(tester);
+    await pumpIoAndSettle(tester, until: () => find.textContaining('제외했습니다').evaluate().isNotEmpty);
     expect(find.byKey(const ValueKey('news-card-a2')), findsNothing);
 
     // Reopen page same day at 21:00 KST (12:00 UTC) -> 0 new news.list calls, a2 remains absent, shows 저장본 표시
