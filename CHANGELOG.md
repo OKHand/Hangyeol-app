@@ -21,6 +21,9 @@
   - `apps/flutter_shell/lib/src/serverless/photos.dart`, `apps/flutter_shell/android/app/src/main/kotlin/com/hangyeolseed/hangyeol_platform/MainActivity.kt`, `apps/flutter_shell/test/photo_detail_test.dart`: `PhotoDetailPage` 상단 바 `사진 크게 보기` 왼쪽에 아이콘 전용 다운로드 버튼(`photo-detail-download`)을 추가하고 Windows(저장 위치 대화상자/Downloads)·Android(`MediaStore` `Pictures/HangyeolSeed`) 기기 저장 구현 및 테스트 추가.
   - `apps/flutter_shell/lib/src/serverless/photo_store.dart`, `apps/flutter_shell/test/photo_batch_store_test.dart`: 썸네일 최대 해상도를 `240px` → `120px`(`cacheWidth: 120`)로 줄이고 5비트 RGB 채널 양자화 PNG 압축 및 `64KB` 상한을 적용해 용량 대폭 절감.
   - `apps/flutter_shell/lib/src/ui/hangyeol_theme.dart`, `apps/flutter_shell/lib/src/market/market_prices.dart`, `apps/flutter_shell/lib/src/market/market_setup.dart`: 텍스트·칩·입력창 대비를 높이고(`#141E18` 진한 텍스트, `#E8EFEB` 미선택 칩 배경 + `#C9D7CF` 테두리), Material 3 `ActionChip` 글자색이 흐려지던 문제를 해결해 부류·품종 코드 선택 칩과 대시보드 시인성 개선 (`dart analyze` 무결점 · Flutter 전체 114건 통과).
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`f3e90da`, `tag: online-app-20261120-b77`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 77`, `run 44665368817`)**: `Hangyeol-android-0.2.0-77.apk` (`56,509,802` bytes, SHA-256 `fffa5ad5c50046398f065e89dd423b386f66fbfa96f3c72d1bc63d186bd85448`) → https://drive.google.com/file/d/1h5EAsZSZe48Es1T5c9F6NgtCdvJlIU5R/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 78`, `run 44665372977`)**: `Hangyeol-windows-0.2.0-78.zip` (`13,899,973` bytes, SHA-256 `2a0a3b6bcbe5915b233da2bc8ce9c3ce627e5652265cfc22acd2fc8ce936b159`) → https://drive.google.com/file/d/1Apb_ECDN6z1I7UgbPJtTXtfXV2i-dymK/view
 
 ## 2026-11-20 · Antigravity · 기존 녹색 색감 유지 · 카카오톡 스타일 플랫 UI 전면 개편 (기능 변경 없음)
 
