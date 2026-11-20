@@ -7,10 +7,13 @@ class SetupClient extends AppsScriptPlatformClient {
   SetupClient():super(Uri.parse('https://script.google.com/macros/s/catalogue-test/exec'));
   final calls=<String>[];
   Map<String,dynamic>? saved;
+  Map<String,dynamic>? lastWarm;
+  bool dailyWarmEnabled=false;
   @override
   Future<Map<String,dynamic>> call(String action,{Map<String,dynamic>? params,bool authenticated=true}) async {
     calls.add(action);
-    if(action=='market.settings'){return {'keyConfigured':true,'version':'v1','marketCode':'110001','allowPlainHttp':false};}
+    if(action=='market.settings'){return {'keyConfigured':true,'version':'v1','marketCode':'110001','allowPlainHttp':false,'dailyWarmEnabled':dailyWarmEnabled};}
+    if(action=='market.warm'){lastWarm=params;dailyWarmEnabled=params?['enabled']==true;return {'keyConfigured':true,'version':'v1','marketCode':'110001','allowPlainHttp':false,'dailyWarmEnabled':dailyWarmEnabled};}
     if(action=='market.catalogue'){expect(params!['allowPlainHttp'],isTrue);expect(params.containsKey('date'),isFalse);return {'items':[
       {'id':'98:97:96','receipt':'a'*64,'category':'토마토','variety':'합성 찰토마토','eligible':['chal-tomato']},
       {'id':'98:97:95','receipt':'b'*64,'category':'방울토마토','variety':'합성 대추방울토마토','eligible':['date-cherry-tomato']},
@@ -33,9 +36,14 @@ void main(){
     expect(find.byKey(const Key('market-pref-days-14')),findsOneWidget);
     expect(find.byKey(const Key('market-pref-days-21')),findsOneWidget);
     expect(find.byKey(const Key('market-pref-monthly-trend')),findsOneWidget);
+    expect(find.byKey(const Key('market-daily-warm-switch')),findsOneWidget);
     final discover=find.byKey(const Key('market-discover'));expect(tester.widget<FilledButton>(discover).onPressed,isNull);expect(client.calls,['market.settings']);
+    await tester.ensureVisible(find.byKey(const Key('market-daily-warm-switch')));
+    await tester.tap(find.byKey(const Key('market-daily-warm-switch')));
+    await tester.pumpAndSettle();
+    expect(client.lastWarm?['enabled'],isTrue);
     final httpSwitch=find.byKey(const Key('market-setup-http'));await tester.ensureVisible(httpSwitch);await tester.tap(httpSwitch);await tester.pumpAndSettle();await tester.ensureVisible(discover);await tester.tap(discover);await tester.pumpAndSettle();
-    expect(client.calls,['market.settings','market.catalogue']);expect(find.text('공식 코드에서 품목 찾기'),findsNothing);expect(find.text('다음 코드에서 품목 찾기'),findsOneWidget);expect(find.byKey(const Key('market-setup-date')),findsNothing);
+    expect(client.calls,['market.settings','market.warm','market.catalogue']);expect(find.text('공식 코드에서 품목 찾기'),findsNothing);expect(find.text('다음 코드에서 품목 찾기'),findsOneWidget);expect(find.byKey(const Key('market-setup-date')),findsNothing);
     final chal=find.byKey(const ValueKey('market-choice-chal-tomato-98:97:96')),cherry=find.byKey(const ValueKey('market-choice-date-cherry-tomato-98:97:95'));
     await tester.ensureVisible(chal);await tester.tap(chal);await tester.pumpAndSettle();await tester.ensureVisible(cherry);await tester.tap(cherry);await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('market-choice-chal-tomato-98:97:94')),findsNothing);

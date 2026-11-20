@@ -70,7 +70,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
   final _choices=<String,String>{};
   final _operation=const Uuid().v4();
   Map<String,dynamic>? _settings,_pendingSave;
-  bool _busy=false,_allowHttp=false,_started=false;
+  bool _busy=false,_allowHttp=false,_started=false,_dailyWarm=false;
   int? _next=1;
   int _scanned=0;
   String _error='';
@@ -115,7 +115,11 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
     try{await run();}catch(e){if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){await widget.onAuthError?.call(e);}if(mounted){setState(()=>_error=e is PlatformAuthFailure?e.message:'연결 설정을 확인하지 못했습니다.');}}
     finally{if(mounted){setState(()=>_busy=false);}}
   }
-  Future<void> _load()=>_work(() async {final data=await widget.client.call('market.settings');if(mounted){setState((){_settings=data;_market.text=data['marketCode'] as String? ?? '110001';_allowHttp=data['allowPlainHttp']==true;});}});
+  Future<void> _load()=>_work(() async {final data=await widget.client.call('market.settings');if(mounted){setState((){_settings=data;_market.text=data['marketCode'] as String? ?? '110001';_allowHttp=data['allowPlainHttp']==true;_dailyWarm=data['dailyWarmEnabled']==true;});}});
+  Future<void> _toggleDailyWarm(bool enabled)=>_work(() async {
+    final res=await widget.client.call('market.warm',params:{'enabled':enabled,'marketCode':_prefMarketCode});
+    if(mounted){setState((){_settings=res;_dailyWarm=res['dailyWarmEnabled']==true;});}
+  });
   Future<void> _discover()=>_work(() async {
     final result=await widget.client.call('market.catalogue',params:{'marketCode':_market.text.trim(),'start':_next,'allowPlainHttp':_allowHttp});
     if(!mounted){return;}setState((){for(final item in List<Map<String,dynamic>>.from(result['items'] as List)){_items[item['id'] as String]=item;}_scanned+=result['scanned'] as int;_next=result['nextStart'] as int?;_started=true;});
@@ -211,6 +215,15 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
         const Divider(height:32),
         const Text('서버 API 코드 검증 · 연결 설정 (관리자)',style:TextStyle(fontSize:15,fontWeight:FontWeight.bold)),
         const SizedBox(height:8),
+        SwitchListTile(
+          key:const Key('market-daily-warm-switch'),
+          contentPadding:EdgeInsets.zero,
+          title:const Text('매일 오전 8시 서버 시세 사전 준비'),
+          subtitle:const Text('아침 경매 정산 후 주요 11개 품목 시세를 서버 캐시에 미리 불러옵니다.'),
+          value:_dailyWarm,
+          onChanged:_busy||_settings==null?null:_toggleDailyWarm,
+        ),
+        const SizedBox(height:4),
         Text(_settings?['keyConfigured']==true?'서버에 API 이용키가 등록돼 있습니다.':'서버 이용키 등록을 확인해 주세요.'),
         const Padding(padding:EdgeInsets.symmetric(vertical:8),child:Text('공식 품목 코드 API에서 사용 중인 품종을 찾아 연결합니다. 거래가 없는 날짜에도 품목 코드를 확인할 수 있습니다.',style:TextStyle(fontSize:12))),
         TextField(key:const Key('market-setup-code'),controller:_market,enabled:!_busy&&!_started,keyboardType:TextInputType.number,maxLength:6,decoration:const InputDecoration(labelText:'도매시장 코드',helperText:'110001 = 서울가락 (제공된 샘플 기준)')),

@@ -1,8 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import '../serverless/client.dart';
 import 'market_setup.dart';
+
+/// 매일 오전 8시(KST)를 기준으로 시세 일일 갱신 주기를 식별하는 날짜 키(`YYYY-MM-DD`).
+String marketDailyCycleKey(DateTime utcOrLocal) {
+  final shifted = utcOrLocal.toUtc().add(const Duration(hours: 9)).subtract(const Duration(hours: 8));
+  final y = shifted.year.toString().padLeft(4, '0');
+  final m = shifted.month.toString().padLeft(2, '0');
+  final d = shifted.day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
+}
 
 const marketProducts=marketOrderedProducts;
 const marketDefaultMarkets=marketStandardMarkets;
@@ -114,25 +127,42 @@ String marketMoney(num value)=>value.round().toString().replaceAllMapped(RegExp(
 String marketDay(DateTime d)=>'${d.year}-${d.month.toString().padLeft(2,'0')}-${d.day.toString().padLeft(2,'0')}';
 
 class MarketPricesPage extends StatefulWidget {
-  const MarketPricesPage({super.key,this.client,this.onAuthError,this.canManage=false});
+  const MarketPricesPage({
+    super.key,
+    this.client,
+    this.onAuthError,
+    this.canManage=false,
+    this.email='',
+    this.cacheDirectory,
+    this.now,
+    this.enablePrefetch=true,
+  });
   final bool canManage;
   final AppsScriptPlatformClient? client;
   final Future<void> Function(Object)? onAuthError;
+  final String email;
+  final Directory? cacheDirectory;
+  final DateTime Function()? now;
+  final bool enablePrefetch;
   @override
   State<MarketPricesPage> createState()=>_MarketPricesPageState();
 }
 class _MarketPricesPageState extends State<MarketPricesPage> {
+  static const _quoteChunkSize=30;
   late String _product,_marketCode;
   String _customLabel='',_market='',_error='',_codeError='',_largeFilter='',_searchQuery='';
   Map<String,String>? _codeParams;
   final _searchController=TextEditingController();
+  final Map<String,Map<String,dynamic>> _memoryCache={};
+  final Set<String> _prefetchedKeys={};
   late List<Map<String,String>> _catalogue;
   late List<Map<String,String>> _markets;
   late bool _sample;
   late DateTime _date;
   Map<String,dynamic>? _data;
-  bool _loading=false,_loadingMoreQuotes=false,_loadingTrend=false,_loadingMonthly=false,_syncingCodes=false,_showGrades=false;
-  int _generation=0,_trendLoadedBatches=0,_totalTrendBatches=3;
+  bool _loading=false,_loadingSummary=false,_loadingMoreQuotes=false,_loadingTrend=false,_loadingMonthly=false,_syncingCodes=false,_showGrades=false,_fromCache=false,_supportsStagedLoading=false,_prefetching=false,_dirResolved=false;
+  Directory? _resolvedDir;
+  int _generation=0,_trendLoadedBatches=0,_totalTrendBatches=3,_prefetchDone=0,_prefetchTotal=0,_prefetchToken=0,_loadedTrendDays=0,_writesSincePrune=0;
   int? _nextCodeStart=1;
   @override
   void initState(){
@@ -144,36 +174,389 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     _catalogue=[for(final r in marketDefaultItems){'id':'${r[0]}:${r[2]}:${r[4]}','large':r[0],'largeName':r[1],'mid':r[2],'midName':r[3],'small':r[4],'goodName':r[5]}];
     _markets=[for(final m in marketDefaultMarkets){'code':m['code']!,'name':m['name']!}];
     _sample=widget.client==null;
-    final kst=DateTime.now().toUtc().add(const Duration(hours:9));
+    final kst=_now().add(const Duration(hours:9));
     _date=DateTime(kst.year,kst.month,kst.day);
     _load();
   }
-  Future<void> _load() async {
-    final generation=++_generation;
-    setState((){_loading=true;_loadingMoreQuotes=false;_loadingTrend=false;_loadingMonthly=false;_trendLoadedBatches=0;_error='';_data=null;_market='';});
+  DateTime _now()=>(widget.now??DateTime.now)().toUtc();
+  String _cacheKey(String product,String dateStr)=>'$_marketCode:$product:$dateStr';
+  String _fileNameFor(String key)=>'${sha256.convert(utf8.encode(key))}.json';
+
+  Future<Directory?> _resolveCacheDir() async {
+    if(_dirResolved){return _resolvedDir;}
+    if(widget.cacheDirectory!=null){
+      _resolvedDir=widget.cacheDirectory;
+      _dirResolved=true;
+      return _resolvedDir;
+    }
+    if(widget.email.isEmpty){_dirResolved=true;return null;}
     try{
-      final params=<String,dynamic>{
-        'product':_product,
-        'date':marketDay(_date),
-        'includeTrend':true,
-        'progressive':true,
-        'page':1,
-        if(_marketCode!='110001')'marketCode':_marketCode,
-        if(_codeParams!=null)..._codeParams!,
-      };
-      final result=_sample?marketSample(_product,label:_customLabel.isEmpty?null:_customLabel):await widget.client!.call('market.prices',params:params);
-      if(!mounted||generation!=_generation){return;}
-      if(result['sample']!=_sample||result['product']!=_product||result['date']!=(_sample?marketSampleDate:marketDay(_date))||result['quotes'] is! List){throw PlatformAuthFailure('MARKET_RESPONSE_INVALID','조회 조건과 응답이 일치하지 않습니다.');}
-      setState((){_data=Map<String,dynamic>.from(result);_loading=false;});
-      if(!_sample&&widget.client!=null){
-        unawaited(_loadProgressive(generation,Map<String,dynamic>.from(result)));
-      }
-    }catch(e){
-      if(!mounted||generation!=_generation){return;}
-      if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){await widget.onAuthError?.call(e);}
-      if(mounted&&generation==_generation){setState(()=>_error=e is PlatformAuthFailure?e.message:'시세를 불러오지 못했습니다. 다시 확인해 주세요.');}
-    }finally{if(mounted&&generation==_generation&&_loading){setState(()=>_loading=false);}}
+      final docs=await getApplicationDocumentsDirectory().timeout(const Duration(seconds:1));
+      final keyHash=sha256.convert(utf8.encode('${widget.client?.storageKey??'offline'}:${widget.email}')).toString();
+      _resolvedDir=Directory('${docs.path}${Platform.pathSeparator}hangyeol_market${Platform.pathSeparator}$keyHash');
+    }catch(_){_resolvedDir=null;}
+    _dirResolved=true;
+    return _resolvedDir;
   }
+
+  Future<void> _restoreMeta() async {
+    if(_supportsStagedLoading){return;}
+    try{
+      final dir=await _resolveCacheDir();
+      if(dir==null||!dir.existsSync()){return;}
+      final f=File('${dir.path}${Platform.pathSeparator}_meta.json');
+      if(!f.existsSync()){return;}
+      final decoded=jsonDecode(f.readAsStringSync());
+      if(decoded is Map&&decoded['stagedSupported']==true&&mounted){_supportsStagedLoading=true;}
+    }catch(_){}
+  }
+
+  Future<void> _persistMeta() async {
+    try{
+      final dir=await _resolveCacheDir();
+      if(dir==null){return;}
+      if(!dir.existsSync()){dir.createSync(recursive:true);}
+      final f=File('${dir.path}${Platform.pathSeparator}_meta.json');
+      f.writeAsStringSync(jsonEncode({'stagedSupported':true}),flush:true);
+    }catch(_){}
+  }
+
+  Future<Map<String,dynamic>?> _readDiskCache(String cacheKey) async {
+    try{
+      final dir=await _resolveCacheDir();
+      if(dir==null||!dir.existsSync()){return null;}
+      final f=File('${dir.path}${Platform.pathSeparator}${_fileNameFor(cacheKey)}');
+      if(!f.existsSync()){return null;}
+      final decoded=jsonDecode(f.readAsStringSync());
+      return decoded is Map<String,dynamic>?decoded:Map<String,dynamic>.from(decoded as Map);
+    }catch(_){return null;}
+  }
+
+  Future<void> _writeDiskCache(String cacheKey,Map<String,dynamic> entry) async {
+    try{
+      final dir=await _resolveCacheDir();
+      if(dir==null){return;}
+      if(!dir.existsSync()){dir.createSync(recursive:true);}
+      final f=File('${dir.path}${Platform.pathSeparator}${_fileNameFor(cacheKey)}');
+      f.writeAsStringSync(jsonEncode(entry),flush:true);
+      _writesSincePrune++;
+      if(_writesSincePrune<20){return;}
+      _writesSincePrune=0;
+      final files=<({File file,DateTime modified})>[];
+      for(final ent in dir.listSync(followLinks:false)){
+        if(ent is File&&ent.path.endsWith('.json')&&!ent.path.endsWith('${Platform.pathSeparator}_meta.json')){
+          files.add((file:ent,modified:ent.statSync().modified));
+        }
+      }
+      if(files.length>120){
+        files.sort((a,b)=>a.modified.compareTo(b.modified));
+        for(final old in files.take(files.length-120)){
+          try{old.file.deleteSync();}catch(_){}
+        }
+      }
+    }catch(_){}
+  }
+
+  bool _isEntryFresh(Map<String,dynamic>? entry,String product,String dateStr,String currentCycle,MarketPreferences prefs){
+    if(entry==null||entry['complete']!=true||entry['data'] is! Map){return false;}
+    final data=entry['data'] as Map;
+    if(data['product']!=product||data['date']!=dateStr){return false;}
+    if(((entry['trendDays'] as num?)?.toInt()??0)<prefs.trendDays){return false;}
+    if(prefs.showMonthlyTrend&&data['monthlyTrend']==null){return false;}
+    final kstNow=_now().add(const Duration(hours:9));
+    final todayKst=marketDay(DateTime(kstNow.year,kstNow.month,kstNow.day));
+    if(dateStr.compareTo(todayKst)<0){return true;}
+    return entry['cycleKey']==currentCycle;
+  }
+
+  Future<void> _saveCompletedCache({required String product,required String dateStr,required String cycleKey,required MarketPreferences prefs,required Map<String,dynamic> dataSnapshot}) async {
+    final snapshot=Map<String,dynamic>.from(dataSnapshot)
+      ..['summaryOnly']=false
+      ..['quotesPending']=false
+      ..['nextPage']=null
+      ..['trendPending']=false
+      ..['monthlyTrendPending']=false;
+    final entry=<String,dynamic>{
+      'cycleKey':cycleKey,
+      'complete':true,
+      'trendDays':prefs.trendDays,
+      'savedAt':_now().toIso8601String(),
+      'data':snapshot,
+    };
+    final key=_cacheKey(product,dateStr);
+    _memoryCache[key]=entry;
+    await _writeDiskCache(key,entry);
+  }
+
+  Future<void> _load({bool forceRefresh=false}) async {
+    final generation=++_generation;
+    _prefetchToken++;
+    final prefs=MarketPreferences.current;
+    final dateStr=_sample?marketSampleDate:marketDay(_date);
+    final currentCycle=marketDailyCycleKey(_now());
+    final cacheKey=_cacheKey(_product,dateStr);
+    if(!_sample&&!forceRefresh){
+      final memEntry=_memoryCache[cacheKey];
+      if(_isEntryFresh(memEntry,_product,dateStr,currentCycle,prefs)){
+        final cachedData=Map<String,dynamic>.from(memEntry!['data'] as Map);
+        setState((){
+          _data=cachedData;
+          _loading=false;
+          _loadingSummary=false;
+          _loadingMoreQuotes=false;
+          _loadingTrend=false;
+          _loadingMonthly=false;
+          _fromCache=true;
+          _prefetching=false;
+          _error='';
+          _market='';
+          _loadedTrendDays=(memEntry['trendDays'] as num?)?.toInt()??prefs.trendDays;
+        });
+        unawaited(_startBackgroundPrefetch(dateStr,currentCycle));
+        return;
+      }
+      setState((){_loading=true;_loadingSummary=false;_loadingMoreQuotes=false;_loadingTrend=false;_loadingMonthly=false;_fromCache=false;_prefetching=false;_trendLoadedBatches=0;_error='';_data=null;_market='';});
+      await _restoreMeta();
+      if(!mounted||generation!=_generation){return;}
+      final diskEntry=await _readDiskCache(cacheKey);
+      if(!mounted||generation!=_generation){return;}
+      if(_isEntryFresh(diskEntry,_product,dateStr,currentCycle,prefs)){
+        final cachedData=Map<String,dynamic>.from(diskEntry!['data'] as Map);
+        _memoryCache[cacheKey]=diskEntry;
+        setState((){
+          _data=cachedData;
+          _loading=false;
+          _loadingSummary=false;
+          _loadingMoreQuotes=false;
+          _loadingTrend=false;
+          _loadingMonthly=false;
+          _fromCache=true;
+          _prefetching=false;
+          _error='';
+          _market='';
+          _loadedTrendDays=(diskEntry['trendDays'] as num?)?.toInt()??prefs.trendDays;
+        });
+        unawaited(_startBackgroundPrefetch(dateStr,currentCycle));
+        return;
+      }
+    }
+
+    if(_sample||!_supportsStagedLoading){
+      setState((){_loading=true;_loadingSummary=false;_loadingMoreQuotes=false;_loadingTrend=false;_loadingMonthly=false;_fromCache=false;_prefetching=false;_trendLoadedBatches=0;_error='';_data=null;_market='';});
+      try{
+        final params=<String,dynamic>{
+          'product':_product,
+          'date':dateStr,
+          'summaryOnly':true,
+          'includeTrend':true,
+          'progressive':true,
+          'page':1,
+          if(_marketCode!='110001')'marketCode':_marketCode,
+          if(_codeParams!=null)..._codeParams!,
+          if(forceRefresh)'refresh':true,
+        };
+        final result=_sample?marketSample(_product,label:_customLabel.isEmpty?null:_customLabel):await widget.client!.call('market.prices',params:params);
+        if(!mounted||generation!=_generation){return;}
+        if(result['sample']!=_sample||result['product']!=_product||result['date']!=dateStr||result['quotes'] is! List){throw PlatformAuthFailure('MARKET_RESPONSE_INVALID','조회 조건과 응답이 일치하지 않습니다.');}
+        if(result['summaryOnly']==true){
+          _supportsStagedLoading=true;
+          unawaited(_persistMeta());
+        }
+        final copy=Map<String,dynamic>.from(result);
+        setState((){_data=copy;_loading=false;});
+        if(!_sample&&widget.client!=null){
+          unawaited(_loadProgressive(generation,copy,dateStr,currentCycle,forceRefresh:forceRefresh));
+        }
+      }catch(e){
+        if(!mounted||generation!=_generation){return;}
+        if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){await widget.onAuthError?.call(e);}
+        if(mounted&&generation==_generation){setState(()=>_error=e is PlatformAuthFailure?e.message:'시세를 불러오지 못했습니다. 다시 확인해 주세요.');}
+      }finally{if(mounted&&generation==_generation&&_loading){setState(()=>_loading=false);}}
+      return;
+    }
+
+    // 지원 확인된 서버: 첫 화면부터 평균 시세(상단) + 일별/월별 추이 차트를 동시 시작하고, 개별 경락가는 평균 시세 뒤 순차 로딩
+    final batches=_buildTrendBatches(prefs.trendDays);
+    final shellData=<String,dynamic>{
+      'product':_product,
+      'productName':_customLabel.isEmpty?(marketProducts[_product]??_product):_customLabel,
+      'date':dateStr,
+      'quotes':<Map<String,dynamic>>[],
+      'trend':<Map<String,dynamic>>[],
+      'summary':<String,dynamic>{},
+      'source':'농식품 공공데이터 포털 경매정보',
+      'fetchedAt':'',
+      'sample':false,
+      'cached':false,
+      'priceBasis':'unconfirmed',
+      'truncated':false,
+    };
+    setState((){
+      _loading=false;
+      _loadingSummary=true;
+      _loadingTrend=true;
+      _loadingMonthly=prefs.showMonthlyTrend;
+      _loadingMoreQuotes=true;
+      _fromCache=false;
+      _prefetching=false;
+      _trendLoadedBatches=0;
+      _totalTrendBatches=batches.length;
+      _error='';
+      _market='';
+      _data=shellData;
+    });
+    await _runParallelStagedLoad(generation,dateStr,currentCycle,batches,prefs,forceRefresh:forceRefresh);
+  }
+
+  Future<void> _runParallelStagedLoad(int generation,String dateStr,String currentCycle,List<List<int>> batches,MarketPreferences prefs,{bool forceRefresh=false}) async {
+    var fatalError=false;
+    Map<String,dynamic>? resolvedMeta;
+    Future<void> fetchSummaryThenQuotes() async {
+      var nextPage=1;
+      try{
+        final sumRes=await widget.client!.call('market.prices',params:{
+          'product':_product,
+          'date':dateStr,
+          'summaryOnly':true,
+          if(_marketCode!='110001')'marketCode':_marketCode,
+          if(_codeParams!=null)..._codeParams!,
+          if(forceRefresh)'refresh':true,
+        });
+        if(!mounted||generation!=_generation||_data==null){return;}
+        if(sumRes['sample']!=false||sumRes['product']!=_product||sumRes['date']!=dateStr||sumRes['quotes'] is! List){
+          throw PlatformAuthFailure('MARKET_RESPONSE_INVALID','조회 조건과 응답이 일치하지 않습니다.');
+        }
+        resolvedMeta=Map<String,dynamic>.from(sumRes);
+        final initialQuotes=List<Map<String,dynamic>>.from(sumRes['quotes'] as List? ?? []);
+        nextPage=sumRes['summaryOnly']==true?((sumRes['nextPage'] as int?)??1):(sumRes['nextPage'] as int? ?? 0);
+        setState((){
+          _loadingSummary=false;
+          _data={
+            ..._data!,
+            'productName':sumRes['productName']??_data!['productName'],
+            'large':sumRes['large'],
+            'mid':sumRes['mid'],
+            'small':sumRes['small'],
+            'summary':sumRes['summary']??_data!['summary'],
+            'source':sumRes['source']??_data!['source'],
+            'fetchedAt':sumRes['fetchedAt']??_data!['fetchedAt'],
+            'priceBasis':sumRes['priceBasis']??_data!['priceBasis'],
+            'cached':sumRes['cached']??_data!['cached'],
+            if(initialQuotes.isNotEmpty)'quotes':initialQuotes,
+            if(nextPage<=0)'truncated':sumRes['truncated']??false,
+          };
+        });
+      }catch(e){
+        fatalError=true;
+        if(!mounted||generation!=_generation){return;}
+        if(e is PlatformAuthFailure&&const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){await widget.onAuthError?.call(e);}
+        if(mounted&&generation==_generation){
+          setState((){
+            _loadingSummary=false;
+            _loadingMoreQuotes=false;
+            _error=e is PlatformAuthFailure?e.message:'시세를 불러오지 못했습니다. 다시 확인해 주세요.';
+          });
+        }
+        return;
+      }
+
+      var curPage=nextPage;
+      while(curPage>0&&mounted&&generation==_generation){
+        final pageToFetch=curPage;
+        curPage=0;
+        try{
+          final res=await widget.client!.call('market.prices',params:{
+            'product':_product,
+            'date':dateStr,
+            'progressive':true,
+            'page':pageToFetch,
+            'chunkSize':_quoteChunkSize,
+            if(_marketCode!='110001')'marketCode':_marketCode,
+            if(_codeParams!=null)..._codeParams!,
+            if(forceRefresh)'refresh':true,
+          });
+          if(!mounted||generation!=_generation||_data==null){return;}
+          final existing=List<Map<String,dynamic>>.from(_data!['quotes'] as List? ?? []);
+          final incoming=List<Map<String,dynamic>>.from(res['quotes'] as List? ?? []);
+          final seen={for(final q in existing)'${q['id']}'};
+          for(final q in incoming){if(seen.add('${q['id']}')){existing.add(q);}}
+          curPage=(res['nextPage'] as int?)??0;
+          setState((){
+            _data={
+              ..._data!,
+              'quotes':existing,
+              'truncated':res['truncated']??_data!['truncated'],
+              if((_data!['fetchedAt'] as String? ?? '').isEmpty)'fetchedAt':res['fetchedAt']??'',
+            };
+          });
+        }catch(_){fatalError=true;break;}
+      }
+      if(mounted&&generation==_generation){setState(()=>_loadingMoreQuotes=false);}
+    }
+
+    Future<void> fetchTrendBatches() async {
+      for(final offsets in batches){
+        if(!mounted||generation!=_generation){return;}
+        final dates=[for(final off in offsets)marketDay(_date.add(Duration(days:off)))];
+        try{
+          final res=await widget.client!.call('market.prices',params:{
+            'product':_product,
+            'date':dateStr,
+            'trendBatch':true,
+            'dates':dates,
+            if(resolvedMeta?['large'] is String)'large':resolvedMeta!['large'],
+            if(resolvedMeta?['mid'] is String)'mid':resolvedMeta!['mid'],
+            if(resolvedMeta?['small'] is String)'small':resolvedMeta!['small'],
+            if(_marketCode!='110001')'marketCode':_marketCode,
+            if(_codeParams!=null)..._codeParams!,
+            if(forceRefresh)'refresh':true,
+          });
+          if(!mounted||generation!=_generation||_data==null){return;}
+          final incoming=List<Map<String,dynamic>>.from(res['points'] as List? ?? []);
+          final current=List<Map<String,dynamic>>.from(_data!['trend'] as List? ?? []);
+          final merged=<String,Map<String,dynamic>>{
+            for(final p in current)if(p['date'] is String)p['date'] as String:p,
+            for(final p in incoming)if(p['date'] is String)p['date'] as String:p,
+          };
+          final sorted=merged.values.toList()..sort((a,b)=>'${a['date']}'.compareTo('${b['date']}'));
+          setState((){
+            _trendLoadedBatches++;
+            _data={..._data!,'trend':sorted};
+          });
+        }catch(_){}
+      }
+      if(mounted&&generation==_generation){setState(()=>_loadingTrend=false);}
+    }
+
+    Future<void> fetchMonthlyTrend() async {
+      if(!prefs.showMonthlyTrend){return;}
+      try{
+        final res=await widget.client!.call('market.prices',params:{
+          'product':_product,
+          'date':dateStr,
+          'monthlyTrend':true,
+          'months':12,
+          if(resolvedMeta?['large'] is String)'large':resolvedMeta!['large'],
+          if(resolvedMeta?['mid'] is String)'mid':resolvedMeta!['mid'],
+          if(resolvedMeta?['small'] is String)'small':resolvedMeta!['small'],
+          if(_marketCode!='110001')'marketCode':_marketCode,
+          if(_codeParams!=null)..._codeParams!,
+          if(forceRefresh)'refresh':true,
+        });
+        if(!mounted||generation!=_generation||_data==null){return;}
+        setState((){_data={..._data!,'monthlyTrend':res};});
+      }catch(_){}
+      if(mounted&&generation==_generation){setState(()=>_loadingMonthly=false);}
+    }
+
+    await Future.wait([fetchSummaryThenQuotes(),fetchTrendBatches(),fetchMonthlyTrend()]);
+    if(!mounted||generation!=_generation||fatalError||_data==null){return;}
+    _loadedTrendDays=prefs.trendDays;
+    await _saveCompletedCache(product:_product,dateStr:dateStr,cycleKey:currentCycle,prefs:prefs,dataSnapshot:_data!);
+    if(!mounted||generation!=_generation){return;}
+    unawaited(_startBackgroundPrefetch(dateStr,currentCycle));
+  }
+
   List<List<int>> _buildTrendBatches(int days){
     final total=days.clamp(7,21);
     final offsets=[for(var d=-1;d>=-(total-1);d--)d];
@@ -184,12 +567,20 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     }
     return batches;
   }
-  Future<void> _loadProgressive(int generation,Map<String,dynamic> firstPage) async {
+  Future<void> _loadProgressive(int generation,Map<String,dynamic> firstPage,String dateStr,String currentCycle,{bool forceRefresh=false}) async {
+    final prefs=MarketPreferences.current;
     final needTrend=firstPage['trendPending']==true;
-    final needMonthly=MarketPreferences.current.showMonthlyTrend&&firstPage['monthlyTrend']==null&&(firstPage['trendPending']==true||firstPage['monthlyTrendPending']==true);
+    final needMonthly=prefs.showMonthlyTrend&&firstPage['monthlyTrend']==null&&(firstPage['trendPending']==true||firstPage['monthlyTrendPending']==true);
     var nextPage=firstPage['nextPage'] as int?;
-    if(!needTrend&&!needMonthly&&nextPage==null){return;}
-    final batches=_buildTrendBatches(MarketPreferences.current.trendDays);
+    if(!needTrend&&!needMonthly&&nextPage==null){
+      if(_supportsStagedLoading){
+        _loadedTrendDays=prefs.trendDays;
+        await _saveCompletedCache(product:_product,dateStr:dateStr,cycleKey:currentCycle,prefs:prefs,dataSnapshot:firstPage);
+        if(mounted&&generation==_generation){unawaited(_startBackgroundPrefetch(dateStr,currentCycle));}
+      }
+      return;
+    }
+    final batches=_buildTrendBatches(prefs.trendDays);
     if(mounted&&generation==_generation){
       setState((){_loadingTrend=needTrend;_loadingMonthly=needMonthly;_totalTrendBatches=batches.length;_loadingMoreQuotes=nextPage!=null;});
     }
@@ -198,7 +589,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
       try{
         final res=await widget.client!.call('market.prices',params:{
           'product':_product,
-          'date':marketDay(_date),
+          'date':dateStr,
           'monthlyTrend':true,
           'months':12,
           if(firstPage['large'] is String)'large':firstPage['large'],
@@ -206,6 +597,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
           if(firstPage['small'] is String)'small':firstPage['small'],
           if(_marketCode!='110001')'marketCode':_marketCode,
           if(_codeParams!=null)..._codeParams!,
+          if(forceRefresh)'refresh':true,
         });
         if(!mounted||generation!=_generation||_data==null){return;}
         setState((){_data={..._data!,'monthlyTrend':res};});
@@ -220,7 +612,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         try{
           final res=await widget.client!.call('market.prices',params:{
             'product':_product,
-            'date':marketDay(_date),
+            'date':dateStr,
             'trendBatch':true,
             'dates':dates,
             if(firstPage['large'] is String)'large':firstPage['large'],
@@ -228,6 +620,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             if(firstPage['small'] is String)'small':firstPage['small'],
             if(_marketCode!='110001')'marketCode':_marketCode,
             if(_codeParams!=null)..._codeParams!,
+            if(forceRefresh)'refresh':true,
           });
           if(!mounted||generation!=_generation||_data==null){return;}
           final incoming=List<Map<String,dynamic>>.from(res['points'] as List? ?? []);
@@ -252,11 +645,13 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         try{
           final res=await widget.client!.call('market.prices',params:{
             'product':_product,
-            'date':marketDay(_date),
+            'date':dateStr,
             'progressive':true,
             'page':pageToFetch,
+            'chunkSize':_quoteChunkSize,
             if(_marketCode!='110001')'marketCode':_marketCode,
             if(_codeParams!=null)..._codeParams!,
+            if(forceRefresh)'refresh':true,
           });
           if(!mounted||generation!=_generation||_data==null){return;}
           final existing=List<Map<String,dynamic>>.from(_data!['quotes'] as List? ?? []);
@@ -272,6 +667,108 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
       if(mounted&&generation==_generation){setState(()=>_loadingMoreQuotes=false);}
     }
     await Future.wait([fetchTrendBatches(),fetchMonthlyTrend(),fetchRemainingQuotePages()]);
+    if(!mounted||generation!=_generation||_data==null){return;}
+    if(_supportsStagedLoading){
+      _loadedTrendDays=prefs.trendDays;
+      await _saveCompletedCache(product:_product,dateStr:dateStr,cycleKey:currentCycle,prefs:prefs,dataSnapshot:_data!);
+      if(mounted&&generation==_generation){unawaited(_startBackgroundPrefetch(dateStr,currentCycle));}
+    }
+  }
+
+  Future<void> _startBackgroundPrefetch(String dateStr,String currentCycle) async {
+    if(_sample||widget.client==null||!widget.enablePrefetch||!_supportsStagedLoading){return;}
+    final dir=await _resolveCacheDir();
+    if(dir==null){return;}
+    final prefs=MarketPreferences.current;
+    final runKey='$_marketCode:$dateStr:$currentCycle:${prefs.trendDays}:${prefs.showMonthlyTrend}:${prefs.visibleProducts.length}';
+    if(_prefetchedKeys.contains(runKey)){return;}
+    final token=_prefetchToken;
+    final orderedVisible=<String>[
+      for(final key in marketOrderedProducts.keys)
+        if(prefs.visibleProducts.contains(key)&&key!=_product)key,
+    ];
+    final pending=<String>[];
+    for(final key in orderedVisible){
+      if(!mounted||token!=_prefetchToken){return;}
+      final cKey=_cacheKey(key,dateStr);
+      final cached=_memoryCache[cKey]??await _readDiskCache(cKey);
+      if(!_isEntryFresh(cached,key,dateStr,currentCycle,prefs)){pending.add(key);}
+    }
+    if(pending.isEmpty){
+      _prefetchedKeys.add(runKey);
+      return;
+    }
+    if(!mounted||token!=_prefetchToken){return;}
+    setState((){_prefetching=true;_prefetchDone=0;_prefetchTotal=pending.length;});
+    final batches=_buildTrendBatches(prefs.trendDays);
+    for(final prod in pending){
+      if(!mounted||token!=_prefetchToken){break;}
+      try{
+        final baseParams=<String,dynamic>{
+          'product':prod,
+          'date':dateStr,
+          if(_marketCode!='110001')'marketCode':_marketCode,
+        };
+        final sumFuture=widget.client!.call('market.prices',params:{...baseParams,'summaryOnly':true});
+        final trendFuture=Future.wait([
+          for(final offsets in batches)
+            widget.client!.call('market.prices',params:{
+              ...baseParams,
+              'trendBatch':true,
+              'dates':[for(final off in offsets)marketDay(_date.add(Duration(days:off)))],
+            }),
+        ]);
+        final monthlyFuture=prefs.showMonthlyTrend
+          ?widget.client!.call('market.prices',params:{...baseParams,'monthlyTrend':true,'months':12})
+          :Future<Map<String,dynamic>?>.value(null);
+
+        final results=await Future.wait<dynamic>([sumFuture,trendFuture,monthlyFuture]);
+        if(!mounted||token!=_prefetchToken){break;}
+        final sumRes=Map<String,dynamic>.from(results[0] as Map);
+        final trendBatches=results[1] as List<Map<String,dynamic>>;
+        final monthlyRes=results[2] as Map<String,dynamic>?;
+        final trendMap=<String,Map<String,dynamic>>{};
+        for(final b in trendBatches){
+          for(final p in List<Map<String,dynamic>>.from(b['points'] as List? ?? [])){
+            if(p['date'] is String){trendMap[p['date'] as String]=p;}
+          }
+        }
+        final sortedTrend=trendMap.values.toList()..sort((a,b)=>'${a['date']}'.compareTo('${b['date']}'));
+
+        final quotes=List<Map<String,dynamic>>.from(sumRes['quotes'] as List? ?? []);
+        final seenIds={for(final q in quotes)'${q['id']}'};
+        var nextPage=sumRes['summaryOnly']==true?((sumRes['nextPage'] as int?)??1):((sumRes['nextPage'] as int?)??0);
+        var truncated=sumRes['truncated']==true;
+        while(nextPage>0&&mounted&&token==_prefetchToken){
+          final pageRes=await widget.client!.call('market.prices',params:{...baseParams,'progressive':true,'page':nextPage,'chunkSize':100});
+          if(!mounted||token!=_prefetchToken){break;}
+          for(final q in List<Map<String,dynamic>>.from(pageRes['quotes'] as List? ?? [])){
+            if(seenIds.add('${q['id']}')){quotes.add(q);}
+          }
+          truncated=pageRes['truncated']==true;
+          nextPage=(pageRes['nextPage'] as int?)??0;
+        }
+        if(!mounted||token!=_prefetchToken){break;}
+        final fullData=<String,dynamic>{
+          ...sumRes,
+          'quotes':quotes,
+          'trend':sortedTrend,
+          if(monthlyRes!=null)'monthlyTrend':monthlyRes,
+          'truncated':truncated,
+        };
+        await _saveCompletedCache(product:prod,dateStr:dateStr,cycleKey:currentCycle,prefs:prefs,dataSnapshot:fullData);
+      }on PlatformAuthFailure catch(e){
+        if(const {'AUTH_REQUIRED','SESSION_EXPIRED','ACCESS_DENIED','IDENTITY_CHANGED'}.contains(e.code)){
+          if(mounted&&token==_prefetchToken){setState(()=>_prefetching=false);}
+          return;
+        }
+      }catch(_){}
+      if(mounted&&token==_prefetchToken){setState(()=>_prefetchDone++);}
+    }
+    if(mounted&&token==_prefetchToken){
+      _prefetchedKeys.add(runKey);
+      setState(()=>_prefetching=false);
+    }
   }
   Future<void> _syncCatalogue() async {
     if(_syncingCodes||widget.client==null){return;}
@@ -316,12 +813,12 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     if(value!=null&&mounted){setState(()=>_date=value);await _load();}
   }
   Future<void> _openSettings() async {
-    if(widget.client==null||_loading){return;}
+    if(widget.client==null||_loading||_loadingSummary){return;}
     final beforeMarket=_marketCode;
     final result=await Navigator.of(context).push<bool>(MaterialPageRoute(builder:(_)=>MarketSetupPage(client:widget.client!,onAuthError:widget.onAuthError,canManage:widget.canManage)));
     if(result==true&&mounted){
       final p=MarketPreferences.current;
-      final needReload=_marketCode!=p.defaultMarketCode||(!p.visibleProducts.contains(_product)&&_customLabel.isEmpty)||(p.showMonthlyTrend&&_data?['monthlyTrend']==null);
+      final needReload=_marketCode!=p.defaultMarketCode||(!p.visibleProducts.contains(_product)&&_customLabel.isEmpty)||(p.showMonthlyTrend&&_data?['monthlyTrend']==null)||(_loadedTrendDays>0&&_loadedTrendDays<p.trendDays);
       setState((){
         _marketCode=p.defaultMarketCode;
         _showGrades=p.autoExpandGrades;
@@ -400,6 +897,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
       padding:const EdgeInsets.all(14),
       decoration:BoxDecoration(color:const Color(0xfff4f6f8),borderRadius:BorderRadius.circular(18)),
       child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+        if(_loadingSummary)const Padding(padding:EdgeInsets.only(bottom:8),child:LinearProgressIndicator(minHeight:2)),
         Row(children:[
           Expanded(child:Container(
             key:const Key('market-avg-price-card'),
@@ -408,7 +906,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             child:Column(children:[
               const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.monetization_on,size:18,color:Color(0xfff59e0b)),SizedBox(width:4),Text('평균가격',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600))]),
               const SizedBox(height:6),
-              Text(primaryPrice,style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+              Text(_loadingSummary&&primaryPrice=='-'?'불러오는 중…':primaryPrice,style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
             ]),
           )),
           const SizedBox(width:10),
@@ -419,7 +917,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             child:Column(children:[
               const Row(mainAxisAlignment:MainAxisAlignment.center,children:[Icon(Icons.local_shipping,size:18,color:Color(0xff3b82f6)),SizedBox(width:4),Text('거래량',style:TextStyle(fontSize:13,fontWeight:FontWeight.w600))]),
               const SizedBox(height:6),
-              Text(totalKg>0?'${marketMoney(totalKg)}kg':totalQty>0?'${marketMoney(totalQty)}건':'0kg',style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
+              Text(_loadingSummary&&totalKg==0&&totalQty==0?'불러오는 중…':(totalKg>0?'${marketMoney(totalKg)}kg':totalQty>0?'${marketMoney(totalQty)}건':'0kg'),style:const TextStyle(fontSize:19,fontWeight:FontWeight.bold)),
             ]),
           )),
         ]),
@@ -445,7 +943,7 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             ])),
           )),
         ],
-        if(chartPoints.isNotEmpty)...[
+        if(chartPoints.isNotEmpty||_loadingTrend)...[
           const SizedBox(height:12),
           Container(
             key:const Key('market-trend-chart'),
@@ -454,12 +952,14 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
             child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
               Text('일별 시세 추이 (최근 ${prefs.trendDays}일)',textAlign:TextAlign.center,style:const TextStyle(fontSize:15,fontWeight:FontWeight.bold,color:Color(0xff1b3a2b))),
               Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
-                Text(_loadingTrend?'시세 추이 불러오는 중… ($_trendLoadedBatches/$_totalTrendBatches)':'조회 일수 ${chartPoints.length}일',style:const TextStyle(fontSize:11,color:Color(0xff2b7de9))),
+                Text(_loadingTrend?'일별 시세 추이 불러오는 중… ($_trendLoadedBatches/$_totalTrendBatches)':'조회 일수 ${chartPoints.length}일',style:const TextStyle(fontSize:11,color:Color(0xff2b7de9))),
                 Text(usePerKg?'단위 : 원/kg':'단위 : 원',style:const TextStyle(fontSize:11,color:Color(0xff52685c))),
               ]),
               if(_loadingTrend)const Padding(padding:EdgeInsets.only(top:4),child:LinearProgressIndicator(minHeight:2)),
-              const SizedBox(height:8),
-              SizedBox(height:170,child:CustomPaint(painter:_MarketTrendPainter(points:chartPoints))),
+              if(chartPoints.isNotEmpty)...[
+                const SizedBox(height:8),
+                SizedBox(height:170,child:CustomPaint(painter:_MarketTrendPainter(points:chartPoints))),
+              ],
             ]),
           ),
         ],
@@ -580,8 +1080,8 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
     final visibleChips=MarketPreferences.current.visibleProducts;
     return Scaffold(
       appBar:AppBar(title:const Text('농산물 경매 시세'),actions:[
-        if(widget.client!=null)IconButton(key:const Key('market-open-setup'),tooltip:'시세 설정',onPressed:_loading?null:_openSettings,icon:const Icon(Icons.settings_outlined)),
-        IconButton(key:const Key('market-refresh'),tooltip:'시세 다시 조회',onPressed:_loading?null:_load,icon:const Icon(Icons.refresh)),
+        if(widget.client!=null)IconButton(key:const Key('market-open-setup'),tooltip:'시세 설정',onPressed:_loading||_loadingSummary?null:_openSettings,icon:const Icon(Icons.settings_outlined)),
+        IconButton(key:const Key('market-refresh'),tooltip:'시세 다시 조회',onPressed:_loading||_loadingSummary?null:()=>_load(forceRefresh:true),icon:const Icon(Icons.refresh)),
       ]),
       body:SafeArea(child:SingleChildScrollView(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
         Wrap(spacing:8,runSpacing:4,children:[
@@ -597,11 +1097,15 @@ class _MarketPricesPageState extends State<MarketPricesPage> {
         if(_data!=null)...[
           DropdownButtonFormField<String>(key:ValueKey('market-filter-$_product-$_sample'),initialValue:_market,isExpanded:true,decoration:const InputDecoration(labelText:'시장 선택'),items:[const DropdownMenuItem(value:'',child:Text('조회된 시장 전체')),for(final name in markets)DropdownMenuItem(value:name,child:Text(name))],onChanged:(v)=>setState(()=>_market=v??'')),
           _dashboardSection(visible),
-          Padding(padding:const EdgeInsets.symmetric(vertical:10),child:Text('${_data!['source']}\n${stamp==null?'조회 시각 미상':'조회 시각 ${marketDay(stamp)} ${stamp.hour.toString().padLeft(2,'0')}:${stamp.minute.toString().padLeft(2,'0')}'}${_data!['cached']==true?' · 캐시 자료':''}',style:const TextStyle(fontSize:12))),
-          if(_data!['truncated']==true)const Text('일부 거래만 조회했습니다. 전체 거래의 평균이나 전체 시장 가격으로 해석하지 마세요.'),
+          Padding(padding:const EdgeInsets.symmetric(vertical:10),child:Text('${_data!['source']}\n${stamp==null?(_loadingSummary?'조회 시각 확인 중…':'조회 시각 미상'):'조회 시각 ${marketDay(stamp)} ${stamp.hour.toString().padLeft(2,'0')}:${stamp.minute.toString().padLeft(2,'0')}'}${_fromCache?' · 저장본 표시 (매일 08시 갱신)':(_data!['cached']==true?' · 서버 캐시':'')}',style:const TextStyle(fontSize:12))),
+          if(_prefetching)Padding(padding:const EdgeInsets.only(bottom:6),child:Text('다른 품목 시세 미리 불러오는 중… ($_prefetchDone/$_prefetchTotal)',style:const TextStyle(fontSize:11,color:Color(0xff1e6247)))),
+          if(!_loadingMoreQuotes&&_data!['truncated']==true)const Text('일부 거래만 조회했습니다. 전체 거래의 평균이나 전체 시장 가격으로 해석하지 마세요.'),
           Text('표시 ${visible.length}건 · ${_data!['priceBasis']=='unconfirmed'?'제공가격의 단가 기준 확인이 필요합니다.':'가격은 해당 거래의 규격당 낙찰가입니다.'}',style:const TextStyle(fontSize:12)),
-          if(_loadingMoreQuotes)const Padding(padding:EdgeInsets.symmetric(vertical:4),child:Text('추가 경매 내역을 이어서 불러오는 중…',style:TextStyle(fontSize:12,color:Color(0xff2b7de9)))),
-          if(visible.isEmpty)Padding(padding:const EdgeInsets.all(20),child:Text(_data!['truncated']==true?'조회한 일부 거래에서 해당 품목을 찾지 못했습니다. 전체 거래에 자료가 없다는 의미는 아닙니다.':'해당 거래일의 자료가 없습니다. 휴장·수집 지연일 수 있으니 다른 날짜도 확인하세요.')),
+          if(_loadingMoreQuotes)...[
+            Padding(padding:const EdgeInsets.symmetric(vertical:4),child:Text('개별 경락가 항목을 차례로 불러오는 중…${visible.isNotEmpty?' (${visible.length}건)':''}',style:const TextStyle(fontSize:12,color:Color(0xff2b7de9)))),
+            const LinearProgressIndicator(minHeight:2),
+          ],
+          if(visible.isEmpty&&!_loadingMoreQuotes)Padding(padding:const EdgeInsets.all(20),child:Text(_data!['truncated']==true?'조회한 일부 거래에서 해당 품목을 찾지 못했습니다. 전체 거래에 자료가 없다는 의미는 아닙니다.':'해당 거래일의 자료가 없습니다. 휴장·수집 지연일 수 있으니 다른 날짜도 확인하세요.')),
           for(final row in visible)Card(key:ValueKey('market-quote-${row['id']}'),margin:const EdgeInsets.symmetric(vertical:4),child:Padding(padding:const EdgeInsets.all(12),child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
             Text(row['market'] as String,style:const TextStyle(fontWeight:FontWeight.bold)),
             Text('${row['productName']} · ${row['grade']} · ${row['package']}',style:const TextStyle(fontSize:13)),
