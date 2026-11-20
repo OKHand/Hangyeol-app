@@ -18,6 +18,9 @@
   - `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`, `apps/flutter_shell/lib/src/demo/erp_report_view.dart`: ERP 조회 화면의 외곽 카드 제거 및 순백 플랫 폼·캡슐형 모드 칩·연회색 조건 배너 적용.
   - `apps/flutter_shell/lib/src/serverless/photos.dart`, `apps/flutter_shell/lib/src/serverless/industry_news.dart`: 작황 사진·업계 뉴스 카드 외곽을 제거하고 가는 구분선 기반 플랫 리스트(`58×58` 둥근 사각 썸네일, 캡슐 배지, 우측 시각 정렬)로 개편.
   - `apps/flutter_shell/lib/src/market/market_prices.dart`, `apps/flutter_shell/lib/src/market/market_setup.dart`: 시세·시세 설정 화면 순백 배경·캡슐형 품목 칩·플랫 요약 패널 및 구분선 경락가 목록 적용 (`dart analyze` 무결점 · Flutter 전체 113건 통과).
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`d81a085`, `tag: online-app-20261120-b75`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 75`, `run 44662154529`)**: `Hangyeol-android-0.2.0-75.apk` (`56,280,426` bytes, SHA-256 `6d1a1fac78af629d65c561ae3b136d5b87f40419b20f32b57baaa1af059d27ba`) → https://drive.google.com/file/d/1a0mxHDJndwH3ij-jEgOKmJHdNl7cqbel/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 76`, `run 44662158737`)**: `Hangyeol-windows-0.2.0-76.zip` (`13,885,260` bytes, SHA-256 `799321cced020959a561e2d8cb8c97fd62744233a7e3217ab38cae8d517d36dc`) → https://drive.google.com/file/d/1pqox6C8S8-NQYwmq4zNvs_R50Lf89WkV/view
 
 ## 2026-11-20 · Antigravity · ERP·농산물 시세 안내 문구 정리, 설정 화면 UI 개편 및 전반적 여백 축소
 
