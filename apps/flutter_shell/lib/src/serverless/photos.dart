@@ -9,6 +9,7 @@ import 'photo_store.dart';
 import 'photo_bulk_edit.dart';
 import 'photo_library.dart';
 import 'photo_repository.dart';
+import '../ui/hangyeol_theme.dart';
 export 'photo_store.dart';
 export 'photo_repository.dart';
 
@@ -215,45 +216,46 @@ class _OnlinePhotosPageState extends State<OnlinePhotosPage> {
     try{await widget.client.call('photos.retry',params:{'id':photo['id'],'confirmDuplicateRisk':confirmed});if(mounted){await _refresh(force:true);}}catch(e){await _fail(e);}
   }
   Widget _header()=>Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-    Row(children:[const Expanded(child:Text('작황 사진',style:TextStyle(fontSize:24,fontWeight:FontWeight.bold))),
+    Row(children:[const Expanded(child:Text('작황 사진',style:TextStyle(fontSize:20,fontWeight:FontWeight.w700,color:kHangyeolInk,letterSpacing:-0.3))),
       if((widget.canManage||widget.owner)&&widget.initialFilter==null)IconButton(key:const Key('photo-open-library'),tooltip:'사진 정리 · 농가·방문·Discord 수집',onPressed:_sending||_adding?null:_library,icon:const Icon(Icons.inventory_2_outlined)),
       if(widget.canCreate&&!_selecting)IconButton(key:const Key('photo-start-selection'),tooltip:'여러 사진 정보 수정',onPressed:_sending||_adding||!_photos.any(_canSelect)?null:(){_searchFocus.unfocus();setState(()=>_selecting=true);},icon:const Icon(Icons.checklist)),
       IconButton(tooltip:'사진 목록 새로고침',onPressed:_loading?null:()=>_refresh(force:true),icon:const Icon(Icons.refresh))]),
-    if(_loading||_adding||_viewing)const LinearProgressIndicator(),
-    if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:10),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),
-    if(_config!=null&&_config?['ready']!=true)const Padding(padding:EdgeInsets.symmetric(vertical:12),child:Text('최초 관리자가 설정에서 사진 저장소를 연결해 주세요.')),
+    if(_loading||_adding||_viewing)const LinearProgressIndicator(minHeight:2),
+    if(_error.isNotEmpty)Padding(padding:const EdgeInsets.symmetric(vertical:8),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),
+    if(_config!=null&&_config?['ready']!=true)const Padding(padding:EdgeInsets.symmetric(vertical:10),child:Text('최초 관리자가 설정에서 사진 저장소를 연결해 주세요.',style:TextStyle(color:kHangyeolMuted))),
     if(widget.canCreate&&widget.initialFilter==null)Wrap(spacing:8,children:[
-      FilledButton.icon(key:const Key('photo-select-many'),onPressed:_selecting||_adding||_sending||_store==null?null:()=>_register(ImageSource.gallery),icon:const Icon(Icons.photo_library_outlined),label:const Text('사진 여러 장 선택')),
-      if(Platform.isAndroid||Platform.isIOS)OutlinedButton.icon(onPressed:_selecting||_adding||_sending||_store==null?null:()=>_register(ImageSource.camera),icon:const Icon(Icons.camera_alt_outlined),label:const Text('촬영'))]),
-    if(_adding)Padding(padding:const EdgeInsets.symmetric(vertical:8),child:Text('사진 준비 $_prepared/$_prepareTotal장')),
-    if(_sending)...[Padding(padding:const EdgeInsets.symmetric(vertical:8),child:Text('업로드 $_sent/$_sendTotal장 완료 · 사진은 순서대로 전송됩니다.')),LinearProgressIndicator(value:_sendTotal==0?null:_sent/_sendTotal)],
-    const SizedBox(height:14),
+      FilledButton.icon(key:const Key('photo-select-many'),onPressed:_selecting||_adding||_sending||_store==null?null:()=>_register(ImageSource.gallery),icon:const Icon(Icons.photo_library_outlined,size:18),label:const Text('사진 여러 장 선택')),
+      if(Platform.isAndroid||Platform.isIOS)OutlinedButton.icon(onPressed:_selecting||_adding||_sending||_store==null?null:()=>_register(ImageSource.camera),icon:const Icon(Icons.camera_alt_outlined,size:18),label:const Text('촬영'))]),
+    if(_adding)Padding(padding:const EdgeInsets.symmetric(vertical:6),child:Text('사진 준비 $_prepared/$_prepareTotal장',style:const TextStyle(fontSize:12,color:kHangyeolMuted))),
+    if(_sending)...[Padding(padding:const EdgeInsets.symmetric(vertical:6),child:Text('업로드 $_sent/$_sendTotal장 완료 · 사진은 순서대로 전송됩니다.',style:const TextStyle(fontSize:12,color:kHangyeolMuted))),LinearProgressIndicator(value:_sendTotal==0?null:_sent/_sendTotal,minHeight:2)],
+    const SizedBox(height:10),
     Row(children:[
       Expanded(child:DropdownButtonFormField<String>(key:ValueKey('photo-field-$_field'),initialValue:_field,isExpanded:true,
-        decoration:const InputDecoration(labelText:'검색 기준',isDense:true,border:OutlineInputBorder()),
+        decoration:InputDecoration(labelText:'검색 기준',isDense:true,filled:true,fillColor:kHangyeolSurface,border:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none),enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none)),
         items:photoFields.entries.map((e)=>DropdownMenuItem(value:e.key,child:Text(e.value))).toList(),
         onChanged:_selecting?null:(value){if(value!=null){setState((){_field=value;_query=_search.text.trim();_exact=false;});_refresh();}})),
-      const SizedBox(width:10),
+      const SizedBox(width:8),
       Expanded(child:DropdownButtonFormField<String>(key:ValueKey('photo-group-$_groupBy'),initialValue:_groupBy,isExpanded:true,
-        decoration:const InputDecoration(labelText:'보기 기준',isDense:true,border:OutlineInputBorder()),
+        decoration:InputDecoration(labelText:'보기 기준',isDense:true,filled:true,fillColor:kHangyeolSurface,border:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none),enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none)),
         items:photoFields.entries.map((e)=>DropdownMenuItem(value:e.key,child:Text(e.key=='all'?'최근 등록순':'${e.value}별'))).toList(),
         onChanged:_selecting?null:(value){if(value!=null){setState(()=>_groupBy=value);_refresh();}})),
-    ]),const SizedBox(height:12),
+    ]),const SizedBox(height:8),
     RawAutocomplete<String>(textEditingController:_search,focusNode:_searchFocus,
       optionsBuilder:(value)=>_selecting?<String>[]:photoSuggestions(_suggestions,_field,value.text),
       onSelected:(_)=>_applySearch(),
       fieldViewBuilder:(context,controller,focus,submit)=>TextField(key:const Key('photo-search-input'),controller:controller,focusNode:focus,
         readOnly:_selecting,textInputAction:TextInputAction.search,onTapOutside:(_)=>focus.unfocus(),onSubmitted:(_)=>_applySearch(),
-        decoration:InputDecoration(labelText:'농가·작물·품종·촬영일·주소·메모 검색',hintText:'예: 가명A, 루비, 2026-11',
+        decoration:InputDecoration(labelText:'농가·작물·품종·촬영일·주소·메모 검색',hintText:'예: 가명A, 루비, 2026-11',filled:true,fillColor:kHangyeolSurface,isDense:true,border:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none),enabledBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:BorderSide.none),focusedBorder:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:kHangyeolPrimary,width:1.4)),
           suffixIcon:IconButton(tooltip:'사진 검색',onPressed:_selecting?null:_applySearch,icon:const Icon(Icons.search)))),
-      optionsViewBuilder:(context,select,options)=>Material(elevation:4,borderRadius:BorderRadius.circular(8),child:ConstrainedBox(
+      optionsViewBuilder:(context,select,options)=>Material(color:kHangyeolCanvas,elevation:4,borderRadius:BorderRadius.circular(12),child:ConstrainedBox(
         constraints:const BoxConstraints(maxHeight:200),child:ListView(shrinkWrap:true,padding:EdgeInsets.zero,
           children:options.map((v)=>ListTile(dense:true,title:Text(v),onTap:()=>select(v))).toList()))),
     ),
     if(_exact)Align(alignment:Alignment.centerLeft,child:InputChip(key:const Key('photo-exact-filter'),label:Text('${photoFields[_field]}: $_query'),
       onDeleted:_selecting?null:(){_search.clear();setState((){_query='';_exact=false;});_refresh();})),
-    Padding(padding:const EdgeInsets.symmetric(vertical:6),child:Text('사진 $_total장 · ${_groupBy=='all'?'최근 등록순':'${photoFields[_groupBy]}별 보기'}',style:const TextStyle(fontSize:12))),
-    if(_config?['ready']==true&&_config?['discordConfigured']!=true)const Padding(padding:EdgeInsets.symmetric(vertical:8),child:Text('Discord 미연결 · 사진은 정상 저장되며 알림은 대기합니다.')),
+    Padding(padding:const EdgeInsets.fromLTRB(2,8,2,4),child:Text('사진 $_total장 · ${_groupBy=='all'?'최근 등록순':'${photoFields[_groupBy]}별 보기'}',style:const TextStyle(fontSize:12,color:kHangyeolMuted))),
+    if(_config?['ready']==true&&_config?['discordConfigured']!=true)const Padding(padding:EdgeInsets.only(bottom:6),child:Text('Discord 미연결 · 사진은 정상 저장되며 알림은 대기합니다.',style:TextStyle(fontSize:12,color:kHangyeolMuted))),
+    const Divider(height:1,color:kHangyeolDivider),
   ]);
   List<_PhotoEntry> _entries(){
     final entries=<_PhotoEntry>[];
@@ -271,43 +273,55 @@ class _OnlinePhotosPageState extends State<OnlinePhotosPage> {
   Widget _photoCard(Map<String,dynamic> photo){
     final note=(photo['note'] as String? ?? '').trim(),notification=(photo['notificationNote'] as String? ?? '').trim();
     final urgent=['failed','uncertain'].contains(photo['notification']);
-    return Card(key:ValueKey('photo-${photo['id']}'),margin:const EdgeInsets.symmetric(vertical:3),child:InkWell(
-      onTap:_selecting?(_canSelect(photo)?()=>_togglePhoto(photo):null):()=>_view(photo),
-      onLongPress:!_sending&&!_adding&&_canSelect(photo)?()=>_togglePhoto(photo):null,borderRadius:BorderRadius.circular(12),child:Padding(padding:const EdgeInsets.symmetric(horizontal:10,vertical:8),child:Row(children:[
-        if(_selecting)Checkbox(key:ValueKey('photo-check-${photo['id']}'),value:_selected.containsKey(photo['id']),onChanged:_canSelect(photo)?(_)=>_togglePhoto(photo):null),
-        SizedBox(width:64,height:64,child:ClipRRect(borderRadius:BorderRadius.circular(6),child:_PhotoThumbnail(
-          key:ValueKey('thumb-${photo['id']}-${photo['previewVersion']}-$_thumbVersion'),repository:_repository,photo:photo))),
-        const SizedBox(width:10),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,mainAxisSize:MainAxisSize.min,children:[
-          Text('${(photo['farm'] as String? ?? '').isEmpty?'농가 미입력':photo['farm']} · ${(photo['crop'] as String? ?? '').isEmpty?'작물 미입력':photo['crop']} ${photo['variety']}',maxLines:2,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w600,height:1.2)),
-          Text('${photo['date']==''?'촬영일 미상':photo['date']} · ${photo['region']}',maxLines:1,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12,height:1.3)),
-          if(note.isNotEmpty)Text(note,maxLines:1,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12,height:1.3)),
-          Text(notification.isEmpty?photoNotificationLabel(photo['notification'] as String?):notification,key:ValueKey('photo-notification-${photo['id']}'),
-            maxLines:1,overflow:TextOverflow.ellipsis,style:TextStyle(fontSize:11,height:1.2,color:urgent?Theme.of(context).colorScheme.error:Theme.of(context).colorScheme.onSurfaceVariant)),
+    return Container(
+      key:ValueKey('photo-${photo['id']}'),
+      decoration:const BoxDecoration(color:kHangyeolCanvas,border:Border(bottom:BorderSide(color:kHangyeolDivider,width:0.8))),
+      child:InkWell(
+        onTap:_selecting?(_canSelect(photo)?()=>_togglePhoto(photo):null):()=>_view(photo),
+        onLongPress:!_sending&&!_adding&&_canSelect(photo)?()=>_togglePhoto(photo):null,
+        child:Padding(padding:const EdgeInsets.symmetric(horizontal:4,vertical:9),child:Row(children:[
+          if(_selecting)Checkbox(key:ValueKey('photo-check-${photo['id']}'),value:_selected.containsKey(photo['id']),onChanged:_canSelect(photo)?(_)=>_togglePhoto(photo):null),
+          SizedBox(width:58,height:58,child:ClipRRect(borderRadius:BorderRadius.circular(14),child:_PhotoThumbnail(
+            key:ValueKey('thumb-${photo['id']}-${photo['previewVersion']}-$_thumbVersion'),repository:_repository,photo:photo))),
+          const SizedBox(width:12),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,mainAxisSize:MainAxisSize.min,children:[
+            Text('${(photo['farm'] as String? ?? '').isEmpty?'농가 미입력':photo['farm']} · ${(photo['crop'] as String? ?? '').isEmpty?'작물 미입력':photo['crop']} ${photo['variety']}',maxLines:1,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w600,color:kHangyeolInk,height:1.25)),
+            const SizedBox(height:2),
+            Text('${photo['date']==''?'촬영일 미상':photo['date']} · ${photo['region']}',maxLines:1,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12,color:kHangyeolMuted,height:1.25)),
+            if(note.isNotEmpty)Text(note,maxLines:1,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:12,color:kHangyeolMuted,height:1.25)),
+            Text(notification.isEmpty?photoNotificationLabel(photo['notification'] as String?):notification,key:ValueKey('photo-notification-${photo['id']}'),
+              maxLines:1,overflow:TextOverflow.ellipsis,style:TextStyle(fontSize:11,height:1.25,color:urgent?Theme.of(context).colorScheme.error:kHangyeolSubtle)),
+          ])),
+          if(!_selecting&&widget.canCreate&&!['sent','not_applicable'].contains(photo['notification'])&&photo['source']!='discord'&&(widget.canManage||widget.owner||photo['email']==widget.email))
+            IconButton(tooltip:'Discord 전송 재시도',onPressed:_sending?null:()=>_retry(photo),icon:const Icon(Icons.send_outlined),iconSize:20),
         ])),
-        if(!_selecting&&widget.canCreate&&!['sent','not_applicable'].contains(photo['notification'])&&photo['source']!='discord'&&(widget.canManage||widget.owner||photo['email']==widget.email))
-          IconButton(tooltip:'Discord 전송 재시도',onPressed:_sending?null:()=>_retry(photo),icon:const Icon(Icons.send_outlined),iconSize:20),
-      ]))));
+      ),
+    );
   }
-  Widget _draftCard(Map<String,dynamic> draft)=>Card(key:ValueKey('draft-${draft['requestId']}'),child:ListTile(
-    leading:SizedBox(width:64,height:64,child:_DraftThumbnail(store:_store!,id:draft['requestId'] as String)),
-    title:Text('${draft['farm']} · ${draft['crop']}'),
-    subtitle:Text('${(draft['batchIndex'] as int? ?? 0)+1}/${draft['batchSize']??1} · ${draft['error']??'전송 대기 · 원본 보관 중'}'),
-    trailing:_activeUpload==draft['requestId']?const SizedBox(width:20,height:20,child:CircularProgressIndicator(strokeWidth:2))
-      :widget.canCreate?IconButton(tooltip:'사진 다시 전송',onPressed:_sending||_adding?null:()=>_sendAll(only:[draft]),icon:const Icon(Icons.cloud_upload_outlined)):null,
-  ));
+  Widget _draftCard(Map<String,dynamic> draft)=>Container(
+    key:ValueKey('draft-${draft['requestId']}'),
+    margin:const EdgeInsets.symmetric(vertical:4),
+    decoration:BoxDecoration(color:kHangyeolSurface,borderRadius:BorderRadius.circular(12)),
+    child:ListTile(
+      leading:SizedBox(width:56,height:56,child:ClipRRect(borderRadius:BorderRadius.circular(12),child:_DraftThumbnail(store:_store!,id:draft['requestId'] as String))),
+      title:Text('${draft['farm']} · ${draft['crop']}',style:const TextStyle(fontSize:14,fontWeight:FontWeight.w600,color:kHangyeolInk)),
+      subtitle:Text('${(draft['batchIndex'] as int? ?? 0)+1}/${draft['batchSize']??1} · ${draft['error']??'전송 대기 · 원본 보관 중'}',style:const TextStyle(fontSize:12,color:kHangyeolMuted)),
+      trailing:_activeUpload==draft['requestId']?const SizedBox(width:20,height:20,child:CircularProgressIndicator(strokeWidth:2))
+        :widget.canCreate?IconButton(tooltip:'사진 다시 전송',onPressed:_sending||_adding?null:()=>_sendAll(only:[draft]),icon:const Icon(Icons.cloud_upload_outlined)):null,
+    ),
+  );
   @override
   void dispose(){_search.dispose();_searchFocus.dispose();if(widget.repository==null){_repository.dispose();}super.dispose();}
   @override
-  Widget build(BuildContext context){final entries=_entries();return Column(children:[if(_selecting)_selectionBar(),Expanded(child:RefreshIndicator(onRefresh:()=>_refresh(force:true),child:ListView.builder(
-    padding:const EdgeInsets.symmetric(horizontal:12,vertical:10),physics:const AlwaysScrollableScrollPhysics(),itemCount:entries.length+1,
+  Widget build(BuildContext context){final entries=_entries();return ColoredBox(color:kHangyeolCanvas,child:Column(children:[if(_selecting)_selectionBar(),Expanded(child:RefreshIndicator(onRefresh:()=>_refresh(force:true),child:ListView.builder(
+    padding:const EdgeInsets.fromLTRB(14,10,14,14),physics:const AlwaysScrollableScrollPhysics(),itemCount:entries.length+1,
     itemBuilder:(context,index){if(index==0){return _header();}final entry=entries[index-1];
       if(entry.kind=='photo'){return _photoCard(entry.photo!);}if(entry.kind=='draft'){return _draftCard(entry.photo!);}
       if(entry.kind=='more'){return TextButton(onPressed:_loading?null:()=>_refresh(more:true),child:const Text('더 보기'));}
-      if(entry.kind=='pending'){return Row(children:[Expanded(child:Text(entry.label!,style:const TextStyle(fontWeight:FontWeight.bold))),
+      if(entry.kind=='pending'){return Row(children:[Expanded(child:Text(entry.label!,style:const TextStyle(fontWeight:FontWeight.w700,color:kHangyeolInk))),
         if(widget.canCreate)TextButton(onPressed:_sending||_adding?null:()=>_sendAll(),child:const Text('모두 재시도'))]);}
-      return Padding(padding:const EdgeInsets.symmetric(vertical:8),child:Text(entry.label!,style:TextStyle(fontWeight:entry.kind=='group'?FontWeight.bold:FontWeight.normal)));
+      return Padding(padding:const EdgeInsets.fromLTRB(4,12,4,6),child:Text(entry.label!,style:TextStyle(fontWeight:entry.kind=='group'?FontWeight.w700:FontWeight.normal,color:entry.kind=='group'?kHangyeolInk:kHangyeolMuted)));
     },
-  )))]);}
+  )))]));}
 }
 class PhotoDetailPage extends StatefulWidget {
   const PhotoDetailPage({super.key,required this.photo,required this.repository,required this.client,required this.canEdit,required this.onAuthError,this.onBrowse});

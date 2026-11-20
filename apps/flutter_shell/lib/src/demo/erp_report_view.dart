@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'demo_erp.dart';
+import '../ui/hangyeol_theme.dart';
 
 /// Scales the whole report, including cell spacing and row heights.
 class ErpReportView extends StatefulWidget {
@@ -241,17 +242,17 @@ class _ErpReportViewState extends State<ErpReportView> {
             ]),
           ],
         ))),
-      Container(width: double.infinity, margin: const EdgeInsets.symmetric(horizontal: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-        decoration: BoxDecoration(color: const Color(0xffe7efe9), borderRadius: BorderRadius.circular(8)),
-        child: Text(widget.condition, style: const TextStyle(fontSize: 12))),
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Row(children: [
+      Container(width: double.infinity, margin: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(color: kHangyeolSurface, borderRadius: BorderRadius.circular(12)),
+        child: Text(widget.condition, style: const TextStyle(fontSize: 12, color: kHangyeolInk))),
+      Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Row(children: [
         Expanded(child: Text('결과 ${widget.report.rows.where((r) => r.first != '[ 총 합 계 ]').length}건${widget.online ? "" : " · 샘플 자료"}',
-          style: const TextStyle(fontSize: 12))),
+          style: const TextStyle(fontSize: 12, color: kHangyeolMuted))),
         TextButton.icon(key: const Key('erp-open-find'), onPressed: widget.report.rows.isEmpty ? null : _openFind,
           icon: const Icon(Icons.search, size: 18), label: const Text('찾기')),
       ])),
-      if (_findOpen) _findBar(),
+      if (_findOpen) _findBar() else const Divider(height: 1, color: kHangyeolDivider),
     ]);
     return CallbackShortcuts(bindings: {
       const SingleActivator(LogicalKeyboardKey.keyF, control: true): _openFind,

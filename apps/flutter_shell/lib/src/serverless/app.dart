@@ -15,6 +15,7 @@ import 'app_updates.dart';
 import 'photo_cache_settings.dart';
 import 'industry_news.dart';
 import 'news_discord_settings.dart';
+import '../ui/hangyeol_theme.dart';
 abstract class SessionVault {
   Future<String?> read(String key);
   Future<void> write(String key,String value);
@@ -37,7 +38,7 @@ class ServerlessApp extends StatelessWidget {
   final Future<bool> Function(Uri)? launch;
   final PhotoRepository Function(AppsScriptPlatformClient,String)? photoRepositoryFactory;
   @override
-  Widget build(BuildContext context)=>MaterialApp(title:'한결씨드 온라인',debugShowCheckedModeBanner:false,locale:const Locale('ko'),supportedLocales:const[Locale('ko')],localizationsDelegates:GlobalMaterialLocalizations.delegates,theme:ThemeData(colorScheme:ColorScheme.fromSeed(seedColor:const Color(0xff1e6247)),scaffoldBackgroundColor:const Color(0xfff5f8f5),useMaterial3:true,inputDecorationTheme:const InputDecorationTheme(border:OutlineInputBorder(),isDense:true)),home:_AuthHome(apiUrl:apiUrl,client:client,vault:vault,launch:launch,photoRepositoryFactory:photoRepositoryFactory));
+  Widget build(BuildContext context)=>MaterialApp(title:'한결씨드 온라인',debugShowCheckedModeBanner:false,locale:const Locale('ko'),supportedLocales:const[Locale('ko')],localizationsDelegates:GlobalMaterialLocalizations.delegates,theme:buildHangyeolTheme(),home:_AuthHome(apiUrl:apiUrl,client:client,vault:vault,launch:launch,photoRepositoryFactory:photoRepositoryFactory));
 }
 class _AuthHome extends StatefulWidget {
   const _AuthHome({required this.apiUrl,this.client,this.vault,this.launch,this.photoRepositoryFactory});
@@ -145,13 +146,14 @@ class _AuthHomeState extends State<_AuthHome> with WidgetsBindingObserver {
       if(_error.isNotEmpty)...[const SizedBox(height:16),Text(_error,textAlign:TextAlign.center,style:TextStyle(color:Theme.of(context).colorScheme.error))],
     ]))))));}
     final manage=(user['permissions'] as List? ?? []).contains('staff.manage');
-    return Scaffold(appBar:AppBar(title:const Row(mainAxisSize:MainAxisSize.min,children:[Icon(Icons.eco,size:20,color:Color(0xff1e6247)),SizedBox(width:6),Text('한결씨드 온라인')]),actions:[IconButton(tooltip:'계정·권한 새로 확인',onPressed:_refreshUser,icon:const Icon(Icons.refresh)),IconButton(tooltip:'로그아웃',onPressed:_busy?null:_logout,icon:const Icon(Icons.logout))]),body:SafeArea(child:Column(children:[Container(width:double.infinity,color:const Color(0xffe7efe9),padding:const EdgeInsets.symmetric(horizontal:12,vertical:5),child:Text('${user['email']} · ${{'owner':'최초 관리자','admin':'관리자','member':'직원','viewer':'조회자'}[user['role']]??user['role']}',style:const TextStyle(fontSize:12))),if(_error.isNotEmpty)Padding(padding:const EdgeInsets.all(6),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),Expanded(child:IndexedStack(index:_tab,children:[
+    final roleLabel=const {'owner':'최초 관리자','admin':'관리자','member':'직원','viewer':'조회자'}[user['role']]??'${user['role']??''}';
+    return Scaffold(appBar:AppBar(title:const Row(mainAxisSize:MainAxisSize.min,children:[Icon(Icons.eco,size:20,color:kHangyeolPrimary),SizedBox(width:6),Text('한결씨드 온라인')]),actions:[IconButton(tooltip:'계정·권한 새로 확인',onPressed:_refreshUser,icon:const Icon(Icons.refresh)),IconButton(tooltip:'로그아웃',onPressed:_busy?null:_logout,icon:const Icon(Icons.logout))]),body:SafeArea(child:Column(children:[Container(width:double.infinity,decoration:const BoxDecoration(color:kHangyeolCanvas,border:Border(bottom:BorderSide(color:kHangyeolDivider,width:0.8))),padding:const EdgeInsets.symmetric(horizontal:14,vertical:6),child:Text('${user['email']} · $roleLabel',style:const TextStyle(fontSize:12,color:kHangyeolMuted))),if(_error.isNotEmpty)Padding(padding:const EdgeInsets.all(6),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),Expanded(child:IndexedStack(index:_tab,children:[
       DemoErpPage(key:ValueKey('erp-${user['email']}'),loadReport:_report,loadSuggestions:_suggestions,refreshSuggestions:_refreshSuggestions),
       _visitedTabs.contains(1)?OnlinePhotosPage(key:ValueKey('photos-${user['email']}'),client:_client!,email:user['email'] as String,canCreate:(user['permissions'] as List? ?? []).contains('photos.create'),owner:user['role']=='owner',canManage:manage,onAuthError:_handle,settingsRevision:_photoSettingsRevision,repository:_photosFor(),useAccountStorage:true):const SizedBox.shrink(),
       _visitedTabs.contains(2)?MarketPricesPage(key:ValueKey('market-${user['email']}'),client:_client!,onAuthError:_handle,canManage:manage,email:'${user['email']??''}'):const SizedBox.shrink(),
       _visitedTabs.contains(3)?IndustryNewsPage(key:ValueKey('news-${user['email']}'),client:_client!,onAuthError:_handle,email:'${user['email']??''}'):const SizedBox.shrink(),
       _visitedTabs.contains(4)?_SettingsPage(client:_client!,user:user,manage:manage,onAuthError:_handle,onPhotoCache:_openPhotoCache,onConnectionsChanged:(){if(mounted){setState(()=>_photoSettingsRevision++);}}):const SizedBox.shrink(),
-    ]))])),bottomNavigationBar:NavigationBar(height:64,selectedIndex:_tab,onDestinationSelected:(value){FocusScope.of(context).unfocus();setState((){_visitedTabs.add(value);_tab=value;});},destinations:const [NavigationDestination(icon:Icon(Icons.table_chart_outlined),label:'ERP'),NavigationDestination(icon:Icon(Icons.photo_library_outlined),label:'작황 사진'),NavigationDestination(key:Key('open-market-prices'),icon:Icon(Icons.show_chart),label:'농산물 시세'),NavigationDestination(key:Key('open-industry-news'),icon:Icon(Icons.newspaper_outlined),label:'업계 뉴스'),NavigationDestination(icon:Icon(Icons.settings_outlined),label:'설정')]));
+    ]))])),bottomNavigationBar:DecoratedBox(decoration:const BoxDecoration(color:kHangyeolCanvas,border:Border(top:BorderSide(color:kHangyeolDivider,width:0.8))),child:NavigationBar(height:58,selectedIndex:_tab,onDestinationSelected:(value){FocusScope.of(context).unfocus();setState((){_visitedTabs.add(value);_tab=value;});},destinations:const [NavigationDestination(icon:Icon(Icons.table_chart_outlined),selectedIcon:Icon(Icons.table_chart),label:'ERP'),NavigationDestination(icon:Icon(Icons.photo_library_outlined),selectedIcon:Icon(Icons.photo_library),label:'작황 사진'),NavigationDestination(key:Key('open-market-prices'),icon:Icon(Icons.show_chart),selectedIcon:Icon(Icons.show_chart),label:'농산물 시세'),NavigationDestination(key:Key('open-industry-news'),icon:Icon(Icons.newspaper_outlined),selectedIcon:Icon(Icons.newspaper),label:'업계 뉴스'),NavigationDestination(icon:Icon(Icons.settings_outlined),selectedIcon:Icon(Icons.settings),label:'설정')])));
   }
 }
 class _SettingsPage extends StatelessWidget {
@@ -162,116 +164,114 @@ class _SettingsPage extends StatelessWidget {
   final Future<void> Function(Object) onAuthError;
   final VoidCallback onConnectionsChanged;
   final Future<void> Function() onPhotoCache;
-  static const _primary=Color(0xff1e6247);
-  static const _border=Color(0xffdce5df);
-  static const _divider=Color(0xffe7eee9);
 
   Widget _tile({Key? tileKey,required IconData icon,required String title,required String subtitle,required VoidCallback onTap})=>ListTile(
     key:tileKey,
     dense:true,
     visualDensity:VisualDensity.compact,
-    contentPadding:const EdgeInsets.symmetric(horizontal:12,vertical:2),
-    leading:Container(
-      width:34,
-      height:34,
-      decoration:BoxDecoration(color:const Color(0xffeef4f0),borderRadius:BorderRadius.circular(9)),
-      child:Icon(icon,size:19,color:_primary),
-    ),
-    title:Text(title,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w600)),
-    subtitle:Text(subtitle,style:const TextStyle(fontSize:12,color:Color(0xff52685c))),
-    trailing:const Icon(Icons.chevron_right,size:20,color:Color(0xff7a8e82)),
+    contentPadding:const EdgeInsets.symmetric(horizontal:16,vertical:3),
+    leading:Icon(icon,size:22,color:kHangyeolInk),
+    title:Text(title,style:const TextStyle(fontSize:15,fontWeight:FontWeight.w500,color:kHangyeolInk)),
+    subtitle:Text(subtitle,style:const TextStyle(fontSize:12,color:kHangyeolMuted)),
+    trailing:const Icon(Icons.chevron_right,size:18,color:kHangyeolSubtle),
     onTap:onTap,
   );
 
-  Widget _cardGroup(String heading,List<Widget> items){
+  Widget _menuSection(String heading,List<Widget> items){
     final spaced=<Widget>[];
     for(var i=0;i<items.length;i++){
-      if(i>0){spaced.add(const Divider(height:1,indent:54,color:_divider));}
+      if(i>0){spaced.add(const Divider(height:1,indent:56,color:kHangyeolDivider));}
       spaced.add(items[i]);
     }
-    return Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-      Padding(padding:const EdgeInsets.fromLTRB(4,12,4,6),child:Text(heading,style:const TextStyle(fontSize:12,fontWeight:FontWeight.w700,color:Color(0xff52685c)))),
-      Container(
-        decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(14),border:Border.all(color:_border)),
-        child:Column(children:spaced),
-      ),
-    ]);
+    return Container(
+      color:kHangyeolCanvas,
+      child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+        Padding(padding:const EdgeInsets.fromLTRB(16,12,16,4),child:Text(heading,style:const TextStyle(fontSize:12,fontWeight:FontWeight.w600,color:kHangyeolMuted))),
+        ...spaced,
+      ]),
+    );
   }
 
   @override
   Widget build(BuildContext context){
     final roleLabel=const {'owner':'최초 관리자','admin':'관리자','member':'직원','viewer':'조회자'}[user['role']]??'${user['role']??''}';
-    return Align(
-      alignment:Alignment.topCenter,
-      child:ConstrainedBox(
-        constraints:const BoxConstraints(maxWidth:680),
-        child:ListView(padding:const EdgeInsets.fromLTRB(12,10,12,16),children:[
-          Container(
-            padding:const EdgeInsets.symmetric(horizontal:14,vertical:11),
-            decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(14),border:Border.all(color:_border)),
-            child:Row(children:[
-              Container(
-                width:40,
-                height:40,
-                decoration:const BoxDecoration(color:Color(0xffe6f0ea),shape:BoxShape.circle),
-                child:const Icon(Icons.person_outline,color:_primary,size:22),
+    return ColoredBox(
+      color:kHangyeolCanvas,
+      child:Align(
+        alignment:Alignment.topCenter,
+        child:ConstrainedBox(
+          constraints:const BoxConstraints(maxWidth:680),
+          child:ListView(padding:const EdgeInsets.only(bottom:24),children:[
+            Container(
+              color:kHangyeolCanvas,
+              padding:const EdgeInsets.fromLTRB(16,14,16,16),
+              child:Row(children:[
+                Container(
+                  width:48,
+                  height:48,
+                  decoration:const BoxDecoration(color:kHangyeolTint,shape:BoxShape.circle),
+                  child:const Icon(Icons.person,color:kHangyeolPrimary,size:26),
+                ),
+                const SizedBox(width:12),
+                Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
+                  Text(user['name'] as String? ?? '내 계정',overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:17,fontWeight:FontWeight.w700,color:kHangyeolInk)),
+                  const SizedBox(height:2),
+                  Text(user['email'] as String,overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:13,color:kHangyeolMuted)),
+                ])),
+                const SizedBox(width:8),
+                Container(
+                  padding:const EdgeInsets.symmetric(horizontal:12,vertical:5),
+                  decoration:BoxDecoration(color:kHangyeolCanvas,borderRadius:BorderRadius.circular(999),border:Border.all(color:kHangyeolBorder)),
+                  child:Text(roleLabel,style:const TextStyle(fontSize:12,fontWeight:FontWeight.w600,color:kHangyeolPrimary)),
+                ),
+              ]),
+            ),
+            Container(height:8,color:kHangyeolSurface),
+            _menuSection('앱 · 기기 관리',[
+              _tile(
+                tileKey:const Key('settings-app-update'),
+                icon:Icons.system_update_outlined,
+                title:'앱 업데이트',
+                subtitle:'이 기기에 맞는 최신 설치 파일 확인',
+                onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>AppUpdatePage(client:client,onAuthError:onAuthError,googleEmail:user['email'] as String))),
               ),
-              const SizedBox(width:12),
-              Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-                Row(children:[
-                  Flexible(child:Text(user['name'] as String? ?? '내 계정',overflow:TextOverflow.ellipsis,style:const TextStyle(fontSize:15,fontWeight:FontWeight.w700))),
-                  const SizedBox(width:6),
-                  Container(
-                    padding:const EdgeInsets.symmetric(horizontal:7,vertical:2),
-                    decoration:BoxDecoration(color:const Color(0xffe6f0ea),borderRadius:BorderRadius.circular(10)),
-                    child:Text(roleLabel,style:const TextStyle(fontSize:11,fontWeight:FontWeight.w600,color:_primary)),
-                  ),
-                ]),
-                const SizedBox(height:2),
-                Text(user['email'] as String,style:const TextStyle(fontSize:12,color:Color(0xff52685c))),
-              ])),
+              _tile(
+                tileKey:const Key('settings-photo-cache'),
+                icon:Icons.cleaning_services_outlined,
+                title:'사진 캐시 파일 삭제',
+                subtitle:'이 기기의 미리보기·열어본 사진 임시 파일 관리',
+                onTap:onPhotoCache,
+              ),
             ]),
-          ),
-          _cardGroup('앱 · 기기 관리',[
-            _tile(
-              tileKey:const Key('settings-app-update'),
-              icon:Icons.system_update_outlined,
-              title:'앱 업데이트',
-              subtitle:'이 기기에 맞는 최신 설치 파일 확인',
-              onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>AppUpdatePage(client:client,onAuthError:onAuthError,googleEmail:user['email'] as String))),
-            ),
-            _tile(
-              tileKey:const Key('settings-photo-cache'),
-              icon:Icons.cleaning_services_outlined,
-              title:'사진 캐시 파일 삭제',
-              subtitle:'이 기기의 미리보기·열어본 사진 임시 파일 관리',
-              onTap:onPhotoCache,
-            ),
+            if(manage)...[
+              const SizedBox(height:4),
+              Container(height:8,color:kHangyeolSurface),
+              _menuSection('관리자 설정',[
+                _tile(
+                  tileKey:const Key('settings-company-connections'),
+                  icon:Icons.cloud_outlined,
+                  title:'사진 저장소·Discord 연결',
+                  subtitle:'새 사진 저장 폴더와 알림 연결 관리',
+                  onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>CompanyConnectionsPage(client:client,owner:user['role']=='owner',onAuthError:onAuthError,onChanged:onConnectionsChanged))),
+                ),
+                _tile(
+                  tileKey:const Key('settings-news-discord'),
+                  icon:Icons.newspaper_outlined,
+                  title:'업계 뉴스 Discord 알림',
+                  subtitle:'매주 월요일 오전 10시 주간 브리핑 웹훅 설정',
+                  onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>NewsDiscordSettingsPage(client:client,onAuthError:onAuthError))),
+                ),
+                _tile(
+                  tileKey:const Key('settings-staff'),
+                  icon:Icons.manage_accounts_outlined,
+                  title:'직원·권한 관리',
+                  subtitle:'등록된 직원 계정 및 역할 관리',
+                  onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>Scaffold(appBar:AppBar(title:const Text('직원·권한 관리')),body:_StaffPage(client:client,owner:user['role']=='owner')))),
+                ),
+              ]),
+            ],
           ]),
-          if(manage)_cardGroup('관리자 설정',[
-            _tile(
-              tileKey:const Key('settings-company-connections'),
-              icon:Icons.cloud_outlined,
-              title:'사진 저장소·Discord 연결',
-              subtitle:'새 사진 저장 폴더와 알림 연결 관리',
-              onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>CompanyConnectionsPage(client:client,owner:user['role']=='owner',onAuthError:onAuthError,onChanged:onConnectionsChanged))),
-            ),
-            _tile(
-              tileKey:const Key('settings-news-discord'),
-              icon:Icons.newspaper_outlined,
-              title:'업계 뉴스 Discord 알림',
-              subtitle:'매주 월요일 오전 10시 주간 브리핑 웹훅 설정',
-              onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>NewsDiscordSettingsPage(client:client,onAuthError:onAuthError))),
-            ),
-            _tile(
-              tileKey:const Key('settings-staff'),
-              icon:Icons.manage_accounts_outlined,
-              title:'직원·권한 관리',
-              subtitle:'등록된 직원 계정 및 역할 관리',
-              onTap:()=>Navigator.of(context).push(MaterialPageRoute<void>(builder:(_)=>Scaffold(appBar:AppBar(title:const Text('직원·권한 관리')),body:_StaffPage(client:client,owner:user['role']=='owner')))),
-            ),
-          ]),
-        ]),
+        ),
       ),
     );
   }
@@ -297,5 +297,26 @@ class _StaffPageState extends State<_StaffPage> {
     email.dispose();name.dispose();
   }
   @override
-  Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(16),children:[const Text('직원·권한',style:TextStyle(fontSize:24,fontWeight:FontWeight.bold)),const SizedBox(height:12),const Text('사용할 Google 이메일을 먼저 등록하세요. 원본 시트를 직원에게 직접 공유할 필요는 없습니다.'),const SizedBox(height:12),FilledButton.icon(onPressed:_busy?null:()=>_edit(),icon:const Icon(Icons.person_add_alt),label:const Text('직원 등록')),if(_busy)const LinearProgressIndicator(),if(_error.isNotEmpty)Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error)),..._users.map((u)=>Card(child:ListTile(title:Text(u['name'] as String),subtitle:Text('${u['email']}\n${u['role']} · ${u['active']==true?'활성':'비활성'}'),trailing:u['role']=='owner'||!widget.owner&&u['role']=='admin'?const Icon(Icons.lock_outline):IconButton(tooltip:'권한 변경',onPressed:()=>_edit(u),icon:const Icon(Icons.edit_outlined)))))]);
+  Widget build(BuildContext context)=>ColoredBox(
+    color:kHangyeolCanvas,
+    child:ListView(padding:const EdgeInsets.fromLTRB(16,12,16,20),children:[
+      const Text('직원·권한',style:TextStyle(fontSize:20,fontWeight:FontWeight.w700,color:kHangyeolInk)),
+      const SizedBox(height:6),
+      const Text('사용할 Google 이메일을 먼저 등록하세요. 원본 시트를 직원에게 직접 공유할 필요는 없습니다.',style:TextStyle(fontSize:12,color:kHangyeolMuted)),
+      const SizedBox(height:12),
+      FilledButton.icon(onPressed:_busy?null:()=>_edit(),icon:const Icon(Icons.person_add_alt),label:const Text('직원 등록')),
+      if(_busy)const Padding(padding:EdgeInsets.only(top:8),child:LinearProgressIndicator()),
+      if(_error.isNotEmpty)Padding(padding:const EdgeInsets.only(top:8),child:Text(_error,style:TextStyle(color:Theme.of(context).colorScheme.error))),
+      const SizedBox(height:8),
+      for(final u in _users)...[
+        const Divider(height:1,color:kHangyeolDivider),
+        ListTile(
+          contentPadding:const EdgeInsets.symmetric(horizontal:4,vertical:2),
+          title:Text(u['name'] as String,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w600,color:kHangyeolInk)),
+          subtitle:Text('${u['email']}\n${u['role']} · ${u['active']==true?'활성':'비활성'}',style:const TextStyle(fontSize:12,color:kHangyeolMuted)),
+          trailing:u['role']=='owner'||!widget.owner&&u['role']=='admin'?const Icon(Icons.lock_outline,color:kHangyeolSubtle):IconButton(tooltip:'권한 변경',onPressed:()=>_edit(u),icon:const Icon(Icons.edit_outlined)),
+        ),
+      ],
+    ]),
+  );
 }

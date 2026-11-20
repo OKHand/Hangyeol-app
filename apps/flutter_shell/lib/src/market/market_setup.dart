@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../serverless/client.dart';
+import '../ui/hangyeol_theme.dart';
 
 const marketOrderedProducts=<String,String>{
   'general-tomato':'일반토마토',
@@ -65,11 +66,11 @@ class MarketSetupPage extends StatefulWidget {
 }
 
 class _MarketSetupPageState extends State<MarketSetupPage> {
-  static const _primary=Color(0xff1e6247);
-  static const _surfaceBg=Color(0xfff5f8f5);
-  static const _cardBorder=Color(0xffdce5df);
-  static const _chipSelected=Color(0xffe6f0ea);
-  static const _mutedText=Color(0xff52685c);
+  static const _primary=kHangyeolPrimary;
+  static const _surfaceBg=kHangyeolCanvas;
+  static const _cardBorder=kHangyeolBorder;
+  static const _chipSelected=kHangyeolTint;
+  static const _mutedText=kHangyeolMuted;
 
   Map<String,dynamic>? _settings;
   bool _busy=false,_dailyWarm=false;
@@ -161,7 +162,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
   InputDecoration _fieldDecoration(String label)=>InputDecoration(
     labelText:label,
     filled:true,
-    fillColor:const Color(0xfff8faf8),
+    fillColor:kHangyeolCanvas,
     isDense:true,
     contentPadding:const EdgeInsets.symmetric(horizontal:12,vertical:12),
     border:OutlineInputBorder(borderRadius:BorderRadius.circular(12),borderSide:const BorderSide(color:_cardBorder)),
@@ -170,17 +171,16 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
 
   Widget _sectionCard({required IconData icon,required String title,Widget? trailing,required List<Widget> children}){
     return Container(
-      padding:const EdgeInsets.all(13),
+      padding:const EdgeInsets.all(14),
       decoration:BoxDecoration(
-        color:Colors.white,
-        borderRadius:BorderRadius.circular(14),
-        border:Border.all(color:_cardBorder),
+        color:kHangyeolSurface,
+        borderRadius:BorderRadius.circular(16),
       ),
       child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
         Row(children:[
           Icon(icon,size:18,color:_primary),
           const SizedBox(width:6),
-          Expanded(child:Text(title,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w700,color:Color(0xff1b3a2b)))),
+          Expanded(child:Text(title,style:const TextStyle(fontSize:14,fontWeight:FontWeight.w700,color:kHangyeolInk))),
           if(trailing!=null)trailing,
         ]),
         const SizedBox(height:10),
@@ -189,18 +189,14 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
     );
   }
 
-  Widget _styledChoice({required Key chipKey,required String label,required bool selected,required VoidCallback? onSelected}){
-    return ChoiceChip(
+  Widget _styledChoice({required Key chipKey,required String label,required bool selected,required VoidCallback? onSelected})=>
+    hangyeolChoicePill(
       key:chipKey,
-      label:Text(label),
+      label:label,
       selected:selected,
-      selectedColor:_chipSelected,
-      backgroundColor:const Color(0xfff8faf8),
-      side:BorderSide(color:selected?_primary:_cardBorder),
-      labelStyle:TextStyle(fontSize:13,fontWeight:selected?FontWeight.w600:FontWeight.normal,color:selected?_primary:const Color(0xff233329)),
+      unselectedBackground:kHangyeolCanvas,
       onSelected:onSelected==null?null:(_)=>onSelected(),
     );
-  }
 
   @override
   Widget build(BuildContext context){
@@ -212,7 +208,8 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
         appBar:AppBar(
           backgroundColor:_surfaceBg,
           surfaceTintColor:Colors.transparent,
-          title:const Text('농산물 시세 설정',style:TextStyle(fontWeight:FontWeight.w600)),
+          elevation:0,
+          title:const Text('농산물 시세 설정',style:TextStyle(fontSize:19,fontWeight:FontWeight.w700,color:kHangyeolInk)),
           actions:[
             TextButton(
               key:const Key('market-prefs-apply'),
@@ -343,12 +340,15 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                         for(final e in marketOrderedProducts.entries)
                           FilterChip(
                             key:ValueKey('market-pref-crop-${e.key}'),
+                            showCheckmark:false,
+                            visualDensity:VisualDensity.compact,
+                            shape:const StadiumBorder(),
+                            side:BorderSide.none,
                             label:Text(e.value),
                             selected:_prefVisible.contains(e.key),
-                            selectedColor:_chipSelected,
-                            backgroundColor:const Color(0xfff8faf8),
-                            side:BorderSide(color:_prefVisible.contains(e.key)?_primary:_cardBorder),
-                            labelStyle:TextStyle(fontSize:13,fontWeight:_prefVisible.contains(e.key)?FontWeight.w600:FontWeight.normal,color:_prefVisible.contains(e.key)?_primary:const Color(0xff233329)),
+                            selectedColor:_primary,
+                            backgroundColor:kHangyeolCanvas,
+                            labelStyle:TextStyle(fontSize:13,fontWeight:_prefVisible.contains(e.key)?FontWeight.w700:FontWeight.w500,color:_prefVisible.contains(e.key)?Colors.white:const Color(0xff425249)),
                             onSelected:(selected){
                               setState((){
                                 if(selected){_prefVisible.add(e.key);}
@@ -369,8 +369,8 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                         :Container(
                           padding:const EdgeInsets.symmetric(horizontal:9,vertical:3),
                           decoration:BoxDecoration(
-                            color:_settings?['keyConfigured']==true?const Color(0xffe6f4ea):const Color(0xfffff4e5),
-                            borderRadius:BorderRadius.circular(12),
+                            color:_settings?['keyConfigured']==true?kHangyeolTint:const Color(0xfffff4e5),
+                            borderRadius:BorderRadius.circular(999),
                           ),
                           child:Text(
                             _settings?['keyConfigured']==true?'API 연결됨':'이용키 확인 필요',
@@ -382,7 +382,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
                           key:const Key('market-daily-warm-switch'),
                           contentPadding:EdgeInsets.zero,
                           visualDensity:VisualDensity.compact,
-                          title:const Text('매일 오전 8시 서버 시세 사전 준비',style:TextStyle(fontSize:14,fontWeight:FontWeight.w500)),
+                          title:const Text('매일 오전 8시 서버 시세 사전 준비',style:TextStyle(fontSize:14,fontWeight:FontWeight.w500,color:kHangyeolInk)),
                           subtitle:const Text('아침 경매 정산 후 주요 11개 품목 시세를 서버 캐시에 미리 불러옵니다.',style:TextStyle(fontSize:12,color:_mutedText)),
                           value:_dailyWarm,
                           onChanged:_busy||_settings==null?null:_toggleDailyWarm,
@@ -400,7 +400,7 @@ class _MarketSetupPageState extends State<MarketSetupPage> {
           ),
         ),
         bottomNavigationBar:Container(
-          decoration:const BoxDecoration(color:Colors.white,border:Border(top:BorderSide(color:_cardBorder))),
+          decoration:const BoxDecoration(color:kHangyeolCanvas,border:Border(top:BorderSide(color:kHangyeolDivider,width:0.8))),
           child:SafeArea(
             child:Center(
               heightFactor:1,

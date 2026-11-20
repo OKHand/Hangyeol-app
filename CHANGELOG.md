@@ -9,6 +9,16 @@
 
 ---
 
+## 2026-11-20 · Antigravity · 기존 녹색 색감 유지 · 카카오톡 스타일 플랫 UI 전면 개편 (기능 변경 없음)
+
+- 요청: 앱의 기존 기능·권한·서버 연동은 전혀 변경하지 않고, 기존 한결씨드 녹색 색감(`#1E6247`)을 유지하면서 전체 UI를 카카오톡과 유사한 순백 캔버스·플랫 목록·캡슐형 탭 감성으로 개편.
+- 변경:
+  - `apps/flutter_shell/lib/src/ui/hangyeol_theme.dart`: 순백 캔버스(`#FFFFFF`), 그림자/틴트 없는 AppBar, 선택 강조 배경 없는 플랫 하단 `NavigationBar`, 캡슐형 필터 칩(`hangyeolChoicePill`), 테두리 없는 연회색(`#F4F6F5`) 채움 입력창, 가는 구분선(`#EEF1EF`) 공통 테마 신설.
+  - `apps/flutter_shell/lib/src/serverless/app.dart`, `apps/flutter_shell/lib/src/demo/demo_app.dart`: 공통 테마 적용, 상단 계정 바·하단 내비게이션 바 가는 구분선 정리, 설정 화면을 프로필 헤더(아바타·아웃라인 역할 배지)+연회색 섹션 띠+가는 구분선 풀폭 메뉴 행 구조로 재구성(위젯 키·메뉴 동작·권한 분기 동일), 직원 목록 플랫 리스트 적용.
+  - `apps/flutter_shell/lib/src/demo/demo_erp_page.dart`, `apps/flutter_shell/lib/src/demo/erp_report_view.dart`: ERP 조회 화면의 외곽 카드 제거 및 순백 플랫 폼·캡슐형 모드 칩·연회색 조건 배너 적용.
+  - `apps/flutter_shell/lib/src/serverless/photos.dart`, `apps/flutter_shell/lib/src/serverless/industry_news.dart`: 작황 사진·업계 뉴스 카드 외곽을 제거하고 가는 구분선 기반 플랫 리스트(`58×58` 둥근 사각 썸네일, 캡슐 배지, 우측 시각 정렬)로 개편.
+  - `apps/flutter_shell/lib/src/market/market_prices.dart`, `apps/flutter_shell/lib/src/market/market_setup.dart`: 시세·시세 설정 화면 순백 배경·캡슐형 품목 칩·플랫 요약 패널 및 구분선 경락가 목록 적용 (`dart analyze` 무결점 · Flutter 전체 113건 통과).
+
 ## 2026-11-20 · Antigravity · ERP·농산물 시세 안내 문구 정리, 설정 화면 UI 개편 및 전반적 여백 축소
 
 - 요청: 기능 변경 없이 ERP·농산물 시세 화면의 불필요한 설명·면책 문구를 제거하고, 설정 화면 UI를 보기 좋게 개편하며, 앱 전반의 간격·패딩을 약간 좁혀 시인성 개선.
