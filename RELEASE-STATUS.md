@@ -1,18 +1,18 @@
-# Release readiness — 2026-11-17 (Official Release Published)
+# Release readiness — 2026-11-20 (Official Release Published)
 
-The formal release transition has been completed and verified on 2026-11-17:
+The formal release transition has been updated and verified on 2026-11-20:
 
-- **Android Official Release (`0.2.0 · build 63`, `run 43999508143`)**:
+- **Android Official Release (`0.2.0 · build 65`, `run 44647768004`)**:
   - Signed with the established fixed Android signing identity (`certificateSha256: 84fc6fb951f82620868f662a30477a589bf39fc5bc7100d387cb737a8e75e8fc`, package `com.hangyeolseed.platform_online`).
-  - File: `Hangyeol-android-0.2.0-63.apk` (`56,066,786` bytes, SHA-256 `ef1b27f76ae761b88387a280c7d60af34d240bdc2262c4d505b10a9e42ad26c3`).
-  - Google Drive: https://drive.google.com/file/d/1sxjxHb_V9kXpOPSsyjwBaoV5QWZAP2iX/view
-  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_android`) and recorded in `config/platform-android-signing` (`online-app-20261117-b63`).
+  - File: `Hangyeol-android-0.2.0-65.apk` (`56,066,786` bytes, SHA-256 `4c4eb62e9b3fcf47e7b2aff2851f528a005dcf3fdc89d0905e16503ca04d3c18`).
+  - Google Drive: https://drive.google.com/file/d/1Iq_Zuu1KzqcUXp0esA5ZAoSxb2bMjIsz/view
+  - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_android`) and recorded in `config/platform-android-signing` (`online-app-20261120-b65`).
 
-- **Windows Official Release (`0.2.0 · build 64`, `run 43999512044`)**:
-  - File: `Hangyeol-windows-0.2.0-64.zip` (`13,853,669` bytes, SHA-256 `4d13992a138aeb09b8131dff5f362cf70d7f99681eb9fef016c54bd7293ecd16`).
-  - Google Drive: https://drive.google.com/file/d/12dUFMtaoOiQ2oq-iSSREvegonnDvm9cB/view
+- **Windows Official Release (`0.2.0 · build 66`, `run 44647773100`)**:
+  - File: `Hangyeol-windows-0.2.0-66.zip` (`13,856,804` bytes, SHA-256 `39f8f449f2ed4534780952fe941903be5c72d8e9f58218296b549ec3a3ff8fbb`).
+  - Google Drive: https://drive.google.com/file/d/1NYxzIHPZgez3-8GnASfeJ63LNiq9tMdc/view
   - Registered in the live Apps Script in-app update registry (`updates.publish` → `APP_RELEASE_windows`).
 
-- **Apps Script Server (`api` v51, `login` v22)**:
-  - `Industry News` bottom tab (`news.list`, `news.feedback`) reading from isolated spreadsheet `1mLQvEAI2lPte8u2UZAzIc1HOCD9Yt5fUIGCUGHvrvB4`.
-  - Admin Discord webhook settings (`news.settings`, `news.configure`, `news.sendWeekly`) & Monday 10:00 AM KST weekly batch briefing (`newsWeeklyBriefingWorker_`) active.
+- **Apps Script Server (`api` v52, `login` v23)**:
+  - Comprehensive issue consolidation in both `NewsScraper.gs` and `news.gs`, once-daily 07:00 KST scraping trigger, 30-min `CacheService` TTL (`1800`s), and weekly Monday 10:00 AM KST Discord briefing capped at 10 important articles (`NW_MAX_DISCORD_ITEMS_ = 10`).
+  - Flutter client caches feeds locally per account across the daily 07:30 KST refresh boundary so repeated opens do not refetch until the next day's update.

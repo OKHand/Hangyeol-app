@@ -18,6 +18,9 @@
     - `관련 없음` 피드백 시 로컬 디스크 캐시에서도 즉시 제외하여 재실행 시 복원되지 않도록 개선, 수동 새로고침 버튼(`refresh: true`) 시 강제 재조회 및 갱신.
   - `apps/flutter_shell/lib/src/serverless/news_discord_settings.dart`: 주간 월요일 10시 자동 발송 안내 문구에 `최대 10건` 기준 반영.
   - `apps/flutter_shell/test/industry_news_test.dart`: 일일 주기 경계(07:30 KST), 동일 주기 무호출 재오픈, 제외 영구 유지, 수동 새로고침 및 다음 날 자동 재조회 테스트 추가(`dart analyze` 무결점 · Flutter 전체 109건 통과).
+- 정식 버전 빌드·Drive 게시·앱 내 업데이트(`updates.publish`) 등록 완료 (`d58e4ee`, `tag: online-app-20261120-b65`):
+  - **Android 정식 버전 (`0.2.0 · 빌드 65`, `run 44647768004`)**: `Hangyeol-android-0.2.0-65.apk` (`56,066,786` bytes, SHA-256 `4c4eb62e9b3fcf47e7b2aff2851f528a005dcf3fdc89d0905e16503ca04d3c18`) → https://drive.google.com/file/d/1Iq_Zuu1KzqcUXp0esA5ZAoSxb2bMjIsz/view
+  - **Windows 정식 버전 (`0.2.0 · 빌드 66`, `run 44647773100`)**: `Hangyeol-windows-0.2.0-66.zip` (`13,856,804` bytes, SHA-256 `39f8f449f2ed4534780952fe941903be5c72d8e9f58218296b549ec3a3ff8fbb`) → https://drive.google.com/file/d/1NYxzIHPZgez3-8GnASfeJ63LNiq9tMdc/view
 
 ## 2026-11-17 · Antigravity · 하단 `업계 뉴스` 탭 추가 및 `설정` 내 주간(월요일 10시) Discord 웹훅 설정 구현
 
